@@ -1,0 +1,223 @@
+{
+  "startAt": "2026-09-21T17:41:10.930Z",
+  "endAt": "2026-09-21T17:41:41.575Z",
+  "pausedStart": true,
+  "pausedEnd": true,
+  "motionEnd": false,
+  "controllerStart": {
+    "firmware": "owlbot-pico-7.14",
+    "micropython": "1.28.0",
+    "uptime_ms": 4485381,
+    "reset_cause": 1,
+    "wifi_rssi_dbm": -69,
+    "memory_free_bytes": 157360,
+    "link": {
+      "stage": "serving",
+      "io": "dispatch",
+      "heartbeats_sent": 872,
+      "pings_sent": 439,
+      "failures": 7,
+      "connections": 4,
+      "radio_resets": 5,
+      "close_code": null,
+      "faults": [
+        {
+          "at_ms": 82907,
+          "stage": "wifi_association",
+          "io": "idle",
+          "error": "Wi-Fi association did not complete"
+        },
+        {
+          "at_ms": 182514,
+          "stage": "serving",
+          "io": "first_byte_read",
+          "error": "relay closed the stream"
+        },
+        {
+          "at_ms": 2149235,
+          "stage": "serving",
+          "io": "first_byte_read",
+          "error": "[Errno 104] ECONNRESET"
+        },
+        {
+          "at_ms": 3786050,
+          "stage": "serving",
+          "io": "first_byte_read",
+          "error": "relay closed the stream"
+        }
+      ]
+    }
+  },
+  "controllerEnd": {
+    "firmware": "owlbot-pico-7.14",
+    "micropython": "1.28.0",
+    "uptime_ms": 4515840,
+    "reset_cause": 1,
+    "wifi_rssi_dbm": -70,
+    "memory_free_bytes": 16848,
+    "link": {
+      "stage": "serving",
+      "io": "dispatch",
+      "heartbeats_sent": 878,
+      "pings_sent": 442,
+      "failures": 7,
+      "connections": 4,
+      "radio_resets": 5,
+      "close_code": null,
+      "faults": [
+        {
+          "at_ms": 82907,
+          "stage": "wifi_association",
+          "io": "idle",
+          "error": "Wi-Fi association did not complete"
+        },
+        {
+          "at_ms": 182514,
+          "stage": "serving",
+          "io": "first_byte_read",
+          "error": "relay closed the stream"
+        },
+        {
+          "at_ms": 2149235,
+          "stage": "serving",
+          "io": "first_byte_read",
+          "error": "[Errno 104] ECONNRESET"
+        },
+        {
+          "at_ms": 3786050,
+          "stage": "serving",
+          "io": "first_byte_read",
+          "error": "relay closed the stream"
+        }
+      ]
+    }
+  },
+  "configuredChannels": [
+    {
+      "channel": 1,
+      "name": "Left front leg",
+      "enabled": true,
+      "calibrated": true
+    },
+    {
+      "channel": 2,
+      "name": "Left rear leg",
+      "enabled": true,
+      "calibrated": true
+    },
+    {
+      "channel": 3,
+      "name": "Right rear leg",
+      "enabled": true,
+      "calibrated": true
+    },
+    {
+      "channel": 5,
+      "name": "Right front leg",
+      "enabled": true,
+      "calibrated": true
+    },
+    {
+      "channel": 6,
+      "name": "Slide",
+      "enabled": true,
+      "calibrated": true
+    },
+    {
+      "channel": 7,
+      "name": "Turn",
+      "enabled": true,
+      "calibrated": true
+    },
+    {
+      "channel": 8,
+      "name": "Pan",
+      "enabled": true,
+      "calibrated": true
+    },
+    {
+      "channel": 9,
+      "name": "Tilt",
+      "enabled": true,
+      "calibrated": true
+    }
+  ],
+  "calibrationReplyReceived": true,
+  "heartbeats": [
+    {
+      "at": "2026-09-21T17:41:15.901Z",
+      "frame": {
+        "t": "ack",
+        "rid": null,
+        "ok": 1,
+        "event": "heartbeat",
+        "uptime_ms": 4490286,
+        "physical_feedback": false
+      },
+      "nativeTrafficAgeMs": 0
+    },
+    {
+      "at": "2026-09-21T17:41:20.991Z",
+      "frame": {
+        "t": "ack",
+        "rid": null,
+        "ok": 1,
+        "event": "heartbeat",
+        "uptime_ms": 4495289,
+        "physical_feedback": false
+      },
+      "nativeTrafficAgeMs": 0
+    },
+    {
+      "at": "2026-09-21T17:41:25.922Z",
+      "frame": {
+        "t": "ack",
+        "rid": null,
+        "ok": 1,
+        "event": "heartbeat",
+        "uptime_ms": 4500310,
+        "physical_feedback": false
+      },
+      "nativeTrafficAgeMs": 0
+    },
+    {
+      "at": "2026-09-21T17:41:31.036Z",
+      "frame": {
+        "t": "ack",
+        "rid": null,
+        "ok": 1,
+        "event": "heartbeat",
+        "uptime_ms": 4505313,
+        "physical_feedback": false
+      },
+      "nativeTrafficAgeMs": 0
+    },
+    {
+      "at": "2026-09-21T17:41:35.940Z",
+      "frame": {
+        "t": "ack",
+        "rid": null,
+        "ok": 1,
+        "event": "heartbeat",
+        "uptime_ms": 4510317,
+        "physical_feedback": false
+      },
+      "nativeTrafficAgeMs": 0
+    },
+    {
+      "at": "2026-09-21T17:41:40.961Z",
+      "frame": {
+        "t": "ack",
+        "rid": null,
+        "ok": 1,
+        "event": "heartbeat",
+        "uptime_ms": 4515320,
+        "physical_feedback": false
+      },
+      "nativeTrafficAgeMs": 0
+    }
+  ],
+  "heartbeatObservationMs": 30208,
+  "noMotionSent": true,
+  "noFirmwareOrSettingsWrites": true
+}

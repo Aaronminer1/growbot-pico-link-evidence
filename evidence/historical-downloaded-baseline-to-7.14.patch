@@ -1,0 +1,3982 @@
+--- a/main.py
++++ b/main.py
+@@ -1,18 +1,25 @@
+ # GrowBot relay client — the Pico dials OUT to the relay as a WebSocket client.
+ # Runs as main.py on boot (battery, untethered) OR via `mpremote run`.
+-# Speaks BOTH body lanes over the relay, reusing the motor driver + act_engine
+-# (so gestures glide exactly like the LAN firmware).
++# OwlBot dog6 relay firmware. The relay carries compact drive intent while the
++# Pico owns all six-servo timing locally.
+ #
+-# ===== CANONICAL WIRE PROTOCOL (keep identical to relay-transport.js) =====
++# ===== OWLBOT DOG6 WIRE PROTOCOL =====
+ #   phone -> chip:
+ #     {"t":"attach","id","code"}                      handshake (sent by the app/tester)
+-#     {"t":"pose","lr":"L,R"}                          WALK lane: latest-wins ~30Hz, L,R int deg 0..180
+-#     {"t":"act","rid","steps":[{l,r,ms}],"mode"}      GESTURE lane: keyframes; mode "replace"|"append"
+-#     {"t":"routine","rid","name"}                     canned gesture (e.g. "wiggle")
+-#     {"t":"stop","rid"}                               halt gesture + limp
++#     {"t":"dog_drive","f","y","step_ms","stride"}    forward/yaw intent
++#     {"t":"dog_routine","rid","name"}                 gentle local gesture
++#     {"t":"dog_cal","rid","offsets":{...}}            persist us offsets
++#     {"t":"dog_gait_save","rid","steps":[...]}          persist a taught one-channel gait
++#     {"t":"dog_gait_test","rid"}                         play one taught gait cycle
++#     {"t":"dog_pose","rid","role","delta_us"}         bounded channel nudge
++#     {"t":"dog_rest"|"stop","rid"}                    stable rest and hold
++#     {"t":"release","rid"}                             explicit limp
++#     {"t":"gaze_config","rid",...}                     save bounds, no movement
++#     {"t":"gaze","rid","pan","tilt"}                  bounded optional gimbal
++#     {"t":"gaze_release"|"gaze_info","rid"}             release/query gimbal
+ #   chip -> phone:
+ #     {"t":"hello","id"}                               chip handshake to the relay
+-#     {"t":"ack","rid","ok","queued_ms"}               reply to act/routine/stop
++#     {"t":"ack","rid","ok","queued_ms"}               command reply
+ #     {"t":"status","awake"}                           emitted by the RELAY (chip presence), not the chip
+ #   (a pose carrying "seq"/"ts" gets a {"t":"ack","seq","ts"} echo — latency tools only.)
+ #
+@@ -21,19 +28,27 @@
+ # keeps running — LED lit, robot deaf, only a power cycle brought it back. The link now
+ # heals itself, in escalating layers:
+ #   1. every socket op carries a timeout — no connect/read/write can block forever
+-#   2. link heartbeat: once the socket goes quiet the chip PINGs the relay (Cloudflare's
++#   2. link heartbeat: at a fixed cadence the chip PINGs the relay (Cloudflare's
+ #      edge pongs back on its own; the traffic also keeps home-router NAT entries alive);
+ #      nothing received for LINK_DEAD_MS -> tear down and re-dial
+ #   3. wifi watch: WLAN drop -> reassociate + re-dial, exponential backoff between tries
+ #   4. escalation: every WIFI_RESET_EVERY straight failures power-cycle the radio
+ #      (active False/True); after HARD_RESET_AFTER failures, machine.reset() = an
+ #      automatic power cycle (boot skips the calibration stretch on self-heal resets)
+-#   5. a hardware watchdog — armed at the FIRST relay connect, unarmed before that so a
+-#      no-wifi boot idles calmly — reboots the chip if the firmware itself ever freezes
++#   5. a hardware watchdog covers initial connection as well as later sessions;
++#      normal Wi-Fi waiting feeds it, a stuck DNS/TLS operation cannot freeze boot.
+ # The walk dead-man below is a FEATURE (limp on pose silence) and is separate from this.
+-import network, socket, ssl, os, json, time, binascii, select, machine
++import network, socket, ssl, os, json, time, binascii, select, machine, gc
+ import PicoRobotics
+-from act_engine import ActEngine
++from dog_engine import DogEngine, normalize_role
++from gimbal_engine import GimbalEngine, normalize_axis
++from servo_channels import ServoChannels
++from named_gait import NamedGait
++from named_turn import NamedTurn
++from pico_head import PicoHead
++from shared_body import SharedBody
++from stock_body import StockBody
++from stock_commands import StockCommands
+ 
+ HOST = "growbot-relay.growbot.workers.dev"
+ # Each board self-assigns a stable, unique pairing code from its hardware id, so two
+@@ -46,21 +61,84 @@
+ print("  Enter this code in the GrowBot app.")
+ print("========================================\n")
+ 
+-board = PicoRobotics.KitronikPicoRobotics()
+-L_PORT, R_PORT = 1, 3
+-DEADMAN_MS = 500          # limp the WALK legs if no pose arrives for this long (matches the firmware)
++board = PicoRobotics.KitronikPicoRobotics(profile="dog6")
++dog = DogEngine(board)
++gaze = GimbalEngine(board)  # loads limits only; sends no PWM at boot
++channels = ServoChannels(board, dog, gaze)
++named_walk = NamedGait(channels)
++named_turn = NamedTurn(channels)
++pico_head = PicoHead(channels, gaze.ports_dict)
++shared_body = SharedBody(channels, pico_head)
++channels.stop_head = pico_head.stop
++stock_fanout = StockBody(channels, named_walk)
++channels.stop_stock = stock_fanout.stop
++try:
++    with open('stock_commands.json') as _f:
++        _stock_config = json.load(_f)
++except (OSError, ValueError):
++    _stock_config = {}  # opt-in; existing two-servo installations are unchanged
++stock_commands = StockCommands(channels, named_walk, named_turn, pico_head,
++                               shared_body, _stock_config)
++pico_head.hold_enabled = _stock_config.get('head_hold_enabled') is True
++
++# The phone labels Waveshare sockets 0..15.  Keep one authoritative, persisted
++# eight-servo map here so a role cannot be accidentally assigned to the same
++# physical socket as another role.  The engines convert to their driver's
++# one-based servo index internally.
++ALL_SERVO_ROLES = ("front_left", "rear_right", "front_right", "rear_left",
++                   "slider", "rotation", "gimbal_tilt", "gimbal_pan")
++
++def _all_ports():
++    ports = dog.ports_dict()
++    ports.update(gaze.ports_dict())
++    return ports
++
++def _set_all_ports(values):
++    """Validate the whole map before writing either calibration file."""
++    if not isinstance(values, dict):
++        return False
++    candidate = _all_ports()
++    try:
++        for role in ALL_SERVO_ROLES:
++            if role in values:
++                port = int(values[role])
++                if port < 0 or port > 15:
++                    return False
++                candidate[role] = port
++    except Exception:
++        return False
++    if len(set(candidate.values())) != len(ALL_SERVO_ROLES):
++        return False
++    body = {role: candidate[role] for role in dog.ports_dict()}
++    head = {role: candidate[role] for role in gaze.ports_dict()}
++    if not dog.set_ports(body, save=False) or not gaze.set_ports(head, save=False):
++        return False
++    # Only persist after all eight channel assignments are valid.
++    return dog.save_calibration() and gaze.save()
++DEADMAN_MS = 700          # settle and hold if drive intent goes quiet
+ POLL_MS = 20              # main-loop cadence: ticks the act engine ~50Hz and polls for frames
++BOOT_MS = time.ticks_ms()
+ 
+ NET_TIMEOUT_S = 6         # bound on every socket op; must stay well under WDT_MS
+-PING_MS = 10000           # heartbeat cadence once the link has been quiet this long
++PING_MS = 10000           # fixed cadence; incoming motor traffic must not starve pings
++HEARTBEAT_MS = 5000       # application proof-of-life visible to existing browser onAck
+ LINK_DEAD_MS = 25000      # quiet this long (= 2 unanswered pings) -> wedged, re-dial
++LINK_START_MS = 10000     # a new socket is not healthy until something comes back
+ WIFI_RESET_EVERY = 3      # straight failures between radio power-cycles
+ HARD_RESET_AFTER = 10     # straight failures before machine.reset() (~3-5 min of trying)
+ WDT_MS = 8000             # hardware watchdog period (rp2 hardware caps near 8.3s)
++MAX_FRAME_BYTES = 32768   # control/calibration JSON, never camera or model payloads
++MAX_HANDSHAKE_BYTES = 4096
++NET_STAGE_MS = 6000       # total progress budget, in addition to socket-op timeout
++LINK_DIAG = {"stage": "boot", "connections": 0, "failures": 0,
++             "last_error": "", "last_error_stage": "",
++             "heartbeats_sent": 0, "pings_sent": 0, "io": "idle",
++             "last_error_io": "", "close_code": None, "faults": [],
++             "reset_radio": False, "radio_resets": 0}
+ 
+ wlan = network.WLAN(network.STA_IF)
+ 
+-_wdt = None               # armed once in serve(); machine.WDT can NEVER be disarmed after
++_wdt = None               # armed once in main(); machine.WDT can NEVER be disarmed after
+                           # that, so every path below must keep the feed()s flowing
+ 
+ def feed():
+@@ -73,12 +151,25 @@
+ 
+ def ensure_wifi():
+     wlan.active(True)
++    # A failed CYW43 association needs a fresh radio, not another connect()
++    # piled onto its failed state. Keep power saving off on this control link.
++    # This function is called serially, after the previous bounded attempt
++    # ended. CYW43 can remain in CONNECTING after that attempt has stalled;
++    # do not keep waiting on it or skip submitting our saved credentials.
++    if not wlan.isconnected() and wlan.status() != 0:
++        wifi_reset()
++    try:
++        pm_none = getattr(network.WLAN, 'PM_NONE', None)
++        if pm_none is not None: wlan.config(pm=pm_none)
++    except Exception:
++        print('wifi: power mode unavailable')
+     if not wlan.isconnected():
+         try:
+             import secrets
+             # field secrets.py (written by the build page + all existing robots) says WIFI_PASS;
+             # newer secrets.example.py says WIFI_PASSWORD — accept both, or cold boots crash here.
+             _pw = getattr(secrets, 'WIFI_PASSWORD', None) or getattr(secrets, 'WIFI_PASS', '')
++            print("wifi: starting a fresh association")
+             wlan.connect(secrets.WIFI_SSID, _pw)
+         except Exception as e:
+             print("wifi err", e)
+@@ -91,7 +182,7 @@
+     if ok:
+         print("WIFI_OK", wlan.ifconfig()[0])
+     else:
+-        print("WIFI_FAIL")
++        print("WIFI_FAIL", wlan.status())
+     print("wifi:", ok, wlan.ifconfig()[0] if ok else "-")
+     return ok
+ 
+@@ -99,6 +190,7 @@
+     # power the radio down and back up — recovers a brownout-wedged CYW43 that still
+     # CLAIMS to be associated (or won't reassociate) without a full chip reset
+     print("wifi: bouncing the radio")
++    LINK_DIAG["radio_resets"] += 1
+     try:
+         wlan.disconnect()
+     except Exception:
+@@ -111,96 +203,177 @@
+     wlan.active(True)
+ 
+ def ws_open():
++    LINK_DIAG["io"] = "connect"
++    LINK_DIAG["stage"] = "dns"
++    gc.collect()         # leave contiguous heap for TLS after the preceding session
+     feed()
+     ai = socket.getaddrinfo(HOST, 443)[0][-1]
+     raw = socket.socket()
+     raw.settimeout(NET_TIMEOUT_S)   # lwIP timeout rides under the SSL layer too: every later
+     feed()                          # read/write errors out instead of blocking forever
++    s = None
+     try:
++        LINK_DIAG["stage"] = "tcp"
+         raw.connect(ai)
+         feed()
++        LINK_DIAG["stage"] = "tls"
+         s = ssl.wrap_socket(raw, server_hostname=HOST)  # SNI required by Cloudflare
++        LINK_DIAG["stage"] = "websocket_upgrade"
++        key = binascii.b2a_base64(os.urandom(16)).strip().decode()
++        req = ("GET %s HTTP/1.1\r\nHost: %s\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
++               "Sec-WebSocket-Key: %s\r\nSec-WebSocket-Version: 13\r\n\r\n") % (PATH, HOST, key)
++        write_all(s, req.encode())
++        resp = bytearray()
++        started = time.ticks_ms()
++        while not resp.endswith(b"\r\n\r\n"):
++            check_net_budget(started)
++            if len(resp) >= MAX_HANDSHAKE_BYTES:
++                raise OSError("WebSocket upgrade header too large")
++            c = s.read(1)
++            if not c:
++                raise OSError("WebSocket upgrade ended early")
++            resp.extend(c)
++        ok = bytes(resp).split(b"\r\n", 1)[0].startswith(b"HTTP/1.1 101 ")
++        if not ok:
++            raise OSError("WebSocket upgrade rejected")
++        print("handshake: OK")
++        return (s, raw)
+     except Exception:
+-        raw.close()
+-        raise
+-    # keep `raw` so serve() can select.poll() it — MicroPython's SSLSocket has no .settimeout()
+-    key = binascii.b2a_base64(os.urandom(16)).strip().decode()
+-    req = ("GET %s HTTP/1.1\r\nHost: %s\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
+-           "Sec-WebSocket-Key: %s\r\nSec-WebSocket-Version: 13\r\n\r\n") % (PATH, HOST, key)
+-    s.write(req.encode())
+-    resp = b""
+-    while b"\r\n\r\n" not in resp:
+-        feed()
+-        c = s.read(1)
+-        if not c:
+-            break
+-        resp += c
+-    ok = b" 101 " in resp
+-    print("handshake:", "OK" if ok else "FAIL", resp.split(b"\r\n")[0])
+-    if not ok:
++        # Until return, main() does not own either socket. A TLS or HTTP
++        # exception used to leak them on each reconnect attempt.
+         for x in (s, raw):
+             try:
+-                x.close()
++                if x: x.close()
+             except Exception:
+                 pass
+-        return (None, None)
+-    return (s, raw)
+-
+-def send_text(s, txt):
+-    p = txt.encode()
++        raise
++
++def check_net_budget(started):
++    if time.ticks_diff(time.ticks_ms(), started) >= NET_STAGE_MS:
++        raise OSError("network progress deadline exceeded")
++    feed()
++
++def write_all(s, data):
++    previous_io = LINK_DIAG["io"]
++    LINK_DIAG["io"] = "write"
++    started = time.ticks_ms()
++    view = memoryview(data)
++    offset = 0
++    while offset < len(view):
++        check_net_budget(started)
++        count = s.write(view[offset:])
++        if not count:
++            raise OSError("network write made no progress")
++        offset += count
++    LINK_DIAG["io"] = previous_io
++
++def send_frame(s, op, p=b""):
+     n = len(p)
++    if n > MAX_FRAME_BYTES or (op >= 8 and n > 125):
++        raise ValueError("WebSocket frame too large")
+     mask = os.urandom(4)
+     if n < 126:
+-        hdr = bytes([0x81, 0x80 | n])
++        hdr = bytes([0x80 | op, 0x80 | n])
+     else:
+-        hdr = bytes([0x81, 0x80 | 126, (n >> 8) & 0xFF, n & 0xFF])
++        hdr = bytes([0x80 | op, 0x80 | 126, (n >> 8) & 0xFF, n & 0xFF])
+     mp = bytearray(n)
+     for i in range(n):
+         mp[i] = p[i] ^ mask[i & 3]
+-    s.write(hdr + mask + bytes(mp))
+-
+-def recvn(s, n):
+-    b = b""
++    write_all(s, hdr + mask + bytes(mp))
++
++def send_text(s, txt):
++    send_frame(s, 1, txt.encode())
++
++def recvn(s, n, started=None):
++    LINK_DIAG["io"] = "frame_read"
++    if started is None: started = time.ticks_ms()
++    b = bytearray()
+     while len(b) < n:
+-        feed()
++        check_net_budget(started)
+         c = s.read(n - len(b))
+         if not c:
+-            return None
+-        b += c
+-    return b
++            raise OSError("WebSocket frame ended early")
++        b.extend(c)
++    return bytes(b)
+ 
+ def _frame_after(s, b0):                # read the rest of a frame given its already-read first byte (blocking)
+-    b1 = recvn(s, 1)
+-    if not b1:
+-        return (None, None)
++    started = time.ticks_ms()
++    b1 = recvn(s, 1, started)
+     op = b0[0] & 0x0F
+     ln = b1[0] & 0x7F
+     if ln == 126:
+-        e = recvn(s, 2); ln = (e[0] << 8) | e[1]
++        e = recvn(s, 2, started); ln = (e[0] << 8) | e[1]
+     elif ln == 127:
+-        e = recvn(s, 8); ln = 0
++        e = recvn(s, 8, started); ln = 0
+         for b in e:
+             ln = (ln << 8) | b
++    if ln > MAX_FRAME_BYTES or (op >= 8 and ln > 125):
++        raise OSError("WebSocket frame too large")
++    # This control protocol uses complete text messages. Do not execute the
++    # first part of a fragmented command as if it were a complete command.
++    if b0[0] & 0x70 or not b0[0] & 0x80 or op not in (1, 8, 9, 10):
++        raise OSError("unsupported WebSocket frame")
+     masked = b1[0] & 0x80
+-    mask = recvn(s, 4) if masked else None
+-    pl = recvn(s, ln) if ln else b""
++    mask = recvn(s, 4, started) if masked else None
++    pl = recvn(s, ln, started) if ln else b""
+     if masked and pl:
+         pl = bytes(pl[i] ^ mask[i & 3] for i in range(ln))
+     return (op, pl)
+ 
+-# ---- motor lanes ----
+-def apply_pose(l, r):                   # WALK lane: direct latest-wins write
+-    board.servoWrite(L_PORT, int(max(0, min(180, l))))
+-    board.servoWrite(R_PORT, int(max(0, min(180, r))))
+-
+-def _act_write(l, r):                   # GESTURE lane: act_engine's hands
+-    board.servoWrite(L_PORT, l); board.servoWrite(R_PORT, r)
+-def _act_release():
+-    board.release(L_PORT); board.release(R_PORT)
+-eng = ActEngine(_act_write, _act_release, time.ticks_ms, time.ticks_diff)
+-ROUTINES = {"wiggle": [{"l": 60, "r": 120, "ms": 400}, {"l": 120, "r": 60, "ms": 400},
+-                       {"l": 60, "r": 120, "ms": 400}, {"l": 120, "r": 60, "ms": 400},
+-                       {"l": 90, "r": 90, "ms": 300}]}
++# ---- dog6 motion lane ----
++def _ack(s, message, ok=True, **extra):
++    payload = {"t": "ack", "rid": message.get("rid"), "ok": 1 if ok else 0}
++    payload.update(extra)
++    send_text(s, json.dumps(payload))
++
++
++def _controller_diagnostics():
++    """Report only states the Pico can actually observe; never imply servo feedback."""
++    result = {
++        "host": "Pico 2 W",
++        "board": "Waveshare Pico Servo Driver",
++        "firmware": "owlbot-pico-7.14",
++        "servo_channels": 16,
++        "protocol": 2,
++        "uptime_ms": time.ticks_diff(time.ticks_ms(), BOOT_MS),
++        "link": dict(LINK_DIAG),
++        "reset_cause": machine.reset_cause(),
++        "micropython": os.uname().release,
++    }
++    try:
++        result["memory_free_bytes"] = gc.mem_free()
++    except Exception:
++        pass
++    try:
++        result["wifi_rssi_dbm"] = wlan.status("rssi")
++    except Exception:
++        pass
++    return result
++
++def link_fault(reason):
++    LINK_DIAG["last_error_io"] = LINK_DIAG["io"]
++    LINK_DIAG["last_error_stage"] = LINK_DIAG["stage"]
++    LINK_DIAG["last_error"] = str(reason)[:120]
++    # Keep the ORIGINAL fault even if subsequent TCP retries fail differently.
++    # Bounded RAM only; no flash writes, identities, commands or camera data.
++    faults = LINK_DIAG["faults"]
++    faults.append(dict(at_ms=time.ticks_diff(time.ticks_ms(), BOOT_MS),
++        stage=LINK_DIAG["stage"], io=LINK_DIAG["io"],
++        error=LINK_DIAG["last_error"]))
++    if len(faults) > 4:
++        del faults[0]
++
++
++def radio_reset_required(fails):
++    # A socket that accepts writes but receives nothing can have a stale CYW43
++    # association. Recover after the receive deadline, not after three TCP retries.
++    # Ordinary remote closes retain the existing graduated retry policy.
++    return LINK_DIAG["reset_radio"] or fails % WIFI_RESET_EVERY == 0
++
++def apply_pose(l, r):
++    """Unmodified GrowBot L/R input; chip-side posture/stepping interpretation."""
++    return stock_fanout.pose(l, r)
++
+ 
+ def _handle(s, pl):
+     """Dispatch one text frame. Returns the lane kind so serve() can manage the dead-man."""
+@@ -208,106 +381,455 @@
+         m = json.loads(pl)
+     except Exception:
+         return None
++    if not isinstance(m, dict):
++        return None
+     t = m.get("t")
+-    if t == "pose":
+-        eng.clear()                                     # walk owns the legs; next gesture cold-starts
+-        try:
+-            ls, rs = m.get("lr", "90,90").split(",")
+-            apply_pose(float(ls), float(rs))
++    commands = globals().get('stock_commands')
++    head = globals().get('pico_head')
++    # STOP is also sent before each GrowBot action: freeze head motion but
++    # retain support. Explicit release and calibration stop remain all-off.
++    if head and t in ('release', 'gaze_release'):
++        head.stop(force=True)
++    if commands and t in ('act', 'routine'):
++        try:
++            # Explicit spin/turn aliases share the tested saved-turn executor.
++            # Never infer their intent from unlabelled stock L/R pose streams.
++            op = commands.decode(m.get('steps')) if t == 'act' else commands.named_opcode(m.get('name'))
++            if op is not None:
++                if stock_fanout.active:
++                    raise ValueError('stop_stock_motion_before_saved_command')
++                state = commands.start(op, m.get('mode', 'replace'))
++                queued = sum(x['ms'] for x in m['steps']) if t == 'act' else state['command_window_ms']
++                _ack(s, m, True, queued_ms=queued, saved_body_command=state,
++                     physical_feedback=False)
++                return 'routine'
++        except Exception as error:
++            _ack(s, m, False, err=str(error), physical_feedback=False)
++            return 'routine'  # never interpolate a broken command as leg angles
++    if commands and commands.active:
++        read_only = t in ('ping', 'dog_info', 'gaze_info') or (t == 'dog_cal' and
++            (m.get('channel_action') in ('info', 'head_info', 'turn_keepalive') or
++             m.get('body_action') in ('status', 'keepalive')))
++        if not read_only:
++            commands.cancel()
++    if t in ('pose','act','routine'):
++        try:
++            if named_walk.running or named_turn.running:
++                raise ValueError('stop_named_motion_before_stock_pose')
++            if t=='pose':
++                raw=m.get('lr')
++                if not isinstance(raw,str) or len(raw)>80:raise ValueError('invalid_lr_pose')
++                values=raw.split(',')
++                if len(values)!=2:raise ValueError('invalid_lr_pose')
++                state=apply_pose(float(values[0]),float(values[1]))
++                if head: head.support()
++                if m.get('rid') is not None or 'seq' in m:
++                    _ack(s,m,True,seq=m.get('seq'),ts=m.get('ts'),stock_pose=state,physical_feedback=False)
++            else:
++                steps=m.get('steps')
++                if t=='routine':
++                    if m.get('name')!='wiggle':raise ValueError('unknown_stock_routine')
++                    steps=[{'l':60,'r':120,'ms':400},{'l':120,'r':60,'ms':400},
++                           {'l':60,'r':120,'ms':400},{'l':90,'r':90,'ms':300}]
++                queued=stock_fanout.enqueue(steps,m.get('mode','replace'))
++                if head: head.support()
++                _ack(s,m,True,queued_ms=queued,stock_pose=stock_fanout.status(),physical_feedback=False)
++        except Exception as error:
++            stock_fanout.stop()
++            _ack(s,m,False,err=str(error),physical_feedback=False)
++        return 'stock'
++    shared_request = t == 'dog_cal' and 'body_action' in m
++    if shared_request:
++        try:
++            m = shared_body.resolve(m)
++        except Exception as error:
++            _ack(s,m,False,err=str(error))
++            return 'cal'
++    # Keep the established relay envelope; new channel commands also work
++    # through relays that only forward existing dog_cal message types.
++    action=m.get("channel_action") if t=="dog_cal" else None
++    if action:
++        try:
++            if action in ('save','walk_save'):
++                stock_fanout.stop()
++            if named_turn.running and action not in ('info','stop','turn_halt','turn_keepalive','head_move','head_info','head_stop'):
++                raise ValueError('stop_turn_before_other_movement')
++            if action in ('head_move','head_info','head_stop'):
++                if action == 'head_move':
++                    if channels.active is not None or channels.queue:
++                        if not (named_walk.running or named_turn.running):
++                            raise ValueError('finish_manual_adjustment_first')
++                    used = set(step['channel'] for step in (named_walk.plan or {}).get('steps', []))
++                    used.update(c['channel'] for c in channels.channels if c['enabled'] and c['name'].lower() in ('turn','body turn','rotation'))
++                    state = pico_head.move(m, used)
++                else:
++                    if action == 'head_stop': pico_head.stop(force=True)
++                    state = pico_head.status()
++                _ack(s,m,True,state=state)
++            elif action=="info":
++                extra = {'body_contract': shared_body.capabilities()} if shared_request else {}
++                extra['stock_pose'] = stock_fanout.status()
++                if commands: extra['saved_body_command'] = commands.status()
++                _ack(s,m,True,channel_state=channels.status(),named_walk=named_walk.status(),walk_plan=named_walk.plan,named_turn=named_turn.status(),**extra)
++            elif action=='turn_run':
++                if named_walk.running: raise ValueError('stop_walk_before_turning')
++                state=named_turn.start_turn(named_walk.plan,m.get('turn_channel'),m.get('binding'),m.get('pattern','a'),m.get('fraction',1))
++                if head: head.support()
++                _ack(s,m,True,named_turn=state,physical_feedback=False)
++            elif action=='turn_halt':
++                named_turn.cancel(release=False)
++                _ack(s,m,True,named_turn=named_turn.status())
++            elif action=='turn_keepalive':
++                _ack(s,m,True,named_turn=named_turn.keepalive(m.get('run_id')))
++            elif action=="walk_save":
++                saved=named_walk.save(m.get("plan"))
++                _ack(s,m,True,walk_plan=saved,named_walk=named_walk.status(),moved=False)
++            elif action=="walk_run":
++                if shared_request and named_walk.running:
++                    # A repeated identical request is idempotent. A changed
++                    # direction/pace must never ACK an old run as the new one.
++                    speeds = {'creep':200, 'slow':600, 'fast':1000, 'run':1600}
++                    if (m.get('direction','forward') != named_walk.direction or
++                        m.get('continuous',False) != named_walk.continuous or
++                        (m.get('pace') is not None and speeds.get(m['pace']) != named_walk.run_speed) or
++                        (m.get('cycles') is not None and m['cycles'] != named_walk.run_cycles)):
++                        raise ValueError('stop_walk_before_changing_parameters')
++                state=named_walk.start(m.get("direction","forward"),m.get("path_clear",False),m.get("bench",False),m.get('continuous',False),m.get('pace'),m.get('cycles'))
++                if head: head.support()
++                _ack(s,m,True,named_walk=state,physical_feedback=False)
++            elif action=='walk_keepalive':
++                _ack(s,m,True,named_walk=named_walk.keepalive(m.get('run_id')),physical_feedback=False)
++            elif action=="walk_continue":
++                state=named_walk.continue_after_vision(m.get("run_id"),m.get("completed_cycles"),m.get("path_clear"))
++                _ack(s,m,True,named_walk=state,physical_feedback=False)
++            elif action=="walk_preview":
++                state=named_walk.preview_next_cycle(m.get('run_id'),m.get('next_cycle'),m.get('path_clear'),m.get('capture_offset_ms'))
++                _ack(s,m,True,named_walk=state,physical_feedback=False)
++            elif action=="walk_halt":
++                named_walk.cancel(release=False)
++                _ack(s,m,True,named_walk=named_walk.status(),holding=channels.owning)
++            elif action=="save":
++                if named_walk.running:raise ValueError("stop_walk_before_changing_channels")
++                pico_head.stop(force=True)
++                saved=channels.configure(m.get("config",{}))
++                _ack(s,m,True,saved_channel=saved,moved=False)
++            elif action=="move":
++                pico_head.stop(force=True)
++                if named_walk.running:named_walk.cancel()
++                count=channels.move(m.get("targets",[]),m.get("calibration",False),m.get("speed_us_s",100))
++                _ack(s,m,True,accepted=count,physical_feedback=False)
++            elif action=="stop":
++                if head: head.stop(force=True)
++                named_turn.cancel();named_walk.cancel();channels.stop();_ack(s,m,True,holding=False)
++            else:raise ValueError("unknown_channel_action")
++        except Exception as error:
++            _ack(s,m,False,err=str(error))
++        return "cal"
++    # Forward intent from either voice or agent tools uses the same saved,
++    # named-channel walk. Never silently fall back if its bindings are stale.
++    if t in ("dog_cycle","dog_drive") and (named_walk.plan or named_walk.error):
++        try:
++            f=float(m.get("f",0));y=float(m.get("y",0))
++            if abs(f)>0.08 and abs(f)>=abs(y):
++                raise ValueError("use_vision_gated_named_walk")
++            if t=="dog_drive" and abs(f)<0.08 and abs(y)<0.08 and named_walk.running:
++                # A bounded walk finishes its feet-down cycle. Explicit stop,
++                # release, disconnect and manual override still cancel immediately.
++                _ack(s,m,True,named_walk=named_walk.status())
++                return "routine"
++        except Exception as error:
++            _ack(s,m,False,err=str(error));return "routine"
++    if named_turn.running and t in ("stop","release","gaze_release","dog_drive","dog_cycle","dog_posture","dog_routine","routine","dog_set","dog_pose","gaze","gaze_set","dog_gait_test","servo_test","dog_rest"):
++        named_turn.cancel()
++    if named_walk.running and t in ("stop","release","gaze_release","dog_drive","dog_cycle","dog_posture","dog_routine","routine","dog_set","dog_pose","gaze","gaze_set","dog_gait_test","servo_test","dog_rest"):
++        named_walk.cancel()
++    if channels.owning and t in ("stop","release","gaze_release"):
++        channels.stop();_ack(s,m,True,holding=bool(head and head.targets));return "stop"
++    if channels.owning and t in ("dog_drive","dog_cycle","dog_posture","dog_routine","routine","dog_set","dog_pose","gaze","gaze_set","dog_gait_test","servo_test","dog_rest"):
++        channels.stop()
++    if t == "ping":
++        # Keep the phone's controller lease warm: bodyLastSeenAt refreshes on
++        # ack/info/pong/status, and a silent body is declared stale after 15s.
++        send_text(s, json.dumps({"t": "pong", "id": m.get("id"), "tms": time.ticks_ms()}))
++        return "ping"
++    if t == "dog_drive":
++        try:
++            ok = dog.drive(m.get("f", 0), m.get("y", 0),
++                           m.get("step_ms", 200), m.get("stride", 1.0))
+         except Exception:
+-            pass
+-        if "seq" in m:                                  # latency-probe echo (tools only)
+-            send_text(s, json.dumps({"t": "ack", "seq": m["seq"], "ts": m.get("ts", 0)}))
+-        return "pose"
+-    if t == "act":
+-        ok, q = eng.enqueue(m.get("steps", []), m.get("mode", "replace"))
+-        send_text(s, json.dumps({"t": "ack", "rid": m.get("rid"), "ok": 1 if ok else 0,
+-                                 "queued_ms": (q if ok else 0)}))
+-        return "act"
+-    if t == "routine":
+-        ok, q = eng.enqueue(ROUTINES.get(m.get("name", ""), []), "replace")
+-        send_text(s, json.dumps({"t": "ack", "rid": m.get("rid"), "ok": 1 if ok else 0,
+-                                 "queued_ms": (q if ok else 0)}))
+-        return "act"
++            ok = False
++        if m.get("rid") is not None:
++            _ack(s, m, ok, mode=dog.mode)
++        return "drive"
++    if t == "dog_cycle":
++        try:
++            queued = dog.play_cycle(m.get("f", 0), m.get("y", 0),
++                                    m.get("step_ms", 300), m.get("stride", 1.0))
++        except Exception:
++            queued = 0
++        _ack(s, m, queued > 0, queued_ms=queued, mode=dog.mode,
++             phases=dog._stage_count() if queued else 0)
++        return "routine"
++    if t == "dog_posture":
++        try:
++            queued = dog.play_posture(m.get("name", "stand_full"), m.get("step_ms", 350))
++        except Exception:
++            queued = 0
++        _ack(s, m, queued > 0, queued_ms=queued, mode=dog.mode,
++             phases=len(dog._posture_steps) if queued else 0, name=m.get("name", ""))
++        return "routine"
++    if t in ("dog_routine", "routine"):
++        q = dog.play_routine(m.get("name", ""))
++        _ack(s, m, q > 0, queued_ms=q, name=m.get("name", ""))
++        return "routine"
++    if t == "dog_cal":
++        if head: head.stop(force=True)
++        stock_fanout.stop()
++        # Configuration never emits PWM.  The full channel map is checked for
++        # duplicates before it is committed, then the ACK echoes the values
++        # actually retained by the Pico.
++        ok = True
++        if m.get("offsets"):
++            ok = dog.set_calibration(m.get("offsets", {}), save=False)
++        if m.get("limits"):
++            ok = dog.set_limits(m.get("limits", {}), save=False) and ok
++        if m.get("lift_endpoints"):
++            ok = dog.set_lift_endpoints(m.get("lift_endpoints", {}), save=False) and ok
++        if m.get("ports"):
++            ok = _set_all_ports(m.get("ports", {})) and ok
++        if m.get("locks"):
++            locks = m.get("locks", {})
++            body_locks = {role: locks[role] for role in dog.locks_dict() if role in locks}
++            gaze_locks = {role: locks[role] for role in gaze.locks_dict() if role in locks}
++            ok = dog.set_locks(body_locks, save=False) and gaze.set_locks(gaze_locks, save=False) and ok
++        if ok and not m.get("ports"):
++            ok = dog.save_calibration() and gaze.save()
++        _ack(s, m, ok, cal=dog.calibration(), limits=dog.limits_dict(), lift_endpoints=dog.lift_endpoints_dict(),
++             ports=_all_ports(), locks=dict(dog.locks_dict(), **gaze.locks_dict()), gaze=gaze.status(), moved=False,
++             err=None if ok else "invalid_or_unsaved_calibration")
++        return "cal"
++    if t == "dog_gait_save":
++        ok = dog.save_custom_gait(m.get("steps", []))
++        _ack(s, m, ok, steps=len(dog.custom_gait),
++             queued_ms=dog.custom_gait_duration(), err=None if ok else "invalid_gait")
++        return "cal"
++    if t == "dog_gait_clear":
++        ok = dog.clear_custom_gait()
++        _ack(s, m, ok, steps=0)
++        return "cal"
++    if t == "dog_gait_test":
++        queued = dog.play_custom_cycle()
++        _ack(s, m, queued > 0, steps=len(dog.custom_gait), queued_ms=queued,
++             err=None if queued else "no_taught_gait")
++        return "routine"
++    if t == "dog_pose":
++        ok = dog.test_servo(m.get("role", ""), m.get("delta_us", 0))
++        _ack(s, m, ok, role=m.get("role", ""))
++        return "cal"
++    if t == "dog_set":
++        ok = dog.set_servo_us(m.get("role", ""), m.get("pulse_us", 1500), bool(m.get("slow", False)))
++        _ack(s, m, ok, role=m.get("role", ""), pulse_us=m.get("pulse_us", 1500))
++        return "cal"
++    if t == "dog_release":
++        ok = dog.release_servo(m.get("role", ""))
++        _ack(s, m, ok, role=m.get("role", ""))
++        return "cal"
++    if t == "servo_test":
++        requested_role = m.get("role", "")
++        role = normalize_axis(requested_role)
++        if role in ("gimbal_pan", "gimbal_tilt"):
++            # Old loose-servo tests can snap the mounted phone. Require the
++            # authoritative paced head lane instead of legacy calibration.
++            _ack(s,m,False,err='use_paced_head_move');return 'gaze'
++        else:
++            role = normalize_role(requested_role)
++            ok = dog.test_servo(role, m.get("delta_us", 0))
++        _ack(s, m, ok, role=role, requested_role=requested_role,
++             delta_us=m.get("delta_us", 0))
++        return "cal"
++    if t == "dog_rest":
++        dog.stop(hold=True)
++        _ack(s, m, True, holding=True)
++        return "stop"
++    if t == "release":
++        dog.release()
++        _ack(s, m, True, holding=False)
++        return "stop"
++    if t == "dog_info":
++        _ack(s, m, True, profile="dog6", ports=_all_ports(), status=dog.status(), gaze=gaze.status(),
++             named_walk=named_walk.status(),stock_pose=stock_fanout.status(),
++             controller=_controller_diagnostics(), observability={
++                 "pico_software_state": True,
++                 "channel_map": True,
++                 "servo_power_rail": False,
++                 "servo_presence": False,
++                 "servo_position_feedback": False,
++                 "physical_motion": False,
++             })
++        return "info"
++    if t == "gaze_config":
++        if head: head.stop(force=True)
++        gaze_values = dict(m)
++        gaze_values.pop("ports", None)
++        gaze_values.pop("locks", None)
++        ok = gaze.configure(gaze_values, save=True)
++        if m.get("ports"):
++            ok = _set_all_ports(m.get("ports", {})) and ok
++        if m.get("locks"):
++            locks = m.get("locks", {})
++            ok = gaze.set_locks({role: locks[role] for role in gaze.locks_dict() if role in locks}, save=True) and ok
++        _ack(s, m, ok, ports=_all_ports(), locks=dict(dog.locks_dict(), **gaze.locks_dict()), gaze=gaze.status(), moved=False,
++             err=None if ok else "invalid_or_unsaved_gaze_calibration")
++        return "gaze_info"
++    if t == "gaze_set":
++        _ack(s,m,False,err='use_paced_head_move')
++        return "gaze"
++    if t == "gaze_release_axis":
++        axis = normalize_axis(m.get("axis", ""))
++        if head: head.release_axis('pan' if axis == 'gimbal_pan' else 'tilt' if axis == 'gimbal_tilt' else None)
++        ok = gaze.release_axis(axis)
++        _ack(s, m, ok, axis=axis)
++        return "gaze"
++    if t == "gaze":
++        _ack(s,m,False,err='use_paced_head_move')
++        return "gaze"
++    if t == "gaze_release":
++        ok = gaze.release()
++        _ack(s, m, ok, gaze=gaze.status())
++        return "gaze"
++    if t == "gaze_info":
++        _ack(s, m, True, gaze=gaze.status())
++        return "gaze_info"
+     if t == "stop":
+-        eng.clear(); _act_release()
+-        send_text(s, json.dumps({"t": "ack", "rid": m.get("rid"), "ok": 1, "queued_ms": 0}))
++        # An idle/repeated STOP must not re-engage the obsolete dog's resting
++        # pose. GrowBot sends STOP before preparing its neutral walk stance.
++        dog.release();gaze.release();channels.stop()
++        _ack(s, m, True, queued_ms=0, holding=bool(head and head.targets))
+         return "stop"
+     return None
+ 
+ def serve(s, raw):
+     global _wdt
+-    poll = select.poll(); poll.register(raw, select.POLLIN)   # poll the RAW fd; SSL reads stay blocking
++    LINK_DIAG["stage"] = "serving"
++    LINK_DIAG["connections"] += 1
++    LINK_DIAG["io"] = "hello"
++    LINK_DIAG["reset_radio"] = False
++    poll = select.poll(); poll.register(s, select.POLLIN)
+     send_text(s, json.dumps({"t": "hello", "id": DEVID}))
+-    print("hello sent; walk + gesture lanes ready (dead-man %dms)" % DEADMAN_MS)
++    LINK_DIAG["io"] = "ping"
++    send_frame(s, 0x9)  # ask for receipt now, not ten seconds into a stale session
++    LINK_DIAG["pings_sent"] += 1
++    print("hello sent; dog6 intent + calibration lanes ready (dead-man %dms)" % DEADMAN_MS)
+     if _wdt is None:
+         _wdt = machine.WDT(timeout=WDT_MS)              # last-resort self-heal: reboots a truly frozen
+         print("hw watchdog armed (%dms)" % WDT_MS)      # chip; from here on every path must feed()
+-    eng.clear()
+-    walk_on = False
++    drive_on = False
+     now = time.ticks_ms()
+-    last_pose = now; last_rx = now; last_ping = now
++    last_pose = now; last_rx = now; last_ping = now; last_heartbeat = now
++    received = False
+     n = 0; nlast = 0; last = now
+     while True:
+         feed()
+         # wait up to POLL_MS for a frame to START (so the act engine keeps ticking between frames).
+-        # MicroPython's SSLSocket has NO .settimeout(); poll the RAW fd for readability instead and keep
+-        # every SSL read blocking — once poll says readable, the bytes are already here so reads return at once.
++        # Poll the TLS stream, not its underlying raw socket. TLS may already
++        # have consumed an entire record containing several WebSocket frames;
++        # raw readability then goes false although decrypted frames remain.
+         b0 = None
+         try:
++            LINK_DIAG["io"] = "poll"
+             if poll.poll(POLL_MS):
++                LINK_DIAG["io"] = "first_byte_read"
+                 b0 = s.read(1)
+         except OSError as e:                            # a real socket/ssl error → drop & let main() re-dial
++            link_fault(e)
+             print("read err:", e); return
+         if b0 == b"":                                   # empty read = relay closed the socket
++            link_fault("relay closed the stream")
+             print("conn closed by relay"); return
+         if b0:
+             op, pl = _frame_after(s, b0)                # rest of the frame: blocking (s is always blocking now)
+             if op is None or op == 0x8:
++                LINK_DIAG["close_code"] = ((pl[0] << 8) | pl[1]) if len(pl) >= 2 else None
++                link_fault("relay sent WebSocket close")
+                 print("conn closed by relay"); return
+             last_rx = time.ticks_ms()                   # any frame (incl. pongs) proves the link is alive
++            received = True
+             if op == 0x9:                               # ping -> pong
+-                s.write(bytes([0x8A, 0x80]) + os.urandom(4))
++                send_frame(s, 0xA, pl)                 # RFC6455: echo the ping payload exactly
+             elif op == 0x1:
++                LINK_DIAG["io"] = "dispatch"
+                 kind = _handle(s, pl)
+-                if kind == "pose":
+-                    walk_on = True; last_pose = time.ticks_ms()
++                if kind == "drive":
++                    drive_on = dog.mode in ("forward", "backward", "left", "right")
++                    last_pose = time.ticks_ms()
+                     n += 1
+                     now = time.ticks_ms()
+                     if time.ticks_diff(now, last) >= 1000:
+                         print("poses", n, "rate", n - nlast, "Hz"); nlast = n; last = now
+-                elif kind in ("act", "stop"):
+-                    walk_on = False                     # the gesture lane owns the legs now
+-        else:
+-            # quiet tick: watch the LINK (the dead-man below guards the LEGS; this guards the SOCKET).
+-            # a brownout can drop WiFi with no FIN/RST — without this, serve() would spin forever deaf.
+-            now = time.ticks_ms()
+-            if not wlan.isconnected():
+-                print("wifi dropped"); return
+-            if time.ticks_diff(now, last_rx) > LINK_DEAD_MS:
+-                print("link dead: nothing heard for %ds, re-dialing" % (LINK_DEAD_MS // 1000)); return
+-            if time.ticks_diff(now, last_rx) > PING_MS and time.ticks_diff(now, last_ping) > PING_MS:
+-                s.write(bytes([0x89, 0x80]) + os.urandom(4))    # ping; the pong refreshes last_rx
+-                last_ping = now
+-        eng.tick()                                      # glide any queued gesture (~50Hz)
+-        if walk_on and not eng.active and time.ticks_diff(time.ticks_ms(), last_pose) > DEADMAN_MS:
+-            _act_release(); walk_on = False             # WALK dead-man: relax on silence
+-            print("dead-man: walk limp (silence)")
++                elif kind in ("routine", "stop", "stock"):
++                    drive_on = False
++        LINK_DIAG["io"] = "actuator_tick"
++        dog.step()
++        gaze.step()
++        channels.step()
++        named_walk.step()
++        stock_commands.step()
++        named_turn.step()
++        pico_head.step()
++        stock_fanout.step()
++        if drive_on and time.ticks_diff(time.ticks_ms(), last_pose) > DEADMAN_MS:
++            dog.stop(hold=True); drive_on = False
++            print("dead-man: dog settled to stable rest (silence)")
++        # Link supervision runs on BOTH busy and quiet ticks. Sending is never
++        # proof of receipt: only a received frame refreshes last_rx. Heartbeats
++        # do not touch a movement lease, command run, or servo output.
++        now = time.ticks_ms()
++        LINK_DIAG["io"] = "link_check"
++        if not wlan.isconnected():
++            link_fault("Wi-Fi association lost")
++            print("wifi dropped"); return
++        deadline = LINK_DEAD_MS if received else LINK_START_MS
++        if time.ticks_diff(now, last_rx) > deadline:
++            LINK_DIAG["reset_radio"] = True
++            link_fault("relay heartbeat deadline exceeded")
++            print("link dead: nothing heard for %ds, re-dialing" % (deadline // 1000)); return
++        if time.ticks_diff(now, last_ping) >= PING_MS:
++            LINK_DIAG["io"] = "ping"
++            send_frame(s, 0x9)  # pongs refresh receive liveness, not motor authority
++            last_ping = time.ticks_ms()
++            LINK_DIAG['pings_sent'] += 1
++        if time.ticks_diff(now, last_heartbeat) >= HEARTBEAT_MS:
++            LINK_DIAG["io"] = "heartbeat"
++            # Existing GrowBot clients observe ACKs but ignore generic pong/info.
++            # Null rid and an explicit event prevent this unsolicited health
++            # frame from acknowledging any particular motion request.
++            send_text(s, json.dumps(dict(t='ack', rid=None, ok=1, event='heartbeat',
++                uptime_ms=time.ticks_diff(now, BOOT_MS), physical_feedback=False)))
++            last_heartbeat = time.ticks_ms()
++            LINK_DIAG['heartbeats_sent'] += 1
+ 
+ def main():
++    global _wdt
++    if _wdt is None:
++        _wdt = machine.WDT(timeout=WDT_MS)
++        print("hw watchdog armed before network startup (%dms)" % WDT_MS)
+     sleep_fed(2000)                                     # let the WiFi radio settle on cold boot
+     fails = 0
+     while True:                                         # never give up: re-ensure wifi, re-dial the relay
+         s = raw = None
+         t0 = time.ticks_ms()
+         try:
++            LINK_DIAG["stage"] = "wifi_association"
+             if ensure_wifi():
+                 s, raw = ws_open()
+                 if s:
+                     serve(s, raw)                       # only returns when the link died
+                     if time.ticks_diff(time.ticks_ms(), t0) > 30000:
+                         fails = 0                       # a session that lived a while = healthy link
++            else:
++                link_fault("Wi-Fi association did not complete")
+         except Exception as e:
++            link_fault(e)
+             print("loop err:", e)
+         for x in (s, raw):                              # re-dialing is routine now — never leak sockets
+             try:
+@@ -315,19 +837,28 @@
+                     x.close()
+             except Exception:
+                 pass
+-        eng.clear()
+-        try:
+-            _act_release()                              # offline = limp: no held torque on a stale pose
++        try:
++            stock_commands.cancel()
++            pico_head.stop()  # lost link freezes the head at its last output
++            stock_fanout.stop()
++            named_turn.cancel()
++            named_walk.cancel()
++            if channels.owning:channels.stop()
++            if dog._enabled:
++                dog.stop(hold=True)                     # offline = stable stance, not a collapse
+         except Exception:
+             pass
+         fails += 1
++        LINK_DIAG["failures"] += 1
++        LINK_DIAG["stage"] = "backoff"
+         if fails >= HARD_RESET_AFTER:
+             print("self-heal: machine.reset()")         # = the power cycle users did by hand
+             sleep_fed(200)
+             machine.reset()
+-        if fails % WIFI_RESET_EVERY == 0:
++        if radio_reset_required(fails):
+             try:
+                 wifi_reset()
++                LINK_DIAG["reset_radio"] = False
+             except Exception as e:
+                 print("wifi reset err:", e)
+         wait = min(30000, 1000 << min(fails, 5))        # backoff 2s,4s,8s,16s,30s cap
+@@ -360,6 +891,7 @@
+     except Exception:
+         return True
+ 
+-if _cold_boot():
++# Disabled for dog6: assembled linkages must never full-sweep at boot.
++if False and _cold_boot():
+     boot_calibration()
+ main()
+--- a/PicoRobotics.py
++++ b/PicoRobotics.py
+@@ -1,139 +1,325 @@
++"""PicoRobotics - GrowBot board driver (drop-in replacement, API-compatible).
++
++Same public API as the stock GrowBot driver, so existing code keeps working:
++
++    board = KitronikPicoRobotics()      # auto-detects whatever you have
++    board.servoWrite(1, 90)             # port 1 = LEFT leg
++    board.servoWrite(3, 90)             # port 3 = RIGHT leg
++    board.release(1)                    # go limp
++
++Board detection, in order:
++  1. PCA9685 over I2C on GP8/GP9 - Kitronik Robotics Board (5329) at 0x6C,
++     or a generic PCA9685 breakout at 0x40.
++  2. Direct hardware PWM on GP0 (left) / GP1 (right).
++     This is the path the Waveshare Pico Servo Driver takes. That board
++     carries NO I2C chip at all - its silkscreen socket numbers ARE the GPIO
++     numbers, so socket 0 = left leg = GP0 and socket 1 = right leg = GP1.
++     Direct PWM is NOT a degraded mode: both paths are hardware PWM at 50 Hz.
++
++What this version adds over the stock driver
++--------------------------------------------
++* ``servoWriteMicros()`` - write raw pulse width, so calibration can correct
++  for servos whose real 0-180 sweep is not exactly 500-2500 us.
++* Per-port trim/invert/range calibration (``set_calibration``), applied inside
++  the driver so every caller benefits.
++* ``set_slew_limit()`` - caps degrees-per-second at the driver level. Servo
++  inrush current rises with commanded step size, so limiting slew is the
++  cheapest software mitigation for the brownouts that are the #1 reliability
++  problem on a 4xAA build.
++* ``supply_volts()`` - reads VSYS through ADC3. Lets the robot report a
++  sagging pack instead of just mysteriously resetting.
++* ``last_write()`` - what was actually commanded, for telemetry.
++
++Written to sit alongside the GrowBot project (CC BY-NC 4.0 upstream) -
++keep credit to Art of the Problem.
+ """
+-PicoRobotics.py  --  GrowBot auto-detecting servo driver.
+-
+-Drop this on the Pico as  PicoRobotics.py . The programs on top all call:
+-    board = KitronikPicoRobotics()
+-    board.servoWrite(port, deg)        # port 1 = LEFT, port 3 = RIGHT; deg 0..180
+-...and don't care what's underneath. This file picks the driver at boot:
+-
+-  * CARRIER BOARD (I2C / PCA9685 chip, e.g. Kitronik Robotics @0x6C,
+-    generic PCA9685 @0x40 on GP8/GP9) -> detected on the I2C bus, driven over I2C.
+-        [VERIFIED on the Kitronik Robotics Board 5329]
+-  * DIRECT-WIRE (no chip on the bus) -> servos driven straight off
+-    GP0 (left) / GP1 (right) with hardware PWM.
+-        [VERIFIED 2026-07-27 on the Waveshare Pico Servo Driver. That board
+-         carries NO PCA9685 -- an I2C sweep of every legal pin pair found
+-         nothing on the bus -- so every Waveshare build runs this path, and
+-         its silkscreen socket numbers ARE the GPIO numbers: 0 = left,
+-         1 = right. Same path for a bare Pico with servos on GP0/GP1.]
+-
+-Ports:  1 = left, 3 = right   (port 2 is the dead socket on the Kitronik board).
+-
+-ADVANCED override (skip auto-detect): set FORCE = "i2c" or "gpio" below, and
+-edit the I2C pins / addresses or GPIO_PINS for an unusual board.
+-"""
+-import machine, utime
+-from machine import Pin, PWM
+-
+-# ---- config / manual override -------------------------------------------
+-FORCE      = None            # None = auto-detect ; or "i2c" / "gpio"
+-I2C_ID     = 0               # Kitronik Robotics board: I2C0 ...
+-SDA_PIN    = 8               # ... SDA on GP8 ...
+-SCL_PIN    = 9               # ... SCL on GP9
+-CHIP_ADDRS = (0x6C, 0x40)    # Kitronik = 0x6C, generic PCA9685 = 0x40
+-
+-# Direct-wire pin map: port 1 = left, port 3 = right.
+-# The default suits the Waveshare (socket number = GPIO number) and a bare Pico.
+-# A board with no servo chip but different wiring needs its own map:
+-#   Kitronik Simply Robotics 5348 -> {1: 15, 3: 13}   (its servo sockets 0 and 2)
+-#      Reported working by two builders, not bench-checked here. That board has
+-#      no PCA9685, so auto-detect already lands on this path; only the pins differ.
+-GPIO_PINS  = {1: 0, 3: 1}
+-
+-
+-# ---- I2C / PCA9685 driver (carrier board) --- verbatim Kitronik logic ----
+-class _I2CBoard:
+-    SRV_REG_BASE = 0x08
+-    REG_OFFSET   = 4
+-    PRESCALE_VAL = b'\x79'           # prescale 121 -> ~50 Hz servo frame
+-
+-    def __init__(self, addr):
+-        self.CHIP_ADDRESS = addr
+-        self.i2c = machine.I2C(I2C_ID, sda=Pin(SDA_PIN), scl=Pin(SCL_PIN), freq=100000)
+-        self.initPCA()
+-
+-    def initPCA(self):
+-        self.i2c.writeto(0, b'\x06')                       # general-call reset
+-        self.i2c.writeto_mem(self.CHIP_ADDRESS, 0xfe, self.PRESCALE_VAL)
+-        for r in (0xfa, 0xfb, 0xfc, 0xfd):                 # clear ALL_LED on/off
+-            self.i2c.writeto_mem(self.CHIP_ADDRESS, r, b'\x00')
+-        self.i2c.writeto_mem(self.CHIP_ADDRESS, 0x00, b'\x01')   # MODE1: wake + allcall
+-        utime.sleep_us(500)
+-
+-    def servoWrite(self, servo, degrees):
+-        degrees = 0 if degrees < 0 else 180 if degrees > 180 else degrees
+-        if servo < 1 or servo > 8:
+-            raise Exception("INVALID SERVO NUMBER")
+-        reg = self.SRV_REG_BASE + (servo - 1) * self.REG_OFFSET
+-        v = int(degrees * 2.2755) + 102                    # 0deg ~0.5ms .. 180deg ~2.5ms
+-        self.i2c.writeto_mem(self.CHIP_ADDRESS, reg,     bytes([v & 0xFF]))
+-        self.i2c.writeto_mem(self.CHIP_ADDRESS, reg + 1, bytes([(v >> 8) & 0x01]))
+-
+-    def release(self, servo):
+-        reg = self.SRV_REG_BASE + (servo - 1) * self.REG_OFFSET
+-        self.i2c.writeto_mem(self.CHIP_ADDRESS, reg + 1, bytes([0x10]))   # full-off -> limp
+-
+-
+-# ---- GPIO driver (direct-wire) --- verified on the Waveshare Pico Servo Driver ----
+-_FREQ = 50
+-_MIN_US, _MAX_US = 500, 2500
+-_PERIOD_US = 1_000_000 // _FREQ
+-
+-def _duty(deg):
+-    deg = 0 if deg < 0 else 180 if deg > 180 else deg
+-    us = _MIN_US + (_MAX_US - _MIN_US) * deg / 180
+-    return int(us / _PERIOD_US * 65535)
+-
+-class _FakeI2C:
+-    """robot-server's release() pokes a PCA9685 register; decode it back to a port -> limp."""
+-    def __init__(self, owner):
+-        self._o = owner
+-    def writeto_mem(self, addr, reg, data):
+-        off = reg - 0x0B
+-        if off >= 0 and off % 4 == 0:
+-            self._o.release(off // 4 + 1)
+-
+-class _GPIOBoard:
++
++from machine import Pin, PWM, I2C, ADC
++import time
++
++# ---------------------------------------------------------------- constants
++
++PCA9685_ADDRESSES = (0x6C, 0x40, 0x41, 0x42, 0x43)  # Kitronik first
++I2C_SDA_PIN = 8
++I2C_SCL_PIN = 9
++I2C_FREQ = 100_000
++
++# PCA9685 registers
++_MODE1 = 0x00
++_PRESCALE = 0xFE
++_LED0_ON_L = 0x06  # each channel is 4 bytes: ON_L, ON_H, OFF_L, OFF_H
++
++SERVO_FREQ_HZ = 50
++PERIOD_US = 1_000_000 // SERVO_FREQ_HZ  # 20000 us
++
++# Default pulse widths. Most MG90S/SG90 land close to this; calibrate if not.
++DEFAULT_MIN_US = 500
++DEFAULT_MAX_US = 2500
++
++# Logical leg ports (kept identical to stock GrowBot: 1 = left, 3 = right)
++PORT_LEFT = 1
++PORT_RIGHT = 3
++
++# Direct-wire profiles. Waveshare socket numbers == GPIO numbers.  The profile
++# keeps the established two-servo mapping intact while letting the dog use six
++# consecutive sockets without changing the public driver API.
++DIRECT_PIN_PROFILES = {
++    "growbot2": {PORT_LEFT: 0, PORT_RIGHT: 1},
++    # Ports 7/8 reserve GP6/GP7 for the optional pan/tilt phone gimbal.
++    # They initialize limp and are never touched by DogEngine.
++    "dog6": {port: port-1 for port in range(1,17)},
++}
++DIRECT_PINS = DIRECT_PIN_PROFILES["growbot2"]
++
++
++def _clamp(v, lo, hi):
++    return lo if v < lo else (hi if v > hi else v)
++
++
++class _PortCal:
++    """Per-servo calibration. Everything the walk needs to be symmetric."""
++
++    __slots__ = ("min_us", "max_us", "trim_deg", "invert", "lo_deg", "hi_deg")
++
+     def __init__(self):
+-        self.pwm = {}
+-        for port, gp in GPIO_PINS.items():
+-            p = PWM(Pin(gp)); p.freq(_FREQ); p.duty_u16(0)
+-            self.pwm[port] = p
+-        self.i2c = _FakeI2C(self)
+-    def servoWrite(self, port, deg):
+-        p = self.pwm.get(port)
+-        if p:
+-            p.duty_u16(_duty(deg))
+-    def release(self, port):
+-        p = self.pwm.get(port)
+-        if p:
+-            p.duty_u16(0)
+-
+-
+-# ---- auto-detect factory -------------------------------------------------
+-def _detect_addr():
+-    try:
+-        bus = machine.I2C(I2C_ID, sda=Pin(SDA_PIN), scl=Pin(SCL_PIN), freq=100000)
+-        found = bus.scan()
+-        for a in CHIP_ADDRS:
+-            if a in found:
+-                return a
+-    except Exception:
+-        pass
+-    return None
+-
+-def KitronikPicoRobotics():
+-    """Factory: an I2C board driver if a servo chip is on the bus, else direct-wire GPIO."""
+-    mode = FORCE
+-    addr = None
+-    if mode is None:
+-        addr = _detect_addr()
+-        mode = "i2c" if addr is not None else "gpio"
+-    elif mode == "i2c":
+-        addr = CHIP_ADDRS[0]
+-    if mode == "i2c":
+-        print("PicoRobotics: I2C servo board detected @", hex(addr))
+-        return _I2CBoard(addr)
+-    print("PicoRobotics: no I2C chip -> direct-wire, GP%d = left, GP%d = right"
+-          % (GPIO_PINS[1], GPIO_PINS[3]))
+-    return _GPIOBoard()
++        self.min_us = DEFAULT_MIN_US
++        self.max_us = DEFAULT_MAX_US
++        self.trim_deg = 0.0      # added after invert; corrects a crooked horn
++        self.invert = False      # mirror the sweep for a flipped servo
++        self.lo_deg = 0.0        # software travel limits
++        self.hi_deg = 180.0
++
++    def to_us(self, deg):
++        d = 180.0 - deg if self.invert else deg
++        d = _clamp(d + self.trim_deg, self.lo_deg, self.hi_deg)
++        span = self.max_us - self.min_us
++        return int(self.min_us + (d / 180.0) * span)
++
++
++class KitronikPicoRobotics:
++    """Board abstraction. Name kept for drop-in compatibility."""
++
++    def __init__(self, i2c=None, address=None, verbose=True, profile="growbot2"):
++        self.mode = "unknown"
++        self.profile = profile if profile in DIRECT_PIN_PROFILES else "growbot2"
++        self._direct_pins = DIRECT_PIN_PROFILES[self.profile]
++        self._ports = tuple(sorted(self._direct_pins.keys()))
++        self.address = None
++        self.i2c = None
++        self._pwm = {}
++        self._cal = {port: _PortCal() for port in self._ports}
++        self._last = {}          # port -> last commanded degrees
++        self._last_t = {}        # port -> ticks_ms of last write
++        self._slew_dps = 0.0     # 0 = unlimited
++        self._vsys = None
++        # An opt-in load-bearing head can retain PWM across body-lane stops.
++        # Empty by default; explicit head/all release clears this ownership.
++        self.retained_servo_ports = set()
++
++        self._detect(i2c, address, verbose)
++        self._init_vsys()
++
++    # ------------------------------------------------------------ detection
++
++    def _detect(self, i2c, address, verbose):
++        bus = None
++        found = []
++        try:
++            bus = i2c or I2C(0, sda=Pin(I2C_SDA_PIN), scl=Pin(I2C_SCL_PIN),
++                             freq=I2C_FREQ)
++            found = bus.scan()
++        except Exception:
++            found = []
++            bus = None
++
++        candidates = (address,) if address else PCA9685_ADDRESSES
++        for addr in candidates:
++            if addr is not None and addr in found:
++                self.i2c = bus
++                self.address = addr
++                self.mode = "pca9685"
++                self._init_pca9685()
++                if verbose:
++                    print("BOARD pca9685 @ 0x%02X" % addr)
++                return
++
++        # No I2C servo chip. Direct hardware PWM (Waveshare / breadboard).
++        self.mode = "direct"
++        for port, gpio in self._direct_pins.items():
++            pwm = PWM(Pin(gpio))
++            pwm.freq(SERVO_FREQ_HZ)
++            pwm.duty_u16(0)  # idle = no pulse = limp
++            self._pwm[port] = pwm
++        if verbose:
++            if self.profile == "dog6":
++                print("BOARD Waveshare direct GP0..GP15 (16 channels)")
++            else:
++                print("BOARD direct GP%d=left GP%d=right"
++                      % (self._direct_pins[PORT_LEFT], self._direct_pins[PORT_RIGHT]))
++
++    def _init_pca9685(self):
++        # Sleep, set prescale for 50 Hz, wake, enable auto-increment.
++        prescale = int(round(25_000_000.0 / (4096 * SERVO_FREQ_HZ)) - 1)
++        self.i2c.writeto_mem(self.address, _MODE1, bytes([0x10]))  # sleep
++        time.sleep_us(500)
++        self.i2c.writeto_mem(self.address, _PRESCALE, bytes([prescale]))
++        self.i2c.writeto_mem(self.address, _MODE1, bytes([0x00]))  # wake
++        time.sleep_us(500)
++        self.i2c.writeto_mem(self.address, _MODE1, bytes([0xA0]))  # AI + RESTART
++
++    def _init_vsys(self):
++        """VSYS sense on ADC3. Approximate on the W (pin is shared with the
++        wireless chip) but good enough to tell fresh cells from a dying pack."""
++        try:
++            self._vsys = ADC(3)
++        except Exception:
++            self._vsys = None
++
++    # ------------------------------------------------------- calibration API
++
++    def set_calibration(self, port, min_us=None, max_us=None, trim_deg=None,
++                        invert=None, lo_deg=None, hi_deg=None):
++        cal = self._cal.get(port)
++        if cal is None:
++            cal = self._cal[port] = _PortCal()
++        if min_us is not None:
++            cal.min_us = int(min_us)
++        if max_us is not None:
++            cal.max_us = int(max_us)
++        if trim_deg is not None:
++            cal.trim_deg = float(trim_deg)
++        if invert is not None:
++            cal.invert = bool(invert)
++        if lo_deg is not None:
++            cal.lo_deg = float(lo_deg)
++        if hi_deg is not None:
++            cal.hi_deg = float(hi_deg)
++
++    def calibration(self):
++        out = {}
++        for port, c in self._cal.items():
++            out[port] = {"min_us": c.min_us, "max_us": c.max_us,
++                         "trim": c.trim_deg, "invert": c.invert,
++                         "lo": c.lo_deg, "hi": c.hi_deg}
++        return out
++
++    def set_slew_limit(self, deg_per_sec):
++        """Cap commanded change rate. 0 disables. ~900 dps is a sane start:
++        fast enough for a 30 Hz walk, slow enough to blunt the current spike."""
++        self._slew_dps = float(deg_per_sec or 0)
++
++    # ------------------------------------------------------------ motion API
++
++    def servoWrite(self, port, degrees):
++        """Command a leg angle. 90 = straight out. Returns the applied angle."""
++        deg = float(degrees)
++        now = time.ticks_ms()
++
++        if self._slew_dps > 0:
++            prev = self._last.get(port)
++            prev_t = self._last_t.get(port)
++            if prev is not None and prev_t is not None:
++                dt = time.ticks_diff(now, prev_t) / 1000.0
++                if dt <= 0:
++                    dt = 0.001
++                max_step = self._slew_dps * dt
++                delta = deg - prev
++                if delta > max_step:
++                    deg = prev + max_step
++                elif delta < -max_step:
++                    deg = prev - max_step
++
++        cal = self._cal.get(port)
++        if cal is None:
++            cal = self._cal[port] = _PortCal()
++        self._write_us(port, cal.to_us(deg))
++        self._last[port] = deg
++        self._last_t[port] = now
++        return deg
++
++    def servoWriteMicros(self, port, micros):
++        """Bypass the degree mapping. For calibration sweeps."""
++        us = int(_clamp(micros, 400, 2600))
++        self._write_us(port, us)
++        return us
++
++    def release(self, port, force=False):
++        """Release unless a load-bearing head owns this port; force is explicit."""
++        if not force and port in self.retained_servo_ports:
++            return
++        if force:
++            self.retained_servo_ports.discard(port)
++        if self.mode == "direct":
++            pwm = self._pwm.get(port)
++            if pwm:
++                pwm.duty_u16(0)
++        else:
++            self._pca_raw(port, 0, 0)
++        self._last.pop(port, None)
++        self._last_t.pop(port, None)
++
++    def releaseAll(self, force=False):
++        for port in self._ports:
++            try:
++                self.release(port, force=force)
++            except Exception:
++                pass
++
++    def legs(self, left_deg, right_deg):
++        """Command both legs. Used by the pose lane."""
++        return (self.servoWrite(PORT_LEFT, left_deg),
++                self.servoWrite(PORT_RIGHT, right_deg))
++
++    def last_write(self):
++        return dict(self._last)
++
++    # --------------------------------------------------------------- telemetry
++
++    def supply_volts(self):
++        """Best-effort VSYS reading in volts, or None."""
++        if self._vsys is None:
++            return None
++        try:
++            raw = self._vsys.read_u16()
++            return round((raw / 65535.0) * 3.3 * 3.0, 2)
++        except Exception:
++            return None
++
++    # ------------------------------------------------------------- low level
++
++    def _write_us(self, port, us):
++        rule=getattr(self,"channel_rules",{}).get(port)
++        if rule:
++            if not rule["enabled"]:
++                self.release(port)
++                return
++            if getattr(self,"calibration_port",None)!=port:
++                us=_clamp(us,min(rule["a_us"],rule["b_us"]),max(rule["a_us"],rule["b_us"]))
++        if self.mode == "direct":
++            pwm = self._pwm.get(port)
++            if pwm is None:
++                return
++            # duty as a fraction of the 20 ms period
++            pwm.duty_u16(int(us * 65535 // PERIOD_US))
++        else:
++            # PCA9685 counts in 4096ths of the period
++            ticks = int(us * 4096 // PERIOD_US)
++            self._pca_raw(port, 0, int(_clamp(ticks, 0, 4095)))
++
++    def _pca_raw(self, port, on, off):
++        if self.i2c is None:
++            return
++        # Kitronik numbers its sockets 1..8 -> PCA channels 0..7
++        chan = int(_clamp(port - 1, 0, 15))
++        base = _LED0_ON_L + 4 * chan
++        try:
++            self.i2c.writeto_mem(self.address, base, bytes([
++                on & 0xFF, (on >> 8) & 0x0F,
++                off & 0xFF, (off >> 8) & 0x0F,
++            ]))
++        except Exception:
++            pass
++
++
++# Convenience alias so `from PicoRobotics import Board` also works.
++Board = KitronikPicoRobotics
+--- /dev/null
++++ b/dog_engine.py
+@@ -0,0 +1,768 @@
++"""Six-servo gait engine for James Bruton's small MG90S robot dog.
++
++The phone sends only drive intent.  This module owns the 10 ms smoothing and
++200 ms gait stages locally, so relay jitter cannot tear the gait apart.
++
++Waveshare Pico Servo Driver sockets are GPIO numbers.  In ``dog6`` profile:
++  socket 0/GP0 = front-left leg       socket 1/GP1 = rear-right leg
++  socket 2/GP2 = front-right leg      socket 3/GP3 = rear-left leg
++  socket 4/GP4 = slider               socket 5/GP5 = rotation
++
++Pulse targets are intentionally kept in microseconds and match DogCode.ino.
++No servo pulse is emitted at construction time.  The first explicit rest,
++drive, calibration-test, or gesture command enables holding torque.
++"""
++
++import json
++import time
++
++
++TICK_MS = 10
++DEFAULT_STEP_MS = 200
++FILTER = 5.0
++# Calibration is intentionally much slower than gait motion.  At 4 us per
++# 10 ms tick, a 1000 us sweep takes roughly 2.5 seconds and remains easy to
++# stop by releasing the channel.
++CALIBRATION_STEP_US = 4
++CAL_FILE = "dog_cal.json"
++GAIT_FILE = "dog_gait.json"
++
++ROLES = ("front_left", "rear_right", "front_right", "rear_left",
++         "slider", "rotation")
++LEG_ROLES = ("front_left", "rear_right", "front_right", "rear_left")
++# Public channel numbers are the labels printed beside the Waveshare sockets
++# (0..15).  KitronikPicoRobotics uses a one-based internal servo index, hence
++# _port() below.  Keeping that conversion in one place prevents a user-set
++# channel from silently being shifted by one.
++DEFAULT_PORTS = {
++    "front_right": 1,
++    "rear_right": 2,
++    "rear_left": 3,
++    "front_left": 4,
++    "slider": 5,
++    "rotation": 6,
++}
++# A pulse number has no universal physical meaning. These defaults preserve the
++# original assembly, but every leg can be calibrated independently after a horn
++# is installed or moved.
++DEFAULT_LIFT_ENDPOINTS = {
++    "front_left": "min", "rear_right": "max",
++    "front_right": "min", "rear_left": "max",
++}
++REST_US = {
++    "front_left": 1800,
++    "rear_right": 1200,
++    "front_right": 1800,
++    "rear_left": 1200,
++    "slider": 1500,
++    "rotation": 1500,
++}
++DEFAULT_OFFSETS = {
++    "front_left": 0,
++    "rear_right": 0,
++    "front_right": 0,
++    "rear_left": 0,
++    "slider": 0,
++    "rotation": 100,
++}
++# Per-role hard travel limits in microseconds. Gait frames, routines, rest,
++# and calibration nudges all clamp inside these. Tighten them after assembly
++# so a linkage can never bind against a mechanical end stop.
++DEFAULT_LIMITS = {
++    "front_left": (650, 2350),
++    "rear_right": (650, 2350),
++    "front_right": (650, 2350),
++    "rear_left": (650, 2350),
++    "slider": (650, 2350),
++    "rotation": (650, 2350),
++}
++LIMIT_MIN, LIMIT_MAX = 500, 2500
++
++
++def _clamp(value, low, high):
++    return low if value < low else (high if value > high else value)
++
++
++_ROLE_ALIASES = {
++    "front_left": "front_left", "front_left_leg": "front_left",
++    "left_front": "front_left", "left_front_leg": "front_left",
++    "frontleft": "front_left", "fl": "front_left", "4": "front_left",
++    "ch4": "front_left", "ch_4": "front_left",
++    "channel4": "front_left", "channel_4": "front_left",
++    "rear_right": "rear_right", "rear_right_leg": "rear_right",
++    "back_right": "rear_right", "back_right_leg": "rear_right",
++    "right_rear": "rear_right", "rr": "rear_right", "2": "rear_right",
++    "ch2": "rear_right", "ch_2": "rear_right",
++    "channel2": "rear_right", "channel_2": "rear_right",
++    "front_right": "front_right", "front_right_leg": "front_right",
++    "right_front": "front_right", "right_front_leg": "front_right",
++    "frontright": "front_right", "fr": "front_right", "1": "front_right",
++    "ch1": "front_right", "ch_1": "front_right",
++    "channel1": "front_right", "channel_1": "front_right",
++    "rear_left": "rear_left", "rear_left_leg": "rear_left",
++    "back_left": "rear_left", "back_left_leg": "rear_left",
++    "left_rear": "rear_left", "rl": "rear_left", "3": "rear_left",
++    "ch3": "rear_left", "ch_3": "rear_left",
++    "channel3": "rear_left", "channel_3": "rear_left",
++    "slider": "slider", "slide": "slider", "linear": "slider",
++    "5": "slider", "ch5": "slider", "ch_5": "slider",
++    "channel5": "slider", "channel_5": "slider",
++    "rotation": "rotation", "rotate": "rotation", "turn": "rotation",
++    "6": "rotation", "ch6": "rotation", "ch_6": "rotation",
++    "channel6": "rotation", "channel_6": "rotation",
++}
++
++
++def normalize_role(role):
++    """Translate unambiguous human/channel aliases to the six wire roles."""
++    key = str(role or "").strip().lower().replace("-", "_").replace(" ", "_")
++    while "__" in key:
++        key = key.replace("__", "_")
++    return _ROLE_ALIASES.get(key, key)
++
++
++def _ticks_ms():
++    fn = getattr(time, "ticks_ms", None)
++    return fn() if fn else int(time.monotonic() * 1000)
++
++
++def _ticks_diff(a, b):
++    fn = getattr(time, "ticks_diff", None)
++    return fn(a, b) if fn else a - b
++
++
++def _ticks_add(a, delta):
++    fn = getattr(time, "ticks_add", None)
++    return fn(a, delta) if fn else a + delta
++
++
++class DogEngine:
++    def __init__(self, board):
++        self.board = board
++        self.offsets = dict(DEFAULT_OFFSETS)
++        self.limits = {role: list(DEFAULT_LIMITS[role]) for role in ROLES}
++        self.ports = dict(DEFAULT_PORTS)
++        self.locks = {role: False for role in ROLES}
++        self.lift_endpoints = dict(DEFAULT_LIFT_ENDPOINTS)
++        self._load_calibration()
++        self.custom_gait = []
++        self._load_custom_gait()
++        self.current = self._rest_frame()
++        self.target = dict(self.current)
++        self.mode = "idle"
++        self.stage = 0
++        self.step_ms = DEFAULT_STEP_MS
++        self.stride = 1.0
++        self._next_tick = 0
++        self._stage_at = 0
++        self._last_drive = 0
++        self._enabled = False
++        self._holding = False
++        self._routine = None
++        self._routine_frames = []
++        self._routine_index = 0
++        # Loose-servo commissioning mode: gait phases energize exactly one
++        # walking channel. Disable only after the assembled body has verified
++        # servo power and proves that stance joints require holding torque.
++        self.single_channel = True
++        self._active_role = None
++        self._one_cycle = False
++        self._posture_steps = []
++        self._posture_index = 0
++
++    # ----------------------------------------------------------- calibration
++
++    def _load_calibration(self):
++        try:
++            with open(CAL_FILE, "r") as handle:
++                saved = json.loads(handle.read())
++            # Accept both the original flat file and the current structured
++            # format, so an update never discards an owner's prior trims.
++            saved_offsets = saved.get("offsets", saved) if isinstance(saved, dict) else {}
++            for role in ROLES:
++                if role in saved_offsets:
++                    self.offsets[role] = int(_clamp(int(saved_offsets[role]), -350, 350))
++            for role in ROLES:
++                saved_lim = saved.get("limits", {}).get(role)
++                if isinstance(saved_lim, dict) and "min" in saved_lim and "max" in saved_lim:
++                    self._apply_limits(role, saved_lim.get("min"), saved_lim.get("max"))
++            self._apply_ports(saved.get("ports", {}))
++            self.set_locks(saved.get("locks", {}), save=False)
++            self.set_lift_endpoints(saved.get("lift_endpoints", {}), save=False)
++        except Exception:
++            pass
++
++    def _apply_limits(self, role, lo, hi):
++        try:
++            lo = int(_clamp(int(lo), LIMIT_MIN, LIMIT_MAX))
++            hi = int(_clamp(int(hi), LIMIT_MIN, LIMIT_MAX))
++        except Exception:
++            return
++        if lo > hi:
++            lo, hi = hi, lo
++        self.limits[role] = [lo, hi]
++
++    def limits_dict(self):
++        return {role: {"min": self.limits[role][0], "max": self.limits[role][1]}
++                for role in ROLES}
++
++    def ports_dict(self):
++        """Return the owner-facing Waveshare channel for every body role."""
++        return {role: self.ports[role] for role in ROLES}
++
++    def locks_dict(self):
++        return {role: bool(self.locks[role]) for role in ROLES}
++
++    def lift_endpoints_dict(self):
++        return {role: self.lift_endpoints[role] for role in LEG_ROLES}
++
++    def set_lift_endpoints(self, values, save=True):
++        if not isinstance(values, dict):
++            return False
++        for role in LEG_ROLES:
++            if role not in values:
++                continue
++            endpoint = str(values[role]).strip().lower()
++            if endpoint == "low":
++                endpoint = "min"
++            elif endpoint == "high":
++                endpoint = "max"
++            if endpoint not in ("min", "max"):
++                return False
++            self.lift_endpoints[role] = endpoint
++        return self.save_calibration() if save else True
++
++    def set_locks(self, values, save=True):
++        if not isinstance(values, dict):
++            return False
++        for role in ROLES:
++            if role in values:
++                self.locks[role] = bool(values[role])
++        return self.save_calibration() if save else True
++
++    def _apply_ports(self, values):
++        if not isinstance(values, dict):
++            return False
++        candidate = dict(self.ports)
++        try:
++            for role in ROLES:
++                if role in values:
++                    port = int(values[role])
++                    if port < 0 or port > 15:
++                        return False
++                    candidate[role] = port
++        except Exception:
++            return False
++        # Two roles on one socket is never a useful configuration and can make
++        # a saved walking sequence move the wrong joint.
++        if len(set(candidate.values())) != len(ROLES):
++            return False
++        self.ports = candidate
++        return True
++
++    def set_ports(self, values, save=True):
++        if not self._apply_ports(values):
++            return False
++        if save:
++            return self.save_calibration()
++        return True
++
++    def _port(self, role):
++        return int(self.ports[role]) + 1
++
++    def set_limits(self, values, save=True):
++        if not isinstance(values, dict):
++            return False
++        changed = False
++        for role in ROLES:
++            v = values.get(role)
++            if not isinstance(v, dict):
++                continue
++            if "min" in v or "max" in v:
++                cur = self.limits[role]
++                lo = int(v.get("min", cur[0]))
++                hi = int(v.get("max", cur[1]))
++                if lo != cur[0] or hi != cur[1]:
++                    self._apply_limits(role, lo, hi)
++                    changed = True
++        if changed:
++            if self._enabled:
++                self.current = self._rest_frame()
++                self.target = dict(self.current)
++                self._write_current()
++            if save:
++                self.save_calibration()
++        return True
++
++    def save_calibration(self):
++        try:
++            with open(CAL_FILE, "w") as handle:
++                handle.write(json.dumps({"offsets": self.offsets,
++                                         "limits": self.limits_dict(),
++                                         "ports": self.ports_dict(),
++                                         "locks": self.locks_dict(),
++                                         "lift_endpoints": self.lift_endpoints_dict()}))
++            return True
++        except Exception:
++            return False
++
++    def set_calibration(self, values, save=True):
++        if not isinstance(values, dict):
++            return False
++        changed = False
++        for role in ROLES:
++            if role not in values:
++                continue
++            try:
++                self.offsets[role] = int(_clamp(int(values[role]), -350, 350))
++                changed = True
++            except Exception:
++                pass
++        if changed:
++            self.current = self._rest_frame()
++            self.target = dict(self.current)
++            if self._enabled:
++                self._write_current()
++            if save:
++                self.save_calibration()
++        return changed
++
++    def calibration(self):
++        return dict(self.offsets)
++
++    def test_servo(self, role, delta_us=0):
++        role = normalize_role(role)
++        if role not in ROLES:
++            return False
++        # Bench calibration must never energize the other loose servos.
++        self.release()
++        # Large enough to identify a loose bench servo, while still far below
++        # the full gait excursion. The per-role hard limits remain authoritative.
++        pulse = self._pulse(role, REST_US[role] + int(_clamp(delta_us, -200, 200)))
++        self.board.servoWriteMicros(self._port(role), pulse)
++        self.current[role] = pulse
++        self.target[role] = pulse
++        return True
++
++    def set_servo_us(self, role, pulse_us, slow=False):
++        """Position one bounded channel; calibration may request a slow ramp."""
++        role = normalize_role(role)
++        if role not in ROLES:
++            return False
++        try:
++            low, high = self.limits[role]
++            pulse = int(_clamp(int(pulse_us), low, high))
++        except Exception:
++            return False
++        if slow:
++            # Keep only this calibration channel energized, then let step()
++            # move toward the requested value in small, visible increments.
++            for other in ROLES:
++                if other != role:
++                    self.board.release(self._port(other))
++            self.mode = "calibration"
++            self._active_role = role
++            self.target[role] = pulse
++            self._enabled = True
++            self._holding = True
++            return True
++        # Release every other channel before a normal direct-position command.
++        self.release()
++        self.board.servoWriteMicros(self._port(role), pulse)
++        self.current[role] = pulse
++        self.target[role] = pulse
++        return True
++
++    def release_servo(self, role):
++        role = normalize_role(role)
++        if role not in ROLES:
++            return False
++        self.board.release(self._port(role))
++        return True
++
++    def _validated_gait(self, steps):
++        if not isinstance(steps, list):
++            return None
++        clean = []
++        for raw in steps[:64]:
++            if not isinstance(raw, dict):
++                return None
++            role = normalize_role(raw.get("role"))
++            if role not in ROLES:
++                return None
++            try:
++                low, high = self.limits[role]
++                pulse = int(_clamp(int(raw.get("pulse")), low, high))
++                duration = int(_clamp(int(raw.get("ms", 350)), 120, 1200))
++            except Exception:
++                return None
++            clean.append({"role": role, "pulse": pulse, "ms": duration})
++        return clean if len(clean) >= 2 else None
++
++    def _load_custom_gait(self):
++        try:
++            with open(GAIT_FILE, "r") as handle:
++                saved = json.loads(handle.read())
++            clean = self._validated_gait(saved.get("steps", saved) if isinstance(saved, dict) else saved)
++            if clean:
++                self.custom_gait = clean
++        except Exception:
++            pass
++
++    def save_custom_gait(self, steps):
++        clean = self._validated_gait(steps)
++        if not clean:
++            return False
++        try:
++            with open(GAIT_FILE, "w") as handle:
++                handle.write(json.dumps({"version": 1, "steps": clean}))
++            self.custom_gait = clean
++            return True
++        except Exception:
++            return False
++
++    def clear_custom_gait(self):
++        self.custom_gait = []
++        try:
++            import os
++            os.remove(GAIT_FILE)
++        except Exception:
++            pass
++        return True
++
++    def custom_gait_duration(self):
++        return sum(step["ms"] for step in self.custom_gait)
++
++    def play_custom_cycle(self):
++        if not self.custom_gait:
++            return 0
++        self.stop(hold=False)
++        self.mode = "forward"
++        self.stage = 0
++        self._stage_at = _ticks_ms()
++        self._one_cycle = True
++        self._enabled = True
++        self._holding = True
++        self._set_stage_target()
++        return self.custom_gait_duration()
++
++    # --------------------------------------------------------------- commands
++
++    def drive(self, forward, yaw, step_ms=DEFAULT_STEP_MS, stride=1.0):
++        try:
++            forward = float(forward)
++            yaw = float(yaw)
++        except Exception:
++            return False
++        self._last_drive = _ticks_ms()
++        requested_step_ms = int(_clamp(int(step_ms), 120, 450))
++        self.stride = float(_clamp(float(stride), 0.35, 1.0))
++        if abs(forward) < 0.08 and abs(yaw) < 0.08:
++            self.stop(hold=True)
++            return True
++        wanted = ("forward" if forward > 0 else "backward") if abs(forward) >= abs(yaw) else (
++            "right" if yaw > 0 else "left")
++        if wanted != "forward" or not self.custom_gait:
++            self.step_ms = requested_step_ms
++        if wanted != self.mode:
++            self.mode = wanted
++            self.stage = 0
++            self._stage_at = _ticks_ms()
++            self._routine = None
++            self.target = self._rest_frame()
++            self._set_stage_target()
++        self._enabled = True
++        self._holding = True
++        return True
++
++    def play_cycle(self, forward, yaw, step_ms=DEFAULT_STEP_MS, stride=1.0):
++        if not self.drive(forward, yaw, step_ms, stride):
++            return 0
++        if self.mode not in ("forward", "backward", "left", "right"):
++            return 0
++        self._one_cycle = True
++        return self.custom_gait_duration() if self.mode == "forward" and self.custom_gait else self._stage_count() * self.step_ms
++
++    def play_posture(self, name, step_ms=350):
++        name = str(name or "").lower()
++        if name not in ("stand", "stand_full", "lower_all"):
++            return 0
++        self.step_ms = int(_clamp(int(step_ms), 200, 600))
++        # Full-down endpoints are the opposite of each leg's calibrated lift
++        # direction. Servo orientation is an assembly fact, not a front/rear rule.
++        self._posture_steps = [
++            ("front_right", self._support_pulse("front_right")),
++            ("rear_left", self._support_pulse("rear_left")),
++            ("front_left", self._support_pulse("front_left")),
++            ("rear_right", self._support_pulse("rear_right")),
++        ]
++        self._posture_index = 0
++        self.mode = "posture"
++        self._enabled = True
++        self._holding = True
++        self._stage_at = _ticks_ms()
++        self._set_posture_target()
++        return len(self._posture_steps) * self.step_ms
++
++    def stop(self, hold=True):
++        was_gait = self.mode in ("forward", "backward", "left", "right", "posture")
++        if self.single_channel and was_gait:
++            hold = False
++        self.mode = "idle"
++        self.stage = 0
++        self._routine = None
++        self._routine_frames = []
++        self._one_cycle = False
++        self._posture_steps = []
++        self._posture_index = 0
++        self.target = self._rest_frame()
++        self._enabled = bool(hold)
++        self._holding = bool(hold)
++        if hold:
++            self._write_current()
++        else:
++            self.release()
++
++    def release(self):
++        for role in ROLES:
++            try:
++                self.board.release(self._port(role))
++            except Exception:
++                pass
++        self._enabled = False
++        self._holding = False
++        self.mode = "released"
++        self._active_role = None
++
++    def play_routine(self, name):
++        name = str(name or "center").lower()
++        rest = dict(REST_US)
++        gentle = 110
++        routines = {
++            "center": [(rest, 450)],
++            "stand": [(rest, 450)],
++            "sit": [(rest, 450)],
++            "lay": [(rest, 450)],
++            "hop": [(rest, 450)],
++            "wiggle": [({"rotation": 1500-gentle}, 220),
++                       ({"rotation": 1500+gentle}, 220), (rest, 260)],
++            "nod": [({"slider": 1420}, 240), ({"slider": 1580}, 240),
++                    (rest, 260)],
++            "shiver": [({"rotation": 1450}, 90), ({"rotation": 1550}, 90),
++                       ({"rotation": 1450}, 90), ({"rotation": 1550}, 90),
++                       (rest, 220)],
++            "stretch": [({"slider": 1370}, 360), ({"slider": 1630}, 360),
++                        (rest, 300)],
++        }
++        frames = routines.get(name)
++        if not frames:
++            return 0
++        self.mode = "routine"
++        self._routine = name
++        self._routine_frames = frames
++        self._routine_index = 0
++        self._enabled = True
++        self._holding = True
++        self._set_routine_target()
++        return sum(frame[1] for frame in frames)
++
++    # ------------------------------------------------------------------ tick
++
++    def step(self):
++        now = _ticks_ms()
++        if _ticks_diff(now, self._next_tick) < 0:
++            return
++        self._next_tick = _ticks_add(now, TICK_MS)
++        if not self._enabled:
++            return
++
++        if self.single_channel and self.mode in ("forward", "backward", "left", "right", "posture", "calibration"):
++            role = self._active_role
++            if role:
++                cur = self.current[role]
++                target = self.target[role]
++                if self.mode == "calibration":
++                    delta = target-cur
++                    self.current[role] = target if abs(delta) <= CALIBRATION_STEP_US else cur + (
++                        CALIBRATION_STEP_US if delta > 0 else -CALIBRATION_STEP_US)
++                else:
++                    self.current[role] = target if abs(target-cur) < 1.0 else (
++                        target + cur * FILTER) / (FILTER + 1.0)
++                self.board.servoWriteMicros(self._port(role), int(self.current[role]))
++        else:
++            for role in ROLES:
++                cur = self.current[role]
++                target = self.target[role]
++                if abs(target - cur) < 1.0:
++                    self.current[role] = target
++                else:
++                    self.current[role] = (target + cur * FILTER) / (FILTER + 1.0)
++            self._write_current()
++
++        if self.mode == "routine":
++            if _ticks_diff(now, self._stage_at) >= self._routine_frames[self._routine_index][1]:
++                self._routine_index += 1
++                if self._routine_index >= len(self._routine_frames):
++                    self.stop(hold=True)
++                else:
++                    self._set_routine_target()
++            return
++
++        if self.mode == "posture":
++            if _ticks_diff(now, self._stage_at) >= self.step_ms:
++                self._posture_index += 1
++                if self._posture_index >= len(self._posture_steps):
++                    self.stop(hold=False)
++                else:
++                    self._stage_at = now
++                    self._set_posture_target()
++            return
++
++        if self.mode in ("forward", "backward", "left", "right"):
++            if _ticks_diff(now, self._stage_at) >= self.step_ms:
++                next_stage = self.stage + 1
++                if self._one_cycle and next_stage >= self._stage_count():
++                    self.stop(hold=False)
++                    return
++                self.stage = next_stage % self._stage_count()
++                self._stage_at = now
++                self._set_stage_target()
++
++    # --------------------------------------------------------------- helpers
++
++    def _pulse(self, role, base_us):
++        lo, hi = self.limits[role]
++        return int(_clamp(int(base_us) + self.offsets[role], lo, hi))
++
++    def _rest_frame(self):
++        return {role: self._pulse(role, REST_US[role]) for role in ROLES}
++
++    def _scaled(self, role, extreme):
++        rest = REST_US[role]
++        return rest + (extreme - rest) * self.stride
++
++    def _lift_scaled(self, role):
++        endpoint = self.limits[role][0 if self.lift_endpoints[role] == "min" else 1]
++        return self._scaled(role, endpoint - self.offsets[role])
++
++    def _support_pulse(self, role):
++        endpoint = self.limits[role][1 if self.lift_endpoints[role] == "min" else 0]
++        return int(endpoint)
++
++    def _frame(self, changes=None):
++        base = dict(REST_US)
++        if changes:
++            base.update(changes)
++        return {role: self._pulse(role, base[role]) for role in ROLES}
++
++    def _stage_count(self):
++        if self.mode == "forward" and self.custom_gait:
++            return len(self.custom_gait)
++        return 11 if self.mode in ("forward", "backward") else 10
++
++    def _set_posture_target(self):
++        role, pulse = self._posture_steps[self._posture_index]
++        self._active_role = role
++        for other in ROLES:
++            if other != role:
++                self.board.release(self._port(other))
++        self.target[role] = int(pulse)
++
++    def _set_stage_target(self):
++        s = self.stage
++        if self.mode == "forward" and self.custom_gait:
++            step = self.custom_gait[s % len(self.custom_gait)]
++            self._active_role = step["role"]
++            self.step_ms = step["ms"]
++            for other in ROLES:
++                if other != self._active_role:
++                    self.board.release(self._port(other))
++            self.target[self._active_role] = int(_clamp(step["pulse"],
++                self.limits[self._active_role][0], self.limits[self._active_role][1]))
++            return
++        if self.mode == "forward":
++            slide_min, slide_max = self.limits["slider"]
++            frames = (
++                # One moving servo per phase. The first slider phase establishes
++                # the starting end on the first cycle and is already satisfied
++                # when subsequent cycles wrap around.
++                {"slider": self._scaled("slider", slide_min - self.offsets["slider"])},
++                {"front_right": self._lift_scaled("front_right")},
++                {"rear_left": self._lift_scaled("rear_left")},
++                {"slider": self._scaled("slider", slide_max - self.offsets["slider"])},
++                {"front_right": REST_US["front_right"]},
++                {"rear_left": REST_US["rear_left"]},
++                {"front_left": self._lift_scaled("front_left")},
++                {"rear_right": self._lift_scaled("rear_right")},
++                {"slider": self._scaled("slider", slide_min - self.offsets["slider"])},
++                {"front_left": REST_US["front_left"]},
++                {"rear_right": REST_US["rear_right"]},
++            )
++        elif self.mode == "backward":
++            slide_min, slide_max = self.limits["slider"]
++            frames = (
++                {"slider": self._scaled("slider", slide_max - self.offsets["slider"])},
++                {"front_right": self._lift_scaled("front_right")},
++                {"rear_left": self._lift_scaled("rear_left")},
++                {"slider": self._scaled("slider", slide_min - self.offsets["slider"])},
++                {"front_right": REST_US["front_right"]},
++                {"rear_left": REST_US["rear_left"]},
++                {"front_left": self._lift_scaled("front_left")},
++                {"rear_right": self._lift_scaled("rear_right")},
++                {"slider": self._scaled("slider", slide_max - self.offsets["slider"])},
++                {"front_left": REST_US["front_left"]},
++                {"rear_right": REST_US["rear_right"]},
++            )
++        elif self.mode == "left":
++            frames = (
++                {"front_left": self._lift_scaled("front_left")},
++                {"rear_right": self._lift_scaled("rear_right")},
++                {"rotation": self._scaled("rotation", self.limits["rotation"][0] - self.offsets["rotation"])},
++                {"front_left": REST_US["front_left"]},
++                {"rear_right": REST_US["rear_right"]},
++                {"front_right": self._lift_scaled("front_right")},
++                {"rear_left": self._lift_scaled("rear_left")},
++                {"rotation": REST_US["rotation"]},
++                {"front_right": REST_US["front_right"]},
++                {"rear_left": REST_US["rear_left"]},
++            )
++        else:  # right: same rotation stroke, opposite diagonal order
++            frames = (
++                {"front_right": self._lift_scaled("front_right")},
++                {"rear_left": self._lift_scaled("rear_left")},
++                {"rotation": self._scaled("rotation", self.limits["rotation"][1] - self.offsets["rotation"])},
++                {"front_right": REST_US["front_right"]},
++                {"rear_left": REST_US["rear_left"]},
++                {"front_left": self._lift_scaled("front_left")},
++                {"rear_right": self._lift_scaled("rear_right")},
++                {"rotation": REST_US["rotation"]},
++                {"front_left": REST_US["front_left"]},
++                {"rear_right": REST_US["rear_right"]},
++            )
++        target = dict(self.target)
++        for role, base_us in frames[s].items():
++            target[role] = self._pulse(role, base_us)
++            self._active_role = role
++        if self.single_channel:
++            for other in ROLES:
++                if other != self._active_role:
++                    self.board.release(self._port(other))
++        self.target = target
++
++    def _set_routine_target(self):
++        changes, _duration = self._routine_frames[self._routine_index]
++        self.target = self._frame(changes)
++        self._stage_at = _ticks_ms()
++
++    def _write_current(self):
++        for role in ROLES:
++            self.board.servoWriteMicros(self._port(role), int(self.current[role]))
++
++    def status(self):
++        return {"mode": self.mode, "stage": self.stage,
++                "holding": self._holding, "cal": self.calibration(),
++                "limits": self.limits_dict(), "ports": self.ports_dict(), "locks": self.locks_dict(),
++                "lift_endpoints": self.lift_endpoints_dict(), "single_channel": self.single_channel,
++                "active_role": self._active_role,
++                "custom_gait_steps": len(self.custom_gait),
++                "custom_gait": self.custom_gait}
+--- /dev/null
++++ b/gimbal_engine.py
+@@ -0,0 +1,286 @@
++"""Bounded two-axis phone-gimbal control for OwlBot dog6.
++
++The gimbal is deliberately independent from the six-servo gait. Construction
++and configuration emit no PWM pulses. Only an explicit ``move`` command starts
++holding pan/tilt; ``release`` returns both axes to limp.
++"""
++
++import json
++import time
++
++
++CAL_FILE = "gaze_cal.json"
++# Owner-facing Waveshare channel numbers.  The Kitronik driver is one-based,
++# so _port() performs the only +1 conversion before a PWM call.
++DEFAULT_PORTS = {"gimbal_pan": 8, "gimbal_tilt": 9}
++CALIBRATION_STEP_US = 4
++CALIBRATION_TICK_MS = 10
++
++
++def _clamp(value, low, high):
++    return low if value < low else (high if value > high else value)
++
++
++_AXIS_ALIASES = {
++    "gimbal_tilt": "gimbal_tilt", "tilt": "gimbal_tilt",
++    "head_tilt": "gimbal_tilt", "9": "gimbal_tilt",
++    "ch9": "gimbal_tilt", "ch_9": "gimbal_tilt",
++    "channel9": "gimbal_tilt", "channel_9": "gimbal_tilt",
++    "gimbal_pan": "gimbal_pan", "pan": "gimbal_pan",
++    "head_pan": "gimbal_pan", "8": "gimbal_pan",
++    "ch8": "gimbal_pan", "ch_8": "gimbal_pan",
++    "channel8": "gimbal_pan", "channel_8": "gimbal_pan",
++}
++
++
++def normalize_axis(axis):
++    key = str(axis or "").strip().lower().replace("-", "_").replace(" ", "_")
++    while "__" in key:
++        key = key.replace("__", "_")
++    return _AXIS_ALIASES.get(key, key)
++
++
++class GimbalEngine:
++    def __init__(self, board):
++        self.board = board
++        self.pan_center_us = 1500
++        self.tilt_center_us = 1500
++        self.travel_us = 250
++        self.pan_min_us = 1250
++        self.pan_max_us = 1750
++        self.tilt_min_us = 1250
++        self.tilt_max_us = 1750
++        self.pan_invert = False
++        self.tilt_invert = False
++        self.ports = dict(DEFAULT_PORTS)
++        self.locks = {"gimbal_pan": False, "gimbal_tilt": False}
++        self.pan = 0.0
++        self.tilt = 0.0
++        self.holding = False
++        self.current = {"gimbal_pan": self.pan_center_us, "gimbal_tilt": self.tilt_center_us}
++        self.target = dict(self.current)
++        self._calibration_axis = None
++        self._next_tick = 0
++        self._load()
++        self.current = {"gimbal_pan": self.pan_center_us, "gimbal_tilt": self.tilt_center_us}
++        self.target = dict(self.current)
++
++    def _load(self):
++        try:
++            with open(CAL_FILE, "r") as handle:
++                saved = json.loads(handle.read())
++            self._apply(saved)
++        except Exception:
++            pass
++
++    def _apply(self, values):
++        values = values or {}
++        self.pan_center_us = int(_clamp(int(values.get(
++            "pan_center_us", self.pan_center_us)), 1100, 1900))
++        self.tilt_center_us = int(_clamp(int(values.get(
++            "tilt_center_us", self.tilt_center_us)), 1100, 1900))
++        self.travel_us = int(_clamp(int(values.get(
++            "travel_us", self.travel_us)), 80, 450))
++        self.pan_min_us = int(_clamp(int(values.get("pan_min_us",
++            self.pan_center_us - self.travel_us)), 500, 2500))
++        self.pan_max_us = int(_clamp(int(values.get("pan_max_us",
++            self.pan_center_us + self.travel_us)), 500, 2500))
++        self.tilt_min_us = int(_clamp(int(values.get("tilt_min_us",
++            self.tilt_center_us - self.travel_us)), 500, 2500))
++        self.tilt_max_us = int(_clamp(int(values.get("tilt_max_us",
++            self.tilt_center_us + self.travel_us)), 500, 2500))
++        if self.pan_min_us > self.pan_max_us:
++            self.pan_min_us, self.pan_max_us = self.pan_max_us, self.pan_min_us
++        if self.tilt_min_us > self.tilt_max_us:
++            self.tilt_min_us, self.tilt_max_us = self.tilt_max_us, self.tilt_min_us
++        if "pan_invert" in values:
++            self.pan_invert = bool(values["pan_invert"])
++        if "tilt_invert" in values:
++            self.tilt_invert = bool(values["tilt_invert"])
++        self._apply_ports(values.get("ports", {}))
++        self.set_locks(values.get("locks", {}), save=False)
++
++    def _apply_ports(self, values):
++        if not isinstance(values, dict):
++            return False
++        candidate = dict(self.ports)
++        try:
++            for axis in ("gimbal_pan", "gimbal_tilt"):
++                if axis in values:
++                    port = int(values[axis])
++                    if port < 0 or port > 15:
++                        return False
++                    candidate[axis] = port
++        except Exception:
++            return False
++        if candidate["gimbal_pan"] == candidate["gimbal_tilt"]:
++            return False
++        self.ports = candidate
++        return True
++
++    def set_ports(self, values, save=True):
++        if not self._apply_ports(values):
++            return False
++        if save:
++            return self.save()
++        return True
++
++    def _port(self, axis):
++        return int(self.ports[axis]) + 1
++
++    def ports_dict(self):
++        return dict(self.ports)
++
++    def locks_dict(self):
++        return {axis: bool(self.locks[axis]) for axis in self.locks}
++
++    def set_locks(self, values, save=True):
++        if not isinstance(values, dict):
++            return False
++        for axis in self.locks:
++            if axis in values:
++                self.locks[axis] = bool(values[axis])
++        return self.save() if save else True
++
++    def save(self):
++        try:
++            with open(CAL_FILE, "w") as handle:
++                handle.write(json.dumps(self.status()))
++            return True
++        except Exception:
++            return False
++
++    def configure(self, values, save=True):
++        """Save bounds only. This function never moves or enables a servo."""
++        try:
++            self._apply(values)
++            return self.save() if save else True
++        except Exception:
++            return False
++
++    def move(self, pan, tilt):
++        try:
++            pan = _clamp(float(pan), -1.0, 1.0)
++            tilt = _clamp(float(tilt), -1.0, 1.0)
++        except Exception:
++            return False
++        if self.pan_invert:
++            pan = -pan
++        if self.tilt_invert:
++            tilt = -tilt
++        pan_us = int(self.pan_center_us + pan * (
++            self.pan_max_us - self.pan_center_us if pan >= 0 else self.pan_center_us - self.pan_min_us))
++        tilt_us = int(self.tilt_center_us + tilt * (
++            self.tilt_max_us - self.tilt_center_us if tilt >= 0 else self.tilt_center_us - self.tilt_min_us))
++        self._calibration_axis = None
++        self.board.servoWriteMicros(self._port("gimbal_pan"), pan_us)
++        self.board.servoWriteMicros(self._port("gimbal_tilt"), tilt_us)
++        self.pan = pan
++        self.tilt = tilt
++        self.holding = True
++        return True
++
++    def set_servo_us(self, axis, pulse_us, slow=False):
++        axis = normalize_axis(axis)
++        try:
++            if axis == "gimbal_pan":
++                low, high = self.pan_min_us, self.pan_max_us
++            elif axis == "gimbal_tilt":
++                low, high = self.tilt_min_us, self.tilt_max_us
++            else:
++                return False
++            pulse = int(_clamp(int(pulse_us), low, high))
++        except Exception:
++            return False
++        if slow:
++            if self._calibration_axis != axis:
++                self.board.releaseAll()
++            self._calibration_axis = axis
++            self.target[axis] = pulse
++            self.holding = True
++            return True
++        self._calibration_axis = None
++        self.board.releaseAll()
++        if axis == "gimbal_pan":
++            self.board.servoWriteMicros(self._port("gimbal_pan"), pulse)
++        elif axis == "gimbal_tilt":
++            self.board.servoWriteMicros(self._port("gimbal_tilt"), pulse)
++        self.holding = True
++        return True
++
++    def step(self):
++        """Advance an explicit calibration move slowly; ordinary gaze is direct."""
++        axis = self._calibration_axis
++        if not axis:
++            return
++        now = time.ticks_ms()
++        if time.ticks_diff(now, self._next_tick) < 0:
++            return
++        self._next_tick = time.ticks_add(now, CALIBRATION_TICK_MS)
++        cur, target = self.current[axis], self.target[axis]
++        delta = target-cur
++        if abs(delta) <= CALIBRATION_STEP_US:
++            cur = target
++        else:
++            cur += CALIBRATION_STEP_US if delta > 0 else -CALIBRATION_STEP_US
++        self.current[axis] = cur
++        self.board.servoWriteMicros(self._port(axis), int(cur))
++
++    def release_axis(self, axis):
++        axis = normalize_axis(axis)
++        if axis == "gimbal_pan":
++            self.board.release(self._port("gimbal_pan"))
++        elif axis == "gimbal_tilt":
++            self.board.release(self._port("gimbal_tilt"))
++        else:
++            return False
++        if self._calibration_axis == axis:
++            self._calibration_axis = None
++        return True
++
++    def test_servo(self, axis, delta_us=0):
++        """Move one loose gimbal servo only for channel identification."""
++        axis = normalize_axis(axis)
++        try:
++            delta_us = int(_clamp(int(delta_us), -200, 200))
++        except Exception:
++            return False
++        if axis == "gimbal_pan":
++            sign = -1 if self.pan_invert else 1
++            pulse = int(_clamp(self.pan_center_us + sign * delta_us, 650, 2350))
++            self.board.servoWriteMicros(self._port("gimbal_pan"), pulse)
++            self.pan = delta_us / float(max(1, self.travel_us))
++        elif axis == "gimbal_tilt":
++            sign = -1 if self.tilt_invert else 1
++            pulse = int(_clamp(self.tilt_center_us + sign * delta_us, 650, 2350))
++            self.board.servoWriteMicros(self._port("gimbal_tilt"), pulse)
++            self.tilt = delta_us / float(max(1, self.travel_us))
++        else:
++            return False
++        self.holding = True
++        return True
++
++    def release(self):
++        self.board.release(self._port("gimbal_pan"))
++        self.board.release(self._port("gimbal_tilt"))
++        self._calibration_axis = None
++        self.holding = False
++        return True
++
++    def status(self):
++        return {
++            "pan_center_us": self.pan_center_us,
++            "tilt_center_us": self.tilt_center_us,
++            "travel_us": self.travel_us,
++            "pan_min_us": self.pan_min_us,
++            "pan_max_us": self.pan_max_us,
++            "tilt_min_us": self.tilt_min_us,
++            "tilt_max_us": self.tilt_max_us,
++            "pan_invert": self.pan_invert,
++            "tilt_invert": self.tilt_invert,
++            "pan": self.pan,
++            "tilt": self.tilt,
++            "holding": self.holding,
++            "ports": self.ports_dict(),
++            "locks": self.locks_dict(),
++        }
+--- /dev/null
++++ b/servo_channels.py
+@@ -0,0 +1,211 @@
++"""Owner-defined Waveshare channels, named endpoints and paced calibration.
++
++Configuration and startup emit no PWM. Positions are commanded values, not
++physical feedback. Calibration ramps at <= 150 us/s and one channel at a time.
++"""
++import json
++import os
++import time
++
++CONFIG_FILE = "servo_channels.json"
++
++
++class ServoChannels:
++    def __init__(self, board, dog, gaze, filename=CONFIG_FILE):
++        self.board, self.dog, self.gaze = board, dog, gaze
++        self.filename = filename
++        self.channels = []
++        self.current = {}
++        self.queue = []
++        self.active = None
++        self.last_tick = None
++        self.calibration = False
++        self.parallel = False
++        self.owning = False
++        self.speed = 100
++        self.config_error = None
++        for ch in range(16):
++            self.channels.append(dict(channel=ch, enabled=False, name="Channel %d" % ch,
++                group="", a_name="Position A", a_us=1400, b_name="Position B", b_us=1600,
++                center_us=1500, locked=True, calibrated=False))
++        # Import installed assignments once; they remain editable, not reserved.
++        for role, ch in dog.ports_dict().items():
++            lo, hi = dog.limits[role]
++            leg = role in dog.lift_endpoints
++            up = dog.lift_endpoints.get(role) == "min"
++            self.channels[ch].update(enabled=True, name=role.replace("_", " "),
++                group="legs" if leg else "body", a_name="Up" if leg else "Back" if role=="slider" else "Left",
++                b_name="Down" if leg else "Forward" if role=="slider" else "Right",
++                a_us=lo if not leg or up else hi, b_us=hi if not leg or up else lo,
++                center_us=max(lo,min(hi,int(dog.current[role]))), locked=bool(dog.locks.get(role)),
++                calibrated=False)
++        for role, ch in gaze.ports_dict().items():
++            pan = role=="gimbal_pan"
++            lo = gaze.pan_min_us if pan else gaze.tilt_min_us
++            hi = gaze.pan_max_us if pan else gaze.tilt_max_us
++            self.channels[ch].update(enabled=True,name="Head pan" if pan else "Head tilt",group="head",
++                a_name="Left" if pan else "Up",b_name="Right" if pan else "Down",a_us=lo,b_us=hi,
++                center_us=gaze.pan_center_us if pan else gaze.tilt_center_us,
++                locked=bool(gaze.locks.get(role)),calibrated=False)
++        try:
++            with open(filename) as f:
++                loaded=json.load(f)
++            if len(loaded)!=16:
++                raise ValueError("channel_count")
++            self.channels=[self.validate(c, i) for i,c in enumerate(loaded)]
++        except OSError as exc:
++            if not exc.args or exc.args[0] != 2:
++                self.config_error = "saved_configuration_unreadable"
++        except (ValueError,KeyError,TypeError):
++            self.config_error = "saved_configuration_invalid"
++        if self.config_error:
++            # A damaged saved file must never silently widen physical travel.
++            for c in self.channels:
++                c.update(enabled=False,locked=True,calibrated=False)
++        self.apply_rules()
++
++    @staticmethod
++    def validate(data, ch):
++        out=dict(channel=ch)
++        for key in ("name","group","a_name","b_name"):
++            out[key]=str(data.get(key,"")).strip()[:48]
++        if not out["name"] or not out["a_name"] or not out["b_name"] or out["a_name"].lower()==out["b_name"].lower():
++            raise ValueError("name_each_endpoint_differently")
++        for key in ("a_us","b_us","center_us"):
++            n=data.get(key)
++            if isinstance(n,bool) or int(n)!=float(n) or not 500<=int(n)<=2500:
++                raise ValueError("pulse_must_be_500_to_2500")
++            out[key]=int(n)
++        if out["a_us"]==out["b_us"] or not min(out["a_us"],out["b_us"])<=out["center_us"]<=max(out["a_us"],out["b_us"]):
++            raise ValueError("center_must_be_between_endpoints")
++        for key in ("enabled","locked","calibrated"):
++            out[key]=bool(data.get(key,False))
++        return out
++
++    def apply_rules(self):
++        # Every old gait/gaze path is clamped by the same saved physical limits.
++        self.board.channel_rules={c["channel"]+1:c for c in self.channels}
++        for role,ch in self.dog.ports_dict().items():
++            c=self.channels[ch]
++            self.dog.limits[role]=[min(c["a_us"],c["b_us"]),max(c["a_us"],c["b_us"])]
++            if role in self.dog.lift_endpoints:
++                up=c["a_us"] if c["a_name"].lower()=="up" else c["b_us"] if c["b_name"].lower()=="up" else None
++                if up is not None:self.dog.lift_endpoints[role]="min" if up==min(c["a_us"],c["b_us"]) else "max"
++
++    def configure(self, data):
++        ch=int(data["channel"])
++        if ch<0 or ch>15:raise ValueError("invalid_channel")
++        candidate=self.validate(data,ch)
++        old=self.channels[ch]
++        if old["locked"] and any(candidate[k]!=old[k] for k in candidate if k!="locked"):
++            raise ValueError("unlock_channel_first")
++        if candidate["enabled"] and any(c["channel"]!=ch and c["enabled"] and c["name"].lower()==candidate["name"].lower() for c in self.channels):
++            raise ValueError("give_each_servo_a_unique_name")
++        updated=list(self.channels);updated[ch]=candidate
++        tmp=self.filename+".tmp"
++        with open(tmp,"w") as f:json.dump(updated,f)
++        getattr(os,"replace",os.rename)(tmp,self.filename)
++        self.channels=updated
++        if self.active or self.queue:self.stop()
++        self.config_error=None
++        self.apply_rules()
++        if not candidate["enabled"]:
++            self.board.release(ch+1)
++        return dict(candidate)
++
++    def stop(self):
++        if hasattr(self, 'stop_stock'): self.stop_stock()
++        if hasattr(self, 'stop_head'): self.stop_head()
++        self.owning=False
++        self.queue=[];self.active=None;self.last_tick=None
++        self.current={}
++        self.board.calibration_port=None
++        self.board.releaseAll()
++
++    def move(self, targets, calibration=False, speed=100, parallel=False):
++        if not isinstance(targets,list) or not 1<=len(targets)<=16:
++            raise ValueError("one_to_sixteen_targets_required")
++        if parallel and (calibration or len(targets)>2):
++            raise ValueError("paired_movement_is_not_calibration")
++        validated=[]
++        for target in targets:
++            ch=int(target["channel"])
++            if ch<0 or ch>15:raise ValueError("invalid_channel")
++            c=self.channels[ch]
++            if not c["enabled"]:raise ValueError("channel_not_enabled")
++            if calibration and c["locked"]:raise ValueError("unlock_for_calibration")
++            if not calibration and not c["calibrated"]:raise ValueError("record_named_endpoints_first")
++            endpoint=str(target.get("position","")).strip().lower()
++            if endpoint:
++                if endpoint==c["a_name"].lower():pulse=c["a_us"]
++                elif endpoint==c["b_name"].lower():pulse=c["b_us"]
++                elif endpoint=="center":pulse=c["center_us"]
++                else:raise ValueError("unknown_named_position")
++            else:pulse=int(target["pulse_us"])
++            lo,hi=(500,2500) if calibration else (min(c["a_us"],c["b_us"]),max(c["a_us"],c["b_us"]))
++            if not lo<=pulse<=hi:raise ValueError("outside_saved_travel")
++            validated.append((ch,pulse))
++        if parallel and len(set(ch for ch,pulse in validated)) != len(validated):
++            raise ValueError("duplicate_paired_channel")
++        if hasattr(self, 'stop_stock'): self.stop_stock()
++        if not self.owning:
++            self.dog.release();self.gaze.release()
++            self.current={}
++        self.owning=True
++        self.queue=validated;self.active=None;self.last_tick=None
++        self.parallel=bool(parallel)
++        head_ports=set(self.gaze.ports_dict().values())
++        head_move=any(ch in head_ports or self.channels[ch].get('group')=='head' for ch,pulse in validated)
++        self.calibration=bool(calibration);self.speed=max(20,min(150 if calibration or head_move else 1600,int(speed)))
++        return len(validated)
++
++    def engagement_position(self, ch):
++        c = self.channels[ch]
++        # A released servo has no measured position. For the calibrated body
++        # turn, first command its known Closed endpoint, not a partly-open
++        # midpoint. This is a command seed, never proof of physical closure.
++        if not self.calibration and c['name'].strip().lower() in ('turn', 'body turn', 'rotation'):
++            ends = {c['a_name'].lower(): c['a_us'], c['b_name'].lower(): c['b_us']}
++            if set(ends) == set(('open', 'closed')):
++                return ends['closed']
++        return c['center_us']
++
++    def step(self):
++        now=time.ticks_ms()
++        if self.last_tick is None:self.last_tick=now
++        elapsed=time.ticks_diff(now,self.last_tick)
++        if elapsed<20:return
++        self.last_tick=now
++        if self.parallel:
++            remaining=[]
++            for ch,target in self.queue:
++                current=self.current.get(ch,self.engagement_position(ch))
++                delta=target-current
++                step=max(1,self.speed*min(elapsed,40)/1000)
++                current=target if abs(delta)<=step else current+(step if delta>0 else -step)
++                self.current[ch]=current
++                self.board.servoWriteMicros(ch+1,int(current))
++                if current!=target:remaining.append((ch,target))
++            self.queue=remaining
++            self.active=remaining[0] if remaining else None
++            return
++        if self.active is None:
++            if not self.queue:return
++            self.active=self.queue.pop(0)
++        ch,target=self.active
++        c=self.channels[ch]
++        # No encoder: this seed is not a measurement of the released horn.
++        current=self.current.get(ch,self.engagement_position(ch))
++        delta=target-current
++        step=max(1,self.speed*min(elapsed,40)/1000)
++        current=target if abs(delta)<=step else current+(step if delta>0 else -step)
++        self.current[ch]=current
++        self.board.calibration_port=ch+1 if self.calibration else None
++        try:self.board.servoWriteMicros(ch+1,int(current))
++        finally:self.board.calibration_port=None
++        if current==target:self.active=None
++
++    def status(self):
++        return dict(channels=self.channels,active=self.active[0] if self.active else None,
++            queued=len(self.queue),commanded={str(k):int(v) for k,v in self.current.items()},
++            physical_feedback=False,config_error=self.config_error)
+--- /dev/null
++++ b/named_gait.py
+@@ -0,0 +1,334 @@
++"""Persisted, channel-based forward walk. No PWM on load/save.
++
++Taught diagonal feet can move together; slide waits for both feet.
++Progress is commanded position, never encoder or physical arrival feedback.
++"""
++import json
++import os
++import time
++
++
++class NamedGait:
++    def __init__(self, channels, filename="named_walk.json"):
++        self.channels = channels
++        self.filename = filename
++        self.plan = None
++        self.error = None
++        self.running = False
++        self.index = 0
++        self.pending = []
++        self.wait_until = None
++        self.started = 0
++        self.run_id = 0
++        self.waiting_for_vision = False
++        self.direction = "forward"
++        self.bench = False
++        self.run_cycles = 1
++        self.run_speed = None
++        self.continuous = False
++        self.cycle_offset = 0
++        self.step_offset = 0
++        self.phase_size = 1
++        self.preview_cycle = -1
++        self.preview_deadline = 0
++        try:
++            with open(filename) as f:
++                self.plan = json.load(f)
++            self.validate(self.plan)
++        except OSError as e:
++            if not e.args or e.args[0] != 2:
++                self.error = "saved_walk_unreadable"
++        except Exception as e:
++            self.error = str(e)
++
++    def validate(self, plan):
++        if not isinstance(plan, dict) or plan.get("version") != 1:
++            raise ValueError("unsupported_named_walk")
++        steps = plan.get("steps")
++        if not isinstance(steps, list) or not 2 <= len(steps) <= 64:
++            raise ValueError("walk_needs_2_to_64_steps")
++        speed = plan.get("speed_us_s", 150)
++        if type(speed) is not int or not 20 <= speed <= 1600:
++            raise ValueError("walk_speed_must_be_20_to_1600")
++        if type(plan.get('paired_feet', True)) is not bool:
++            raise ValueError('paired_feet_must_be_boolean')
++        settle=plan.get('settle_ms',20)
++        if type(settle) is not int or not 0 <= settle <= 500:
++            raise ValueError('settle_ms_must_be_0_to_500')
++        cycles = plan.get("cycles", 1)
++        if type(cycles) is not int or not 1 <= cycles <= 10:
++            raise ValueError("walk_cycles_must_be_1_to_10")
++        lift = plan.get("lift_percent", 50)
++        if type(lift) is not int or not 10 <= lift <= 100:
++            raise ValueError("walk_lift_must_be_10_to_100")
++        for step in steps:
++            ch = step.get("channel")
++            if isinstance(ch, bool) or not isinstance(ch, int) or not 0 <= ch <= 15:
++                raise ValueError("invalid_walk_channel")
++            c = self.channels.channels[ch]
++            if not c["enabled"] or not c["calibrated"]:
++                raise ValueError("walk_channel_%d_needs_calibration" % ch)
++            # Renaming/remapping/recalibrating requires an explicit re-save.
++            keys = ("name", "a_name", "b_name", "a_us", "b_us", "center_us")
++            if step.get("binding") != {k: c[k] for k in keys}:
++                raise ValueError("walk_channel_%d_changed_resave_walk" % ch)
++            if step.get("position") not in (c["a_name"], c["b_name"]):
++                raise ValueError("unknown_walk_position")
++        return plan
++
++    def save(self, plan):
++        if self.running or self.channels.active is not None or self.channels.queue:
++            raise ValueError("stop_movement_before_saving_walk")
++        self.validate(plan)
++        # Store only the public, validated schema.
++        clean = dict(version=1, name="Forward Walk",
++                     speed_us_s=int(plan.get("speed_us_s", 150)),
++                     cycles=plan.get("cycles", 1),
++                     lift_percent=plan.get("lift_percent", 50),
++                     paired_feet=plan.get('paired_feet',True),
++                     settle_ms=plan.get('settle_ms',20),
++                     steps=[dict(channel=s["channel"], position=s["position"],
++                                 binding=dict(s["binding"])) for s in plan["steps"]])
++        tmp = self.filename + ".tmp"
++        with open(tmp, "w") as f:
++            json.dump(clean, f)
++        getattr(os, "replace", os.rename)(tmp, self.filename)
++        self.plan = clean
++        self.error = None
++        return clean
++
++    def start(self, direction="forward", path_clear=False, bench=False, continuous=False, pace=None, cycles=None):
++        speeds = {'creep':200, 'slow':600, 'fast':1000, 'run':1600}
++        if pace is not None and (type(pace) is not str or pace not in speeds):
++            raise ValueError('unknown_walk_pace')
++        if self.running:
++            return self.status()
++        if direction not in ("forward", "backward"):
++            raise ValueError("unknown_walk_direction")
++        if continuous is not True and continuous is not False:
++            raise ValueError('invalid_continuous_mode')
++        if continuous is True and cycles not in (None, 1):
++            raise ValueError('continuous_uses_internal_cycles')
++        if cycles is not None and (type(cycles) is not int or not 1 <= cycles <= 10):
++            raise ValueError('invalid_walk_cycles')
++        if bench is True and cycles not in (None, 1):
++            raise ValueError('manual_test_requires_one_cycle')
++        if bench is not True and path_clear is not True:
++            raise ValueError("fresh_directional_vision_required")
++        self.validate(self.plan)
++        if self.channels.active is not None or self.channels.queue:
++            raise ValueError("another_servo_move_is_active")
++        self.run_speed = speeds[pace] if pace is not None else self.plan.get('speed_us_s',150)
++        # Recognize only the taught diagonal walk, independently of whether
++        # paired output is enabled. NamedTurn and arbitrary plans keep their
++        # existing preparation; their support sequence must not be guessed.
++        steps = self.plan['steps']
++        diagonal_walk = len(steps)==10 and \
++            [s['position'].lower() for s in steps]==['up','up','back','down','down','up','up','forward','down','down'] and \
++            len(set(steps[i]['channel'] for i in (0,1,2,5,6)))==5 and \
++            all(steps[a]['channel']==steps[b]['channel'] for a,b in ((0,3),(1,4),(2,7),(5,8),(6,9)))
++        # Establish support first. Do NOT pre-position the walking slide with
++        # all feet down: the first real gait phase lifts its diagonal before
++        # moving the slide. From an unknown slide position that first stroke
++        # may be shorter; dragging planted feet is not a valid homing method.
++        final = {}
++        for step in self.plan["steps"]:
++            final[step["channel"]] = step
++        preparation = sorted(final.values(), key=lambda s: s["position"].lower() != "down")
++        if diagonal_walk:
++            preparation = [s for s in preparation if s['channel'] != steps[2]['channel']]
++        # A walk omits the independent turn output. Re-engage Closed before
++        # stepping so a previous release cannot leave it floating while walking.
++        # NamedTurn already includes this output in its own final pose.
++        for c in self.channels.channels:
++            if c['enabled'] and c['calibrated'] and c['channel'] not in final and c['name'].strip().lower() in ('turn', 'body turn', 'rotation'):
++                ends = {c['a_name'].lower(), c['b_name'].lower()}
++                if ends == set(('open', 'closed')):
++                    insert_at=next((i for i,s in enumerate(preparation) if s['position'].lower()!='down'),len(preparation))
++                    preparation.insert(insert_at,dict(channel=c['channel'], position='Closed'))
++        sequence = list(self.plan["steps"])
++        if direction == "backward":
++            # Reverse transitions, not merely the list of endpoint commands.
++            # The old target for each channel becomes the inverse target.
++            previous = dict(final)
++            inverse = []
++            for s in sequence:
++                inverse.append(previous[s["channel"]])
++                previous[s["channel"]] = s
++            sequence = list(reversed(inverse))
++        self.direction = direction
++        self.continuous = continuous is True
++        self.lease_at = time.ticks_ms()
++        self.cycle_offset = 0
++        self.step_offset = 0
++        self.sequence = sequence
++        # Pair only the exact taught diagonal gait, never arbitrary adjacent legs.
++        self.paired = self.plan.get('paired_feet',True) and diagonal_walk
++        self.bench = bench is True
++        self.run_cycles = 1 if self.bench or self.continuous else (cycles if cycles is not None else self.plan.get("cycles", 1))
++        self.pending = preparation + sequence * self.run_cycles
++        self.preparation_steps = len(preparation)
++        self.approved_cycle = 0
++        self.preview_cycle = -1
++        self.preview_deadline = 0
++        self.waiting_for_vision = False
++        self.index = 0
++        self.wait_until = None
++        self.started = time.ticks_ms()
++        self.running = True
++        self.error = None
++        self.run_id += 1
++        self._next()
++        return self.status()
++
++    def _next(self):
++        if self.index >= len(self.pending):
++            if not self.continuous:
++                self.running = False
++                return
++            # Reuse one cycle in bounded memory, without re-preparing or waiting
++            # for a phone round trip at the cycle boundary.
++            self.cycle_offset += 1
++            self.step_offset += self.index
++            self.pending = self.sequence
++            self.preparation_steps = 0
++            self.index = 0
++        completed = self.cycle_offset * len(self.sequence) + max(0, self.index - self.preparation_steps)
++        if not self.bench and completed and completed % len(self.plan["steps"]) == 0:
++            boundary = completed // len(self.plan["steps"])
++            if self.preview_cycle == boundary:
++                if time.ticks_diff(time.ticks_ms(), self.preview_deadline) >= 0:
++                    self.approved_cycle = boundary - 1
++                self.preview_cycle = -1  # one image grants only one next cycle
++            if boundary > self.approved_cycle:
++                self.waiting_for_vision = True
++                self.vision_wait_started = time.ticks_ms()
++                return
++        self.phase_size=1
++        phase=[self.pending[self.index]]
++        if self.paired and self.index >= self.preparation_steps:
++            offset=(self.index-self.preparation_steps)%len(self.sequence)
++            if offset in (0,3,5,8):
++                phase.append(self.pending[self.index+1])
++                self.phase_size=2
++        targets=[self._target(s) for s in phase]
++        self.channels.move(targets, calibration=False,
++                           speed=self.run_speed, parallel=len(targets)==2)
++
++    def _target(self, s):
++        target = dict(channel=s["channel"], position=s["position"])
++        if s["position"].lower() == "up":
++            c = self.channels.channels[s["channel"]]
++            endpoints = {c['a_name'].lower(): c['a_us'], c['b_name'].lower(): c['b_us']}
++            if "down" not in endpoints:
++                raise ValueError("leg_needs_up_and_down_endpoints")
++            pulse = round(endpoints['down'] + (endpoints['up'] - endpoints['down']) * self.plan.get('lift_percent', 50) / 100)
++            target = dict(channel=s['channel'], pulse_us=pulse)
++        return target
++
++    def keepalive(self, run_id):
++        if not self.running or not self.continuous or run_id != self.run_id:
++            raise ValueError('no_matching_continuous_walk')
++        if time.ticks_diff(time.ticks_ms(), self.lease_at)>3000:
++            self.error='manual_control_timed_out'
++            self.cancel()
++            raise ValueError(self.error)
++        self.lease_at=time.ticks_ms()
++        return self.status()
++
++    def preview_next_cycle(self, run_id, next_cycle, path_clear, capture_offset_ms):
++        """Approve one imminent boundary from a fresh view captured while moving."""
++        if not self.running or self.bench or run_id != self.run_id:
++            raise ValueError('no_matching_visual_walk')
++        count = self.cycle_offset + max(0, self.index - self.preparation_steps) // len(self.plan['steps'])
++        expected = count if self.waiting_for_vision else count + 1
++        if type(next_cycle) is not int or next_cycle != expected or (not self.continuous and next_cycle >= self.run_cycles):
++            raise ValueError('stale_cycle_preview')
++        if path_clear is not True or type(capture_offset_ms) is not int or not 0 <= capture_offset_ms <= 1800000:
++            raise ValueError('fresh_cycle_preview_required')
++        # The phone measures capture relative to receipt of the run ACK. That
++        # timestamp is later than self.started, so this intentionally ages the
++        # frame conservatively and includes transport/queue delay on delivery.
++        age = time.ticks_diff(time.ticks_ms(), self.started) - capture_offset_ms
++        if age < 0 or age >= 2500:
++            raise ValueError('stale_cycle_preview')
++        self.preview_cycle = next_cycle
++        self.preview_deadline = time.ticks_add(time.ticks_ms(), 2500 - age)
++        self.approved_cycle = next_cycle
++        if self.waiting_for_vision:
++            self.waiting_for_vision = False
++            self._next()
++        return self.status()
++
++    def continue_after_vision(self, run_id, completed_cycles, path_clear):
++        if not self.running or not self.waiting_for_vision or run_id != self.run_id:
++            raise ValueError("no_matching_walk_waiting_for_vision")
++        count = self.cycle_offset + (self.index - self.preparation_steps) // len(self.plan["steps"])
++        if completed_cycles != count or path_clear is not True:
++            raise ValueError("fresh_cycle_vision_required")
++        self.approved_cycle = count
++        self.preview_cycle = -1
++        self.waiting_for_vision = False
++        self._next()
++        return self.status()
++
++    def cancel(self, release=True):
++        self.running = False
++        self.pending = []
++        self.wait_until = None
++        self.waiting_for_vision = False
++        if release:
++            self.channels.stop()
++        else:
++            self.channels.active = None
++            self.channels.queue = []
++
++    def step(self):
++        if not self.running:
++            return
++        now = time.ticks_ms()
++        try:
++            if self.continuous and time.ticks_diff(now,self.lease_at)>3000:
++                raise ValueError('manual_control_timed_out' if self.bench else 'walking_supervisor_timed_out')
++            if self.waiting_for_vision:
++                if time.ticks_diff(now, self.vision_wait_started) > 45000:
++                    self.error = "vision_check_timed_out"
++                    self.cancel(release=False)
++                return
++            if not self.continuous and time.ticks_diff(now, self.started) > 180000 * self.run_cycles:
++                raise ValueError("walk_timed_out")
++            if not self.channels.owning:
++                raise ValueError("walk_interrupted")
++            if self.channels.active is not None or self.channels.queue:
++                return
++            if self.wait_until is None:
++                self.wait_until = now
++                return
++            if time.ticks_diff(now, self.wait_until) < self.plan.get('settle_ms',20):
++                return
++            self.wait_until = None
++            self.index += self.phase_size
++            self._next()
++        except Exception as e:
++            self.error = str(e)
++            self.cancel()
++
++    def status(self):
++        cycles = self.run_cycles
++        plan = self.plan if isinstance(self.plan, dict) else {}
++        steps = plan.get("steps", [])
++        steps_per_cycle = max(1, len(steps)) if isinstance(steps, list) else 1
++        completed_cycles = self.cycle_offset + min(cycles, max(0, self.index - getattr(self, "preparation_steps", 0)) // steps_per_cycle)
++        return dict(available=bool(self.plan), error=self.error, running=self.running,
++                    run_id=self.run_id, completed_steps=self.step_offset+self.index,
++                    cycles=cycles, completed_cycles=completed_cycles,
++                    protocol=2, waiting_for_vision=self.waiting_for_vision,
++                    moving_vision=True, visual_continuous=True, per_request_cycles=True, preview_max_age_ms=2500,
++                    preview_cycle=self.preview_cycle,
++                    direction=self.direction, bench=self.bench,
++                    speed_us_s=self.run_speed if self.run_speed is not None else plan.get("speed_us_s",150),
++                    pace_control=True, pace_speeds={'creep':200,'slow':600,'fast':1000,'run':1600},
++                    max_speed_us_s=1600, settle_ms=plan.get('settle_ms',20),
++                    smooth_walk=True, continuous=self.continuous,
++                    paired_feet=getattr(self,'paired',False), manual_lease_ms=3000,
++                    total_steps=None if self.continuous else len(self.pending), physical_feedback=False)
+--- /dev/null
++++ b/named_turn.py
+@@ -0,0 +1,78 @@
++"""One owner-taught diagonal turn. No guessed opposite-direction gait."""
++from named_gait import NamedGait
++import time
++
++class NamedTurn(NamedGait):
++    def __init__(self, channels):
++        super().__init__(channels, 'named_turn.json')
++        self.plan=None
++        self.error=None
++
++    def start_turn(self, walk, turn_channel, binding, pattern='a', fraction=1):
++        if self.running: raise ValueError('turn_already_running')
++        if pattern not in ('a','b'): raise ValueError('unknown_turn_pattern')
++        if type(fraction) not in (int, float) or not 0.02 <= fraction <= 1:
++            raise ValueError('turn_fraction_must_be_0.02_to_1')
++        self.validate(walk)
++        steps=walk['steps']
++        expected=['up','up','back','down','down','up','up','forward','down','down']
++        if len(steps)!=10 or [s['position'].lower() for s in steps]!=expected:
++            raise ValueError('turn_needs_taught_diagonal_walk')
++        if not all(steps[a]['channel']==steps[b]['channel'] for a,b in ((0,3),(1,4),(2,7),(5,8),(6,9))):
++            raise ValueError('invalid_diagonal_bindings')
++        roles=[steps[i]['channel'] for i in (0,1,5,6)]
++        if type(turn_channel) is not int or not 0<=turn_channel<=15 or len(set(roles+[steps[2]['channel'],turn_channel]))!=6:
++            raise ValueError('turn_requires_separate_calibrated_output')
++        c=self.channels.channels[turn_channel]
++        keys=('name','a_name','b_name','a_us','b_us','center_us')
++        if not c['enabled'] or not c['calibrated'] or binding!={k:c[k] for k in keys}:
++            raise ValueError('turn_channel_changed_reload_settings')
++        endpoints={c['a_name'].lower():c['a_us'],c['b_name'].lower():c['b_us']}
++        if set(endpoints)!=set(('open','closed')): raise ValueError('label_turn_endpoints_open_and_closed')
++        def turn_step(pulse):
++            return dict(channel=turn_channel,position=c['a_name'] if pulse==c['a_us'] else c['b_name'],binding=dict(binding))
++        # Both patterns start and finish CLOSED. Swap supporting diagonals to
++        # reverse yaw; physical left/right is identified on the assembled robot.
++        first,second=((5,6,8,9),(0,1,3,4)) if pattern=='a' else ((0,1,3,4),(5,6,8,9))
++        sequence=[steps[first[0]],steps[first[1]],turn_step(endpoints['open']),steps[first[2]],steps[first[3]],
++                  steps[second[0]],steps[second[1]],turn_step(endpoints['closed']),steps[second[2]],steps[second[3]]]
++        plan=dict(version=1,name='Taught Turn',cycles=1,steps=sequence,
++                  speed_us_s=walk.get('speed_us_s',150),lift_percent=walk.get('lift_percent',50),
++                  paired_feet=True,settle_ms=walk.get('settle_ms',20))
++        self.validate(plan)
++        if self.channels.active is not None or self.channels.queue: raise ValueError('movement_active')
++        self.plan=plan
++        self.pattern=pattern
++        self.turn_channel=turn_channel
++        self.fraction=fraction
++        self.partial_open=round(endpoints['closed']+(endpoints['open']-endpoints['closed'])*fraction)
++        self.lease_at=time.ticks_ms()
++        super().start(bench=True)
++        # The parent recognizes walking labels only. This exact validated
++        # ten-step turn has the same paired phase indices; preparation is single.
++        self.paired=True
++        return self.status()
++
++    def _target(self, step):
++        if step['channel']==self.turn_channel and step['position'].lower()=='open':
++            return dict(channel=self.turn_channel, pulse_us=self.partial_open)
++        return super()._target(step)
++
++    def keepalive(self, run_id):
++        if not self.running or run_id!=self.run_id: raise ValueError('no_matching_turn')
++        if time.ticks_diff(time.ticks_ms(),self.lease_at)>3000:
++            self.error='turn_control_timed_out';self.cancel();raise ValueError(self.error)
++        self.lease_at=time.ticks_ms()
++        return self.status()
++
++    def step(self):
++        if self.running and time.ticks_diff(time.ticks_ms(),self.lease_at)>3000:
++            self.error='turn_control_timed_out';self.cancel();return
++        super().step()
++
++    def status(self):
++        result=super().status()
++        result.update(available=True,kind='taught_turn',direction='unverified',return_endpoint='closed',
++                      turn_protocol=2,pattern=getattr(self,'pattern',None),
++                      partial_turn=True,turn_fraction=getattr(self,'fraction',1))
++        return result
+--- /dev/null
++++ b/pico_head.py
+@@ -0,0 +1,141 @@
++"""Paced head lane using authoritative saved channel limits, never body outputs."""
++import time
++
++class PicoHead:
++    def __init__(self, channels, ports):
++        self.channels = channels
++        self.ports = ports
++        self.current = {}
++        # PWM release is not a move to center. Remember our last output so the
++        # next command (especially center) ramps from it instead of snapping.
++        # This is volatile commanded state, never encoder/physical feedback.
++        self.last_commanded = {}
++        self.last_binding = {}
++        self.targets = {}
++        self.last = time.ticks_ms()
++        self.received = self.last
++        self.speed = 150
++        self.run_id = 0
++        self.hold_enabled = False
++        self.static_hold = False
++        self.retained_ports = set()
++
++    def _seed(self, axis, c):
++        binding = (c['channel'], c['minimum'], c['maximum'], c['center'])
++        return self.last_commanded.get(axis, c['center']) if self.last_binding.get(axis) == binding else c['center']
++
++    def support(self):
++        """Engage both head axes on a body command, never merely at boot/info."""
++        if self.hold_enabled and not self.targets:
++            c = self.config()['pan']
++            self.move(dict(axis='pan', pulse=round(self._seed('pan', c))),
++                      set(self.channels.dog.ports_dict().values()))
++
++    def config(self):
++        ports = self.ports()
++        result = {}
++        for axis in ('pan', 'tilt'):
++            ch = ports['gimbal_' + axis]
++            c = self.channels.channels[ch]
++            if not c['enabled'] or not c['calibrated']:
++                raise ValueError('head_channel_not_calibrated')
++            result[axis] = dict(channel=ch, minimum=min(c['a_us'], c['b_us']),
++                maximum=max(c['a_us'], c['b_us']), center=c['center_us'])
++        if result['pan']['channel'] == result['tilt']['channel']:
++            raise ValueError('head_channels_overlap')
++        return result
++
++    def move(self, message, body_channels):
++        config = self.config()
++        if any(c['channel'] in body_channels for c in config.values()):
++            raise ValueError('head_channel_overlaps_body')
++        proposed = {}
++        for axis, c in config.items():
++            if message.get('axis') == axis:
++                pulse = message.get('pulse')
++                if type(pulse) is not int: raise ValueError('integer_head_pulse_required')
++            elif message.get('axis') is None and axis in message:
++                value = message[axis]
++                if type(value) not in (int, float) or not -1 <= value <= 1:
++                    raise ValueError('invalid_head_position')
++                pulse = round(c['center'] + value * (c['maximum'] - c['center'] if value >= 0 else c['center'] - c['minimum']))
++            else: continue
++            if not c['minimum'] <= pulse <= c['maximum']: raise ValueError('outside_saved_head_limits')
++            proposed[axis] = pulse
++        if not proposed: raise ValueError('head_target_required')
++        if self.hold_enabled:
++            # Pan alone must not leave the load-bearing tilt unsupported.
++            for axis, c in config.items():
++                if axis not in proposed and axis not in self.targets:
++                    proposed[axis] = round(self._seed(axis, c))
++            if not hasattr(self.channels.board, 'retained_servo_ports'):
++                self.channels.board.retained_servo_ports = set()
++            for axis in proposed:
++                port = config[axis]['channel'] + 1
++                self.retained_ports.add(port)
++                self.channels.board.retained_servo_ports.add(port)
++        self.targets.update(proposed)
++        self.static_hold = False
++        self.run_id += 1
++        # Mechanical phone-holder limit, not an optional caller preference.
++        self.speed = 150
++        self.received = time.ticks_ms()
++        return self.status()
++
++    def release_axis(self, axis):
++        if axis not in ('pan', 'tilt'):
++            return
++        port = self.ports()['gimbal_' + axis] + 1
++        getattr(self.channels.board, 'retained_servo_ports', set()).discard(port)
++        self.retained_ports.discard(port)
++        self.targets.pop(axis, None)
++        self.current.pop(axis, None)
++        self.channels.board.release(port)
++
++    def stop(self, force=False):
++        if self.hold_enabled and not force:
++            # Cancel motion, NOT support: freeze at the last actual PWM command,
++            # never leap to an unfinished target or resume it on a later tick.
++            self.targets = dict(self.current)
++            self.static_hold = bool(self.targets)
++            return
++        protected = getattr(self.channels.board, 'retained_servo_ports', set())
++        for port in self.retained_ports:
++            protected.discard(port)
++            self.channels.board.release(port)
++        self.retained_ports = set()
++        for axis in self.targets:
++            self.channels.board.release(self.ports()['gimbal_' + axis] + 1)
++        self.targets = {}
++        self.current = {}
++        self.static_hold = False
++        # Keep last_commanded while reporting no active outputs/holding.
++
++    def status(self):
++        self.received = time.ticks_ms()
++        return dict(config=self.config(), targets=dict(self.targets),run_id=self.run_id,commanded={a:round(v) for a,v in self.current.items()},
++            moving=any(self.current.get(a) != v for a,v in self.targets.items()),
++            holding=bool(self.targets), speed_us_s=self.speed, max_speed_us_s=150,
++            support_enabled=self.hold_enabled, static_hold=self.static_hold,
++            last_commanded={a:round(v) for a,v in self.last_commanded.items()}, physical_feedback=False)
++
++    def step(self):
++        now = time.ticks_ms()
++        elapsed = time.ticks_diff(now, self.last)
++        self.last = now
++        if not self.targets: return
++        if self.static_hold: return  # hardware PWM continues; no repeated I/O
++        if time.ticks_diff(now, self.received) > 3000:
++            self.stop(); return
++        config = self.config()
++        for axis, target in self.targets.items():
++            c = config[axis]
++            binding = (c['channel'], c['minimum'], c['maximum'], c['center'])
++            seed = self._seed(axis, c)
++            old = self.current.get(axis, seed)
++            distance = self.speed * max(0, min(40, elapsed)) / 1000
++            value = max(old-distance, min(old+distance, target))
++            self.channels.board.servoWriteMicros(c['channel']+1, round(value))
++            self.current[axis] = value
++            self.last_commanded[axis] = value
++            self.last_binding[axis] = binding
+--- /dev/null
++++ b/shared_body.py
+@@ -0,0 +1,95 @@
++"""App-neutral commands translated to the existing calibrated Pico executors.
++
++No gait, PWM loop, network connection or identity lives here. Both clients use
++the same NamedGait/NamedTurn/PicoHead objects through relay_chip._handle. Keep
++the established dog_cal envelope: relays may filter unknown top-level types.
++"""
++
++
++class SharedBody:
++    def __init__(self, channels, head):
++        self.channels = channels
++        self.head = head
++
++    def capabilities(self):
++        # Discovery must not call head.status(), which renews its holding lease.
++        return dict(version=1, executor="pico_named", physical_feedback=False,
++                    commands=["status", "walk", "turn", "head", "stop",
++                              "keepalive", "preview", "continue", "head_stop"],
++                    paces=["creep", "slow", "fast", "run"],
++                    continuous=True, camera_on_client=True,
++                    keepalive_ms=1000, lease_ms=3000, preview_max_age_ms=2500,
++                    simultaneous_walk_turn=False, head_max_speed_us_s=150,
++                    turn_requires_pattern_a_direction=True,
++                    head_coordinates="pan:left=-1,right=1;tilt:down=-1,up=1",
++                    stock_two_leg_pose_compatible=True,
++                    stock_pose_mode='posture_or_alternating_support',stock_locomotion_verified=False,
++                    stock_steering_decoded=False,stock_browser_changes_required=False)
++
++    def resolve(self, message):
++        if type(message.get("body_version")) is not int or message['body_version'] != 1:
++            raise ValueError("unsupported_body_version")
++        verb = message.get("body_action")
++        # Copy only allowed arguments: no hidden bench override or raw PWM.
++        out = dict(t="dog_cal", rid=message.get("rid"))
++        fields = ()
++        if verb == "status":
++            action = "info"
++        elif verb == "walk":
++            action = "walk_run"
++            fields = ("direction", "path_clear", "continuous", "pace", "cycles")
++        elif verb == "turn":
++            action = "turn_run"
++            direction = message.get("direction")
++            observed = message.get("pattern_a_direction")
++            if direction not in ("left", "right") or observed not in ("left", "right"):
++                raise ValueError("observed_turn_mapping_required")
++            candidates = [c for c in self.channels.channels
++                          if c['enabled'] and c['calibrated']
++                          and c['name'].strip().lower() in ('turn', 'body turn', 'rotation')
++                          and {c['a_name'].lower(), c['b_name'].lower()} == {'open', 'closed'}]
++            if len(candidates) != 1:
++                raise ValueError("unique_calibrated_turn_channel_required")
++            c = candidates[0]
++            out.update(turn_channel=c['channel'],
++                       binding={k: c[k] for k in ('name', 'a_name', 'b_name', 'a_us', 'b_us', 'center_us')},
++                       pattern='a' if direction == observed else 'b',
++                       fraction=message.get('fraction', 1))
++        elif verb == "head":
++            action = "head_move"
++            axis, value = message.get('axis'), message.get('position')
++            if axis not in ('pan', 'tilt') or type(value) not in (int, float) or not -1 <= value <= 1:
++                raise ValueError("invalid_semantic_head_position")
++            cfg = self.head.config()[axis]
++            c = self.channels.channels[cfg['channel']]
++            negative, positive = ('left', 'right') if axis == 'pan' else ('down', 'up')
++            endpoints = {c['a_name'].strip().lower(): c['a_us'], c['b_name'].strip().lower(): c['b_us']}
++            if set(endpoints) != {negative, positive}:
++                raise ValueError("semantic_head_endpoint_labels_required")
++            # Tilt Up can be a SMALLER pulse than Down. Use saved labels, not
++            # sorted electrical limits; leave legacy OwlBot inversion intact.
++            target = endpoints[positive if value >= 0 else negative]
++            out.update(axis=axis, pulse=round(cfg['center'] + abs(value) * (target - cfg['center'])))
++        elif verb == "stop":
++            action = "stop"
++        elif verb == "head_stop":
++            action = "head_stop"
++        elif verb == "keepalive":
++            lane = message.get('lane')
++            if lane not in ('walk', 'turn', 'head'):
++                raise ValueError("invalid_body_lane")
++            action = 'head_info' if lane == 'head' else lane + '_keepalive'
++            fields = ('run_id',)
++        elif verb == "preview":
++            action = "walk_preview"
++            fields = ('run_id', 'next_cycle', 'path_clear', 'capture_offset_ms')
++        elif verb == "continue":
++            action = "walk_continue"
++            fields = ('run_id', 'completed_cycles', 'path_clear')
++        else:
++            raise ValueError("unknown_body_action")
++        out['channel_action'] = action
++        for key in fields:
++            if key in message:
++                out[key] = message[key]
++        return out
+--- /dev/null
++++ b/stock_body.py
+@@ -0,0 +1,204 @@
++"""Chip-side coupling of stock two-leg signals to the slide-driven body.
++
++No browser hooks or synthetic camera approval. Pose packets contain positions,
++not intention labels: this profile interprets sustained alternating virtual-leg
++support as stepping. Streamed neutral is feet Down; act/routine gestures retain
++the bounded StockFanout mapping.
++It cannot recover steering intent when the sender emits identical L/R signals.
++"""
++import time
++from stock_fanout import StockFanout
++
++
++class StockBody(StockFanout):
++    PHASE_THRESHOLD = 18
++    MIN_REVERSAL_MS = 100
++    MAX_REVERSAL_MS = 1100
++    NEUTRAL_STOP_MS = 200
++
++    def __init__(self, channels, walk):
++        super().__init__(channels)
++        self.walk = walk
++        self.walking = False
++        self.internal_move = False
++        self.completed_cycles = 0
++        self.completed_phases = 0
++        self.phases = []
++        self.phase_index = 0
++        self.last_input = None
++        self.run_id = 0
++        self.last_stop_reason = None
++        self.last_stop_cycles = 0
++        self.last_pose_gap_ms = None
++        self.walk_lift_ceiling = 60
++        self._reset_pattern()
++
++    def _reset_pattern(self):
++        self.sign = 0
++        self.reversals = 0
++        self.reversed_at = None
++        self.neutral_at = None
++
++    def _sample(self, left, right, now):
++        self.last_pose_gap_ms=None if self.last_input is None else time.ticks_diff(now,self.last_input)
++        if self.last_input is None or time.ticks_diff(now,self.last_input)>self.POSE_TIMEOUT_MS:
++            self._reset_pattern()
++        self.last_input = now
++        # Virtual legs are mirrored. Difference of their lift fractions is
++        # proportional to L + R - 180, NOT L - R. Uniform tuck/stand stays zero.
++        contrast = left + right - 180
++        sign = 1 if contrast>=self.PHASE_THRESHOLD else -1 if contrast<=-self.PHASE_THRESHOLD else 0
++        if not sign:
++            if self.neutral_at is None:self.neutral_at=now
++            if time.ticks_diff(now,self.neutral_at)>=self.NEUTRAL_STOP_MS:
++                self._reset_pattern()
++                if self.walking:self.stop('neutral_pose_held')
++            return False
++        self.neutral_at=None
++        if not self.sign:
++            self.sign=sign;self.reversed_at=now
++        elif sign!=self.sign:
++            gap=time.ticks_diff(now,self.reversed_at)
++            self.reversals=self.reversals+1 if self.MIN_REVERSAL_MS<=gap<=self.MAX_REVERSAL_MS else 0
++            self.sign=sign;self.reversed_at=now
++        return self.reversals>=2
++
++    def _make_phases(self):
++        self.walk.validate(self.walk.plan)
++        steps=self.walk.plan['steps']
++        labels=['up','up','back','down','down','up','up','forward','down','down']
++        if len(steps)!=10 or [s['position'].lower() for s in steps]!=labels:
++            raise ValueError('stock_step_needs_taught_diagonal_sequence')
++        if not all(steps[a]['channel']==steps[b]['channel'] for a,b in ((0,3),(1,4),(2,7),(5,8),(6,9))):
++            raise ValueError('stock_step_bindings_mismatch')
++        if len({steps[i]['channel'] for i in (0,1,2,5,6)})!=5:
++            raise ValueError('stock_step_channels_overlap')
++        # Require the actual named four legs and Slide, not arbitrary learned
++        # endpoint names that happen to spell Up/Down/Back/Forward.
++        legs={r['channel'] for r in self.mapping()}
++        if {steps[i]['channel'] for i in (0,1,5,6)}!=legs:
++            raise ValueError('stock_step_leg_map_mismatch')
++        slide=self.channels.channels[steps[2]['channel']]
++        if slide['name'].strip().lower() not in ('slide','slider'):
++            raise ValueError('stock_step_needs_slide')
++        turns=[c for c in self.channels.channels if c['enabled'] and c['calibrated']
++               and c['name'].strip().lower() in ('turn','body turn','rotation')
++               and {c['a_name'].lower(),c['b_name'].lower()}=={'open','closed'}]
++        if len(turns)!=1 or turns[0]['channel'] in legs|{slide['channel']}:
++            raise ValueError('stock_step_needs_unique_closed_turn')
++        # Walking clearance is independent of the legacy all-leg tuck limit.
++        # Keep fold/pose limits at 50%; admit at most 60% only in a validated
++        # alternating diagonal walk, with each opposite pair supporting it.
++        self.walk_lift_percent = min(self.walk_lift_ceiling, self.walk.plan.get('lift_percent',50))
++        def target(step):
++            t=self.walk._target(step)
++            if step['position'].lower()=='up':
++                c=self.channels.channels[step['channel']]
++                ends={c['a_name'].lower():c['a_us'],c['b_name'].lower():c['b_us']}
++                t['pulse_us']=round(ends['down']+(ends['up']-ends['down'])*self.walk_lift_percent/100)
++            return t
++        # Freeze validated targets for this run; calibration changes stop the
++        # lane through the existing stop hook before taking manual ownership.
++        self.cycle=[[target(steps[i]) for i in group] for group in
++                    ((0,1),(2,),(3,4),(5,6),(7,),(8,9))]
++        preparation=[[dict(channel=ch,position='Down')] for ch in sorted(legs)]
++        preparation.append([dict(channel=turns[0]['channel'],position='Closed')])
++        # Leave the slide alone until cycle[0] has lifted its diagonal. A
++        # feet-down Forward reset here dragged the body before its first step.
++        self.phases=preparation+self.cycle
++        self.preparation_count=len(preparation)
++        self.speed=min(1600,self.walk.plan.get('speed_us_s',600))
++
++    def _start_steps(self):
++        self._make_phases()  # reject before taking ownership
++        previous=dict(self.channels.current)
++        super().stop()
++        self.channels.current=previous
++        self.walking=True;self.mode='stock_walk';self.error=None
++        self.run_id+=1;self.last_stop_reason=None
++        self.frames=[];self.frame=None;self.targets={}
++        self.completed_cycles=0;self.completed_phases=0;self.phase_index=0
++        self._next_phase()
++
++    def _next_phase(self):
++        if self.phase_index>=len(self.phases):
++            self.completed_cycles+=1
++            self.phases=self.cycle;self.phase_index=0;self.preparation_count=0
++        # move() normally preempts stock output. Only this synchronous internal
++        # call bypasses that hook; external moves/stops still cancel immediately.
++        self.internal_move=True
++        try:self.channels.move(self.phases[self.phase_index],speed=self.speed,
++                               parallel=len(self.phases[self.phase_index])==2)
++        finally:self.internal_move=False
++
++    def pose(self,left,right):
++        left,right=self.angle(left),self.angle(right)
++        now=time.ticks_ms()
++        start=self._sample(left,right,now)
++        self.last_lr=(left,right)
++        if not self.walking and start:self._start_steps()
++        if self.walking:
++            self.received=now
++            return self.status()
++        # Stock walking first streams neutral 90/90. On this body neutral must
++        # mean feet Down, not the calibrated midpoint (which tucks all legs).
++        # Keep act/routine gesture mapping unchanged; only streamed virtual
++        # legs use a Down-based stance and proportional half-range lift.
++        super().pose(left,right)
++        self.targets={}
++        for row in self.mapping():
++            lift=max(0,(left-90)/90 if row['side']=='l' else (90-right)/90)
++            self.targets[row['channel']]=round(row['down']+(row['up_limit']-row['down'])*lift)
++        return self.status()
++
++    def engagement_position(self,ch):
++        if self.mode=='pose':
++            c=self.channels.channels[ch]
++            return c['a_us'] if c['a_name'].lower()=='down' else c['b_us']
++        return super().engagement_position(ch)
++
++    def enqueue(self,steps,mode='replace'):
++        if self.walking:self.stop('gesture_preempted')
++        self._reset_pattern();self.last_input=None
++        return super().enqueue(steps,mode)
++
++    def stop(self,reason='stop_or_manual_preemption'):
++        if self.internal_move:return
++        self._reset_pattern();self.last_input=None
++        if self.walking:
++            self.last_stop_reason=reason;self.last_stop_cycles=self.completed_cycles
++            self.walking=False;self.mode='idle';self.phases=[];self.targets={}
++            self.channels.queue=[];self.channels.active=None
++            self.channels.owning=False;self.channels.current={}
++            self.channels.board.releaseAll()
++        else:super().stop()
++
++    def step(self):
++        if not self.walking:return super().step()
++        now=time.ticks_ms()
++        # A connection/pose lease is not enough: a frozen repeating last pose
++        # must not keep the body walking. Ongoing reversals are also required.
++        if self.last_input is None or time.ticks_diff(now,self.last_input)>self.POSE_TIMEOUT_MS:
++            self.stop('pose_stream_timeout');return
++        if self.reversed_at is None or time.ticks_diff(now,self.reversed_at)>self.MAX_REVERSAL_MS:
++            self.stop('support_pattern_timeout');return
++        try:
++            if not self.channels.owning:raise ValueError('stock_steps_preempted')
++            if self.channels.active is not None or self.channels.queue:return
++            self.phase_index+=1;self.completed_phases+=1
++            self._next_phase()
++        except Exception as error:self.error=str(error);self.stop('executor_error')
++
++    def status(self):
++        out=super().status()
++        out['stock_walk']=dict(running=self.walking,profile='alternating_virtual_support',
++            run_id=self.run_id,last_stop_reason=self.last_stop_reason,
++            last_stop_cycles=self.last_stop_cycles,last_pose_gap_ms=self.last_pose_gap_ms,
++            direction='configured_forward_not_inferred',completed_cycles=self.completed_cycles,
++            completed_phases=self.completed_phases,reversals=self.reversals,
++            phase_timeout_ms=self.MAX_REVERSAL_MS,steering_decoded=False,
++            lift_percent=getattr(self,'walk_lift_percent',min(self.walk_lift_ceiling,(self.walk.plan or {}).get('lift_percent',50))),
++            physical_feedback=False)
++        out['slide_output']=self.walking
++        out['turn_output']='closed_only' if self.walking else False
++        return out
+--- /dev/null
++++ b/stock_commands.py
+@@ -0,0 +1,199 @@
++"""Exact saved-gesture commands carried by GrowBot's existing act packet.
++
++These are an explicit encoding agreement, NOT a classifier for arbitrary leg
++poses or neural policies. All eight frames (including durations and checksum)
++must match. Decode before interpolation; malformed marked packets never reach
++the legs. L==R makes the encoding invariant to the browser's leg-swap setting.
++The channel calibration remains authoritative. No output or movement on import.
++"""
++import time
++
++NAMES = ('turn left', 'turn right', 'look left', 'look right',
++         'look up', 'look down', 'look ahead')
++# Preserve 15% for existing profiles; this body's commissioned profile can opt
++# into up to 60%. This is linkage travel, NOT degrees of body heading.
++PAN_EXTENT = 0.60
++TILT_EXTENT = 0.60
++
++# Explicit names carried by the existing routine packet. Stock neural-policy
++# pose streams do NOT carry these names and must never be classified by this
++# table. One named spin is one bounded calibrated turn, not a timed full spin.
++TURN_ALIASES = {'spin left': 1, 'spin_left': 1, 'turn left': 1, 'turn_left': 1,
++                'spin right': 2, 'spin_right': 2, 'turn right': 2, 'turn_right': 2}
++
++
++def named_opcode(name):
++    if not isinstance(name, str):
++        return None
++    return TURN_ALIASES.get(name)
++
++
++def frames(op):
++    if type(op) is not int or not 1 <= op <= len(NAMES):
++        raise ValueError('unknown_saved_body_command')
++    values = (87, 93, 88, 90 + op, 107 - op, 92, 86, 90)
++    # 60% pan can travel 1200 us across both sides: 8 s at 150 us/s.
++    # Use the browser's existing eight-frame/2000-ms-per-frame contract to
++    # reserve 10.286 s for pan, without modifying website code or speeding up.
++    durations = ((137, 149, 1500, 1500, 1500, 1500, 2000, 2000) if op in (3, 4)
++                 else (137, 149, 163, 181, 193, 197, 2000, 2000))
++    return [dict(l=v, r=v, ms=ms) for v, ms in zip(values, durations)]
++
++
++def decode(steps):
++    if not isinstance(steps, list) or not steps:
++        return None
++    # Reserve the tag even if a later frame is truncated/corrupted. Ordinary
++    # factory gestures do not use this tag. This is framing, not authentication.
++    # Redundant first/second tags catch a damaged field or a dropped first frame.
++    # Arbitrary corruption of ALL framing is not distinguishable from a normal
++    # gesture; this protocol is not a generic corruption/authentication layer.
++    def tag(s, value, duration):
++        return isinstance(s, dict) and sum((s.get('l') == value,
++            s.get('r') == value, s.get('ms') == duration)) >= 2
++    if not any(tag(s, 87, 137) or tag(s, 93, 149) for s in steps[:2]):
++        return None
++    for op in range(1, len(NAMES) + 1):
++        expected = frames(op)
++        if len(steps) == 8 and all(
++                isinstance(s, dict) and set(s) == {'l', 'r', 'ms'} and
++                all(type(s[k]) is int and s[k] == e[k] for k in e)
++                for s, e in zip(steps, expected)):
++            return op
++    raise ValueError('corrupt_saved_body_command')
++
++
++class StockCommands:
++    decode = staticmethod(decode)
++    named_opcode = staticmethod(named_opcode)
++
++    def __init__(self, channels, walk, turn, head, shared, config=None):
++        self.channels, self.walk, self.turn = channels, walk, turn
++        self.head, self.shared = head, shared
++        self.config = config if isinstance(config, dict) else {}
++        self.active = None
++        self.last = None
++        self.error = None
++        self.run_id = 0
++        self.started = 0
++        self.turn_run = None
++        self.completed = False
++        self.return_closed = False
++        self.window_ms = 4800
++
++    def turn_fraction(self):
++        value = self.config.get('turn_fraction', 0.15)
++        return value if type(value) in (int, float) and 0.02 <= value <= 0.60 else None
++
++    def start(self, op, mode='replace'):
++        if self.config.get('enabled') is not True:
++            raise ValueError('saved_body_commands_not_enabled')
++        if mode != 'replace':
++            raise ValueError('saved_body_commands_cannot_append')
++        if type(op) is not int or not 1 <= op <= len(NAMES):
++            raise ValueError('unknown_saved_body_command')
++        if self.active or self.walk.running or self.turn.running:
++            raise ValueError('stop_active_motion_before_saved_command')
++        if self.channels.active is not None or self.channels.queue:
++            raise ValueError('finish_manual_motion_before_saved_command')
++        if op <= 2:
++            fraction = self.turn_fraction()
++            if fraction is None:
++                raise ValueError('saved_turn_fraction_must_be_0.02_to_0.60')
++            # Direction must come from this assembled body's recorded mapping,
++            # not inference from two virtual leg angles or a servo port number.
++            m = self.shared.resolve(dict(body_version=1, body_action='turn',
++                direction='left' if op == 1 else 'right',
++                pattern_a_direction=self.config.get('pattern_a_direction'),
++                fraction=fraction))
++            plan = dict(self.walk.plan or {})
++            plan['speed_us_s'] = min(800, plan.get('speed_us_s', 150))
++            plan['lift_percent'] = min(50, plan.get('lift_percent', 50))
++            state = self.turn.start_turn(plan, m['turn_channel'], m['binding'],
++                                         m['pattern'], m['fraction'])
++            self.head.support()
++            self.turn_run = state['run_id']
++            self.turn_channel = m['turn_channel']
++            c = self.channels.channels[self.turn_channel]
++            self.closed = c['a_us'] if c['a_name'].lower() == 'closed' else c['b_us']
++        else:
++            pairs = {3: [('pan', -PAN_EXTENT)], 4: [('pan', PAN_EXTENT)],
++                     5: [('tilt', TILT_EXTENT)], 6: [('tilt', -TILT_EXTENT)],
++                     7: [('pan', 0), ('tilt', 0)]}[op]
++            # This mounted body's observed pan direction can differ from its
++            # saved endpoint labels. Correct only GrowBot's gesture semantics;
++            # do not rewrite calibration or invert OwlBot/shared head commands.
++            if self.config.get('pan_inverted') is True:
++                pairs = [(a, -v if a == 'pan' else v) for a, v in pairs]
++            # Resolve/validate both center axes before issuing either command.
++            requests = [self.shared.resolve(dict(body_version=1,
++                body_action='head', axis=a, position=v)) for a, v in pairs]
++            used = {s['channel'] for s in (self.walk.plan or {}).get('steps', [])}
++            used.update(c['channel'] for c in self.channels.channels if
++                        c['enabled'] and c['name'].lower() in ('turn', 'body turn', 'rotation'))
++            for m in requests:
++                self.head.move(m, used)
++        self.active = NAMES[op - 1]
++        self.last = self.active
++        self.error = None
++        self.completed = False
++        self.return_closed = False
++        self.run_id += 1
++        self.started = time.ticks_ms()
++        self.window_ms = 10000 if op in (3, 4) else 4800
++        return self.status()
++
++    def cancel(self):
++        active, self.active = self.active, None
++        if active and active.startswith('turn'):
++            self.turn.cancel()
++        elif active:
++            self.head.stop()
++
++    def step(self):
++        if not self.active:
++            return
++        age = time.ticks_diff(time.ticks_ms(), self.started)
++        if age >= self.window_ms:
++            if self.active.startswith('turn') and self.turn.running:
++                self.error = 'saved_turn_execution_timeout'
++            elif not self.active.startswith('turn'):
++                self.completed = all(self.head.current.get(a) == p for a, p in self.head.targets.items()) and bool(self.head.targets)
++                if not self.completed:
++                    self.error = 'saved_head_execution_interrupted'
++            self.cancel()
++            return
++        if self.active.startswith('turn'):
++            if not self.turn.running:
++                self.error = self.turn.error
++                self.return_closed = self.channels.current.get(self.turn_channel) == self.closed
++                if not self.return_closed and not self.error:
++                    self.error = 'saved_turn_did_not_return_closed'
++                self.completed = self.return_closed and self.error is None
++                self.active = None
++                # Return Closed is commanded by NamedTurn before this release.
++                self.channels.stop()
++            elif self.turn.run_id != self.turn_run:
++                self.active = None
++                self.error = 'saved_turn_preempted'
++            else:
++                # A single atomic gesture authorizes ONLY this bounded turn.
++                # Not an unbounded stream lease. Stop/disconnect cancel it.
++                self.turn.keepalive(self.turn_run)
++        else:
++            # Renew motion during the command; configured support freezes the
++            # head at completion instead of releasing the load-bearing servos.
++            self.head.received = time.ticks_ms()
++
++    def status(self):
++        return dict(protocol=2, enabled=self.config.get('enabled') is True,
++                    named_turn_aliases=sorted(TURN_ALIASES),
++                    alias_transport='routine.name', pose_stream_turn_inference=False,
++                    head_support_enabled=self.head.hold_enabled,
++                    pan_inverted=self.config.get('pan_inverted') is True,
++                    active=self.active, last=self.last, error=self.error,
++                    completed=self.completed, return_closed_commanded=self.return_closed,
++                    run_id=self.run_id, head_max_speed_us_s=150,
++                    turn_fraction=self.turn_fraction(), pan_extent=PAN_EXTENT,
++                    tilt_extent=TILT_EXTENT, command_window_ms=self.window_ms,
++                    physical_feedback=False)
+--- /dev/null
++++ b/stock_fanout.py
+@@ -0,0 +1,192 @@
++"""Stock GrowBot L/R compatibility for a calibrated four-leg BENCH test.
++
++Two input coordinates fan out to four leg outputs. This is not a learned gait
++for the slide-driven body: slide, turn and head are deliberately NOT outputs.
++Both streamed poses and gesture keyframes use map_pose(). No PWM on startup.
++"""
++import math
++import time
++
++
++class StockFanout:
++    # Owner-observed full tucking bound all four legs. Match this body's saved
++    # walking lift (50%), without rewriting its independently calibrated ends.
++    # This is a stock-lane ceiling, not proof a simultaneous folded pose clears
++    # the linkage. Increasing it requires another physical commissioning test.
++    MAX_LIFT_PERCENT = 50
++    SPEED_US_S = 600
++    POSE_TIMEOUT_MS = 500
++    HOLD_MS = 250
++    ROLES = (('l', 'left front leg'), ('l', 'left rear leg'),
++             ('r', 'right front leg'), ('r', 'right rear leg'))
++
++    def __init__(self, channels):
++        self.channels = channels
++        self.mode = 'idle'
++        self.targets = {}
++        self.last_lr = (90.0, 90.0)
++        self.frames = []
++        self.frame = None
++        self.received = 0
++        self.tick_at = time.ticks_ms()
++        self.error = None
++
++    @property
++    def active(self):
++        return self.mode != 'idle'
++
++    @staticmethod
++    def angle(value):
++        if type(value) not in (int, float) or not math.isfinite(value):
++            raise ValueError('finite_stock_angle_required')
++        return max(0.0, min(180.0, value))
++
++    def mapping(self):
++        rows = []
++        for side, name in self.ROLES:
++            found = [c for c in self.channels.channels if c['name'].strip().lower() == name]
++            if len(found) != 1:
++                raise ValueError('unique_named_leg_required:' + name)
++            c = found[0]
++            ends = {c['a_name'].lower():c['a_us'], c['b_name'].lower():c['b_us']}
++            if not c['enabled'] or not c['calibrated'] or set(ends) != {'up','down'}:
++                raise ValueError('calibrated_up_down_leg_required:' + name)
++            # GrowBot's legs are mirrored: low L + high R is its down/stand
++            # direction. Translate meaning, never reuse its degree-to-us map.
++            rows.append(dict(channel=c['channel'], side=side, name=c['name'],
++                zero=ends['down' if side=='l' else 'up'], center=c['center_us'],
++                full=ends['up' if side=='l' else 'down'], down=ends['down'],
++                up_limit=round(ends['down']+(ends['up']-ends['down'])*self.MAX_LIFT_PERCENT/100)))
++        if len({r['channel'] for r in rows}) != 4:
++            raise ValueError('stock_leg_channels_overlap')
++        return rows
++
++    def map_pose(self, left, right):
++        left, right = self.angle(left), self.angle(right)
++        result = {}
++        for row in self.mapping():
++            angle = left if row['side']=='l' else right
++            pulse = (row['zero']+(row['center']-row['zero'])*angle/90 if angle<=90
++                     else row['center']+(row['full']-row['center'])*(angle-90)/90)
++            # Clamp only the tucked-up side. Do not rescale neutral/downward
++            # commands, invert mounts, or use numerical min as anatomical Up.
++            result[row['channel']] = self.bound_pulse(row, round(pulse))
++        return result
++
++    @staticmethod
++    def bound_pulse(row, pulse):
++        return max(min(row['down'],row['up_limit']),
++                   min(max(row['down'],row['up_limit']),pulse))
++
++    def _begin(self):
++        if self.active:
++            return
++        if self.channels.active is not None or self.channels.queue:
++            raise ValueError('finish_named_or_manual_motion_first')
++        # Preserve known commanded positions across a lane handover. They are
++        # not encoder readings; after release the actual positions are unknown.
++        previous = dict(self.channels.current)
++        self.channels.stop()
++        self.channels.current = previous
++        self.channels.owning = True
++        self.tick_at = time.ticks_ms()
++        self.error = None
++
++    def pose(self, left, right):
++        targets = self.map_pose(left, right)  # validate before taking outputs
++        self._begin()
++        self.frames = []; self.frame = None
++        self.targets = targets
++        self.last_lr = (self.angle(left), self.angle(right))
++        self.mode = 'pose'; self.received = time.ticks_ms()
++        return self.status()
++
++    def enqueue(self, steps, mode='replace'):
++        if mode not in ('replace','append') or not isinstance(steps,list) or not 1<=len(steps)<=64:
++            raise ValueError('invalid_stock_gesture')
++        clean = []
++        for step in steps:
++            if not isinstance(step,dict):raise ValueError('invalid_stock_frame')
++            left,right = self.angle(step.get('l')),self.angle(step.get('r'))
++            ms = step.get('ms')
++            if type(ms) is not int or not 20<=ms<=10000:
++                raise ValueError('stock_frame_duration_20_to_10000_ms')
++            clean.append(dict(l=left,r=right,ms=ms))
++        queued = self.queued_ms() if mode=='append' and self.mode=='act' else 0
++        existing = len(self.frames)+(1 if self.frame else 0) if queued else 0
++        if len(clean)+existing>64 or queued+sum(s['ms'] for s in clean)>60000:
++            raise ValueError('stock_gesture_queue_full')
++        self.map_pose(clean[0]['l'],clean[0]['r'])
++        self._begin()
++        if mode=='replace' or self.mode!='act':
++            self.frames=[];self.frame=None
++        self.frames.extend(clean)
++        self.mode='act'
++        return self.queued_ms()
++
++    def queued_ms(self):
++        remaining = max(0,self.frame['ms']-time.ticks_diff(time.ticks_ms(),self.frame_at)) if self.frame else 0
++        return remaining+sum(s['ms'] for s in self.frames)
++
++    def stop(self):
++        if not self.active:return
++        self.mode='idle';self.frames=[];self.frame=None
++        # Only this lane's four leg outputs. Never turn a head release into an
++        # unexpected head movement, or touch the slide/turn as an L/R guess.
++        for ch in self.targets:
++            self.channels.board.release(ch+1)
++            self.channels.current.pop(ch,None)
++        self.targets={}
++        self.channels.owning=False
++
++    def engagement_position(self,ch):
++        return self.channels.channels[ch]['center_us']
++
++    def step(self):
++        if not self.active:return
++        now=time.ticks_ms()
++        elapsed=time.ticks_diff(now,self.tick_at)
++        if elapsed<20:return
++        self.tick_at=now
++        if self.mode=='pose' and time.ticks_diff(now,self.received)>self.POSE_TIMEOUT_MS:
++            self.stop();return
++        if self.mode=='hold' and time.ticks_diff(now,self.hold_at)>self.HOLD_MS:
++            self.stop();return
++        try:
++            if self.mode=='act':
++                if self.frame is None:
++                    self.frame=self.frames.pop(0);self.frame_at=now;self.start_lr=self.last_lr
++                f=self.frame
++                fraction=min(1,max(0,time.ticks_diff(now,self.frame_at)/f['ms']))
++                eased=fraction*fraction*(3-2*fraction)
++                left=self.start_lr[0]+(f['l']-self.start_lr[0])*eased
++                right=self.start_lr[1]+(f['r']-self.start_lr[1])*eased
++                self.targets=self.map_pose(left,right)
++                self.last_lr=(left,right)
++                if fraction>=1:
++                    self.frame=None
++                    if not self.frames:self.mode='hold';self.hold_at=now
++            distance=self.SPEED_US_S*min(40,elapsed)/1000
++            rows={r['channel']:r for r in self.mapping()}
++            for ch,target in self.targets.items():
++                old=self.channels.current.get(ch,self.engagement_position(ch))
++                # A previous lane or released-position seed can be outside the
++                # stock envelope. Never emit an over-limit intermediate pulse.
++                old=self.bound_pulse(rows[ch],old)
++                pulse=max(old-distance,min(old+distance,target))
++                pulse=self.bound_pulse(rows[ch],pulse)
++                self.channels.current[ch]=pulse
++                self.channels.board.servoWriteMicros(ch+1,round(pulse))
++        except Exception as error:
++            self.error=str(error);self.stop()
++
++    def status(self):
++        try: mapping=self.mapping();mapping_error=None
++        except Exception as error: mapping=[];mapping_error=str(error)
++        return dict(mode=self.mode,active=self.active,mapping=mapping,
++            mapping_error=mapping_error,error=self.error,targets=dict(self.targets),
++            last_lr=list(self.last_lr),queued_ms=self.queued_ms(),speed_us_s=self.SPEED_US_S,
++            pose_timeout_ms=self.POSE_TIMEOUT_MS,physical_feedback=False,
++            max_lift_percent=self.MAX_LIFT_PERCENT,
++            bench_fanout=True,locomotion_verified=False,head_outputs=False,
++            slide_output=False,turn_output=False)

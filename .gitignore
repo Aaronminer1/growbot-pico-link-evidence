@@ -1,0 +1,8 @@
+secrets.py
+.env
+.env.*
+*.pem
+*.key
+bridge-token.txt
+__pycache__/
+*.pyc

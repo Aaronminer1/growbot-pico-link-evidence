@@ -1,0 +1,226 @@
+--- a/main.py
++++ b/main.py
+@@ -28,7 +28,7 @@
+ # keeps running — LED lit, robot deaf, only a power cycle brought it back. The link now
+ # heals itself, in escalating layers:
+ #   1. every socket op carries a timeout — no connect/read/write can block forever
+-#   2. link heartbeat: once the socket goes quiet the chip PINGs the relay (Cloudflare's
++#   2. link heartbeat: at a fixed cadence the chip PINGs the relay (Cloudflare's
+ #      edge pongs back on its own; the traffic also keeps home-router NAT entries alive);
+ #      nothing received for LINK_DEAD_MS -> tear down and re-dial
+ #   3. wifi watch: WLAN drop -> reassociate + re-dial, exponential backoff between tries
+@@ -120,8 +120,10 @@
+ BOOT_MS = time.ticks_ms()
+ 
+ NET_TIMEOUT_S = 6         # bound on every socket op; must stay well under WDT_MS
+-PING_MS = 10000           # heartbeat cadence once the link has been quiet this long
++PING_MS = 10000           # fixed cadence; incoming motor traffic must not starve pings
++HEARTBEAT_MS = 5000       # application proof-of-life visible to existing browser onAck
+ LINK_DEAD_MS = 25000      # quiet this long (= 2 unanswered pings) -> wedged, re-dial
++LINK_START_MS = 10000     # a new socket is not healthy until something comes back
+ WIFI_RESET_EVERY = 3      # straight failures between radio power-cycles
+ HARD_RESET_AFTER = 10     # straight failures before machine.reset() (~3-5 min of trying)
+ WDT_MS = 8000             # hardware watchdog period (rp2 hardware caps near 8.3s)
+@@ -129,7 +131,10 @@
+ MAX_HANDSHAKE_BYTES = 4096
+ NET_STAGE_MS = 6000       # total progress budget, in addition to socket-op timeout
+ LINK_DIAG = {"stage": "boot", "connections": 0, "failures": 0,
+-             "last_error": "", "last_error_stage": ""}
++             "last_error": "", "last_error_stage": "",
++             "heartbeats_sent": 0, "pings_sent": 0, "io": "idle",
++             "last_error_io": "", "close_code": None, "faults": [],
++             "reset_radio": False, "radio_resets": 0}
+ 
+ wlan = network.WLAN(network.STA_IF)
+ 
+@@ -185,6 +190,7 @@
+     # power the radio down and back up — recovers a brownout-wedged CYW43 that still
+     # CLAIMS to be associated (or won't reassociate) without a full chip reset
+     print("wifi: bouncing the radio")
++    LINK_DIAG["radio_resets"] += 1
+     try:
+         wlan.disconnect()
+     except Exception:
+@@ -197,6 +203,7 @@
+     wlan.active(True)
+ 
+ def ws_open():
++    LINK_DIAG["io"] = "connect"
+     LINK_DIAG["stage"] = "dns"
+     gc.collect()         # leave contiguous heap for TLS after the preceding session
+     feed()
+@@ -247,6 +254,8 @@
+     feed()
+ 
+ def write_all(s, data):
++    previous_io = LINK_DIAG["io"]
++    LINK_DIAG["io"] = "write"
+     started = time.ticks_ms()
+     view = memoryview(data)
+     offset = 0
+@@ -256,6 +265,7 @@
+         if not count:
+             raise OSError("network write made no progress")
+         offset += count
++    LINK_DIAG["io"] = previous_io
+ 
+ def send_frame(s, op, p=b""):
+     n = len(p)
+@@ -275,6 +285,7 @@
+     send_frame(s, 1, txt.encode())
+ 
+ def recvn(s, n, started=None):
++    LINK_DIAG["io"] = "frame_read"
+     if started is None: started = time.ticks_ms()
+     b = bytearray()
+     while len(b) < n:
+@@ -321,7 +332,7 @@
+     result = {
+         "host": "Pico 2 W",
+         "board": "Waveshare Pico Servo Driver",
+-        "firmware": "owlbot-pico-7.11",
++        "firmware": "owlbot-pico-7.14",
+         "servo_channels": 16,
+         "protocol": 2,
+         "uptime_ms": time.ticks_diff(time.ticks_ms(), BOOT_MS),
+@@ -340,8 +351,24 @@
+     return result
+ 
+ def link_fault(reason):
++    LINK_DIAG["last_error_io"] = LINK_DIAG["io"]
+     LINK_DIAG["last_error_stage"] = LINK_DIAG["stage"]
+     LINK_DIAG["last_error"] = str(reason)[:120]
++    # Keep the ORIGINAL fault even if subsequent TCP retries fail differently.
++    # Bounded RAM only; no flash writes, identities, commands or camera data.
++    faults = LINK_DIAG["faults"]
++    faults.append(dict(at_ms=time.ticks_diff(time.ticks_ms(), BOOT_MS),
++        stage=LINK_DIAG["stage"], io=LINK_DIAG["io"],
++        error=LINK_DIAG["last_error"]))
++    if len(faults) > 4:
++        del faults[0]
++
++
++def radio_reset_required(fails):
++    # A socket that accepts writes but receives nothing can have a stale CYW43
++    # association. Recover after the receive deadline, not after three TCP retries.
++    # Ordinary remote closes retain the existing graduated retry policy.
++    return LINK_DIAG["reset_radio"] or fails % WIFI_RESET_EVERY == 0
+ 
+ def apply_pose(l, r):
+     """Unmodified GrowBot L/R input; chip-side posture/stepping interpretation."""
+@@ -685,15 +712,21 @@
+     global _wdt
+     LINK_DIAG["stage"] = "serving"
+     LINK_DIAG["connections"] += 1
++    LINK_DIAG["io"] = "hello"
++    LINK_DIAG["reset_radio"] = False
+     poll = select.poll(); poll.register(s, select.POLLIN)
+     send_text(s, json.dumps({"t": "hello", "id": DEVID}))
++    LINK_DIAG["io"] = "ping"
++    send_frame(s, 0x9)  # ask for receipt now, not ten seconds into a stale session
++    LINK_DIAG["pings_sent"] += 1
+     print("hello sent; dog6 intent + calibration lanes ready (dead-man %dms)" % DEADMAN_MS)
+     if _wdt is None:
+         _wdt = machine.WDT(timeout=WDT_MS)              # last-resort self-heal: reboots a truly frozen
+         print("hw watchdog armed (%dms)" % WDT_MS)      # chip; from here on every path must feed()
+     drive_on = False
+     now = time.ticks_ms()
+-    last_pose = now; last_rx = now; last_ping = now
++    last_pose = now; last_rx = now; last_ping = now; last_heartbeat = now
++    received = False
+     n = 0; nlast = 0; last = now
+     while True:
+         feed()
+@@ -703,7 +736,9 @@
+         # raw readability then goes false although decrypted frames remain.
+         b0 = None
+         try:
++            LINK_DIAG["io"] = "poll"
+             if poll.poll(POLL_MS):
++                LINK_DIAG["io"] = "first_byte_read"
+                 b0 = s.read(1)
+         except OSError as e:                            # a real socket/ssl error → drop & let main() re-dial
+             link_fault(e)
+@@ -714,12 +749,15 @@
+         if b0:
+             op, pl = _frame_after(s, b0)                # rest of the frame: blocking (s is always blocking now)
+             if op is None or op == 0x8:
++                LINK_DIAG["close_code"] = ((pl[0] << 8) | pl[1]) if len(pl) >= 2 else None
+                 link_fault("relay sent WebSocket close")
+                 print("conn closed by relay"); return
+             last_rx = time.ticks_ms()                   # any frame (incl. pongs) proves the link is alive
++            received = True
+             if op == 0x9:                               # ping -> pong
+                 send_frame(s, 0xA, pl)                 # RFC6455: echo the ping payload exactly
+             elif op == 0x1:
++                LINK_DIAG["io"] = "dispatch"
+                 kind = _handle(s, pl)
+                 if kind == "drive":
+                     drive_on = dog.mode in ("forward", "backward", "left", "right")
+@@ -730,19 +768,7 @@
+                         print("poses", n, "rate", n - nlast, "Hz"); nlast = n; last = now
+                 elif kind in ("routine", "stop", "stock"):
+                     drive_on = False
+-        else:
+-            # quiet tick: watch the LINK (the dead-man below guards the LEGS; this guards the SOCKET).
+-            # a brownout can drop WiFi with no FIN/RST — without this, serve() would spin forever deaf.
+-            now = time.ticks_ms()
+-            if not wlan.isconnected():
+-                link_fault("Wi-Fi association lost")
+-                print("wifi dropped"); return
+-            if time.ticks_diff(now, last_rx) > LINK_DEAD_MS:
+-                link_fault("relay heartbeat deadline exceeded")
+-                print("link dead: nothing heard for %ds, re-dialing" % (LINK_DEAD_MS // 1000)); return
+-            if time.ticks_diff(now, last_rx) > PING_MS and time.ticks_diff(now, last_ping) > PING_MS:
+-                send_frame(s, 0x9)                     # ping; the pong refreshes last_rx
+-                last_ping = now
++        LINK_DIAG["io"] = "actuator_tick"
+         dog.step()
+         gaze.step()
+         channels.step()
+@@ -754,6 +780,33 @@
+         if drive_on and time.ticks_diff(time.ticks_ms(), last_pose) > DEADMAN_MS:
+             dog.stop(hold=True); drive_on = False
+             print("dead-man: dog settled to stable rest (silence)")
++        # Link supervision runs on BOTH busy and quiet ticks. Sending is never
++        # proof of receipt: only a received frame refreshes last_rx. Heartbeats
++        # do not touch a movement lease, command run, or servo output.
++        now = time.ticks_ms()
++        LINK_DIAG["io"] = "link_check"
++        if not wlan.isconnected():
++            link_fault("Wi-Fi association lost")
++            print("wifi dropped"); return
++        deadline = LINK_DEAD_MS if received else LINK_START_MS
++        if time.ticks_diff(now, last_rx) > deadline:
++            LINK_DIAG["reset_radio"] = True
++            link_fault("relay heartbeat deadline exceeded")
++            print("link dead: nothing heard for %ds, re-dialing" % (deadline // 1000)); return
++        if time.ticks_diff(now, last_ping) >= PING_MS:
++            LINK_DIAG["io"] = "ping"
++            send_frame(s, 0x9)  # pongs refresh receive liveness, not motor authority
++            last_ping = time.ticks_ms()
++            LINK_DIAG['pings_sent'] += 1
++        if time.ticks_diff(now, last_heartbeat) >= HEARTBEAT_MS:
++            LINK_DIAG["io"] = "heartbeat"
++            # Existing GrowBot clients observe ACKs but ignore generic pong/info.
++            # Null rid and an explicit event prevent this unsolicited health
++            # frame from acknowledging any particular motion request.
++            send_text(s, json.dumps(dict(t='ack', rid=None, ok=1, event='heartbeat',
++                uptime_ms=time.ticks_diff(now, BOOT_MS), physical_feedback=False)))
++            last_heartbeat = time.ticks_ms()
++            LINK_DIAG['heartbeats_sent'] += 1
+ 
+ def main():
+     global _wdt
+@@ -802,9 +855,10 @@
+             print("self-heal: machine.reset()")         # = the power cycle users did by hand
+             sleep_fed(200)
+             machine.reset()
+-        if fails % WIFI_RESET_EVERY == 0:
++        if radio_reset_required(fails):
+             try:
+                 wifi_reset()
++                LINK_DIAG["reset_radio"] = False
+             except Exception as e:
+                 print("wifi reset err:", e)
+         wait = min(30000, 1000 << min(fails, 5))        # backoff 2s,4s,8s,16s,30s cap

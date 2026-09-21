@@ -1,0 +1,162 @@
+[
+  {
+    "file": "baseline-downloaded-20260811/act_engine.py",
+    "bytes": 6282,
+    "sha256": "169d5324bd90d845dd4509313b29f17e9f82a32b361f267408c2d5e4124a4bfe"
+  },
+  {
+    "file": "baseline-downloaded-20260811/PicoRobotics.py",
+    "bytes": 5707,
+    "sha256": "11767bc26346badec2ffe9112ed20c147fcd8ef4bdf82f226739771a2467e067"
+  },
+  {
+    "file": "baseline-downloaded-20260811/relay_chip.py",
+    "bytes": 17123,
+    "sha256": "3a7d2042bcbc3e22d33dcde6da5a15427524bea6bb8d0784cbcb036e455d8d69"
+  },
+  {
+    "file": "browser-heartbeat-handlers.json",
+    "bytes": 2786,
+    "sha256": "a8fff9d2541bb6a60332a41809acd7bb1c3ac95d96b2479cabde66c2f5491416"
+  },
+  {
+    "file": "collection-method/collect_brit_evidence.cjs",
+    "bytes": 3062,
+    "sha256": "f5de73e9fa23599d69d8d797e24eadf3ff618811d5535f55c52f2d42dd9373d8"
+  },
+  {
+    "file": "collection-method/collect_brit_serial.py",
+    "bytes": 3122,
+    "sha256": "b6810866eb817f7cd09ae4d8c8c1f5dd8a178a77ba3dc5acb58d2826222fa3b4"
+  },
+  {
+    "file": "collection-method/growbot_browser_probe.cjs",
+    "bytes": 1618,
+    "sha256": "b4c80166d5de84707433eead46b15b4c196a02803f1856cda4607fab9306665b"
+  },
+  {
+    "file": "firmware-host-copy/dog_engine.py",
+    "bytes": 30112,
+    "sha256": "61022341300b4bcc8d600237218f673a59939649612490432dfafc4f4bb3da3c"
+  },
+  {
+    "file": "firmware-host-copy/gimbal_engine.py",
+    "bytes": 10540,
+    "sha256": "23144b1f9401e10139fb7e9c663c76db2b109119a02f91f55005d4587af75001"
+  },
+  {
+    "file": "firmware-host-copy/main.py",
+    "bytes": 43693,
+    "sha256": "13fd76356638558359ef42251571c28af0a83072cc6687c71161d9f0d0437151"
+  },
+  {
+    "file": "firmware-host-copy/named_gait.py",
+    "bytes": 16891,
+    "sha256": "c6d299dd8f8c3163e71c829698c8519c619d8788d78f6ac7e8a0d19fada31398"
+  },
+  {
+    "file": "firmware-host-copy/named_turn.py",
+    "bytes": 4424,
+    "sha256": "cc906f1b06673dd7f2ccd7fc63021715ed9c924c8628e4d9ecc6f9ef623dc68a"
+  },
+  {
+    "file": "firmware-host-copy/pico_head.py",
+    "bytes": 6628,
+    "sha256": "71a1b429b7ba342e37c6399ca1fbd70e152408cb84a68020d583981d59ceaab3"
+  },
+  {
+    "file": "firmware-host-copy/PicoRobotics.py",
+    "bytes": 12371,
+    "sha256": "3aa316ceb10464ccd1c060890536a8c258dd9a2e928732631ecaae0168e08975"
+  },
+  {
+    "file": "firmware-host-copy/relay_chip.py",
+    "bytes": 43693,
+    "sha256": "13fd76356638558359ef42251571c28af0a83072cc6687c71161d9f0d0437151"
+  },
+  {
+    "file": "firmware-host-copy/servo_channels.py",
+    "bytes": 10566,
+    "sha256": "f116c7a372cd4f9feed5e335a1395143eda1a28270f61fbc986c64d5f31ee2bb"
+  },
+  {
+    "file": "firmware-host-copy/shared_body.py",
+    "bytes": 5043,
+    "sha256": "4fcfc249377ecc7b02dbf9576e1a1b1e8648756425d98faa8070c5c87742eb75"
+  },
+  {
+    "file": "firmware-host-copy/stock_body.py",
+    "bytes": 10207,
+    "sha256": "06138d38b27c995ec33f1637691280bd6e6715b2728c3365435fcfd77764cd13"
+  },
+  {
+    "file": "firmware-host-copy/stock_commands.py",
+    "bytes": 9900,
+    "sha256": "859c136c5ce3b8aea697fa7c570a2f4b34fd643c50483ba08975c5791117483d"
+  },
+  {
+    "file": "firmware-host-copy/stock_fanout.py",
+    "bytes": 8851,
+    "sha256": "980788cd1a79dbb72e6c79b54e8ed210f53cc2c011200882eef6421740191bcc"
+  },
+  {
+    "file": "historical-downloaded-baseline-to-7.14.patch",
+    "bytes": 187272,
+    "sha256": "eea4791f63506710b40d31b15d667c40f44a6356b9288e14de1adc585c6da0e3"
+  },
+  {
+    "file": "historical-install-verification.md",
+    "bytes": 6483,
+    "sha256": "b4c7bbe4954e70f4a38fd96848f016ad62ca33ca50a07eb70f5b44567469ff32"
+  },
+  {
+    "file": "LICENSE.txt",
+    "bytes": 4636,
+    "sha256": "bf84ac619bf18cae2f0dc914cb4f306aa4c5b7d9fd65b57fdd143d87f9f98f92"
+  },
+  {
+    "file": "live-telemetry.json",
+    "bytes": 4941,
+    "sha256": "146ebae78afd4ae89799788bfbaa0b5831c049c65706209af2eeaaf5117e7c53"
+  },
+  {
+    "file": "main-7.11-to-7.14.patch",
+    "bytes": 10836,
+    "sha256": "a7cfb2395012e318238e2c028384f66a54781cc277a17b1bf5d601813c236426"
+  },
+  {
+    "file": "main-7.13-to-7.14.patch",
+    "bytes": 5782,
+    "sha256": "06bdf724f80420c04601cf205bc972965a1fe0d4bb994c1e031d10fc4e29d007"
+  },
+  {
+    "file": "network-baselines/main-7.11.py",
+    "bytes": 41002,
+    "sha256": "4cd4b71a8e887fcb3698e55c10cf587ce1e681dd0810e5506ee247ff9450b81c"
+  },
+  {
+    "file": "network-baselines/main-7.13.py",
+    "bytes": 42355,
+    "sha256": "b86657b47f6ab53879dae4de74e6b4b4b4b81eaf3198df2dee3da44fbb60f098"
+  },
+  {
+    "file": "passive-serial.json",
+    "bytes": 349,
+    "sha256": "c62f75246e0e270786a67e353030702450af618f25b7b816f14e6c279f441877"
+  },
+  {
+    "file": "READ-ME-FIRST.md",
+    "bytes": 12406,
+    "sha256": "76959687eabad4225c5adc73d0aae3711d6d25f72a6939bd334a0345e7b2778c"
+  },
+  {
+    "file": "secret-scan.json",
+    "bytes": 3,
+    "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+  },
+  {
+    "file": "SECURITY-REVIEW.md",
+    "bytes": 1203,
+    "sha256": "f7cead3929472699a9c763d10e0b0b3665a986598e785ac0f9a6a1ea3ed0e677"
+  }
+]
