@@ -1,0 +1,2759 @@
+{
+  "version": 1,
+  "label": "floor-explore-poll-and-watch",
+  "active": false,
+  "startedUtc": "2026-09-21T21:58:16.401Z",
+  "durationMs": 180000,
+  "pollEveryMs": 5000,
+  "staleThresholdMs": 20000,
+  "forced": 0,
+  "noMotionCommands": true,
+  "noFirmwareChanges": true,
+  "rows": [
+    {
+      "seq": 1,
+      "at": "2026-09-21T21:58:16.402Z",
+      "elapsed_ms": 1,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T21:58:16.402Z armed, stale threshold 20000ms; polling 5000ms"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-21T21:58:16.402Z",
+      "elapsed_ms": 1,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T21:58:16.402Z watching new socket, readyState=1",
+      "socket": 1
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-21T21:58:16.403Z",
+      "elapsed_ms": 2,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 1
+    },
+    {
+      "seq": 4,
+      "at": "2026-09-21T21:58:16.403Z",
+      "elapsed_ms": 2,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 39
+    },
+    {
+      "seq": 5,
+      "at": "2026-09-21T21:58:16.550Z",
+      "elapsed_ms": 149,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 147,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 555143,
+        "memory_free_bytes": 24480,
+        "wifi_rssi_dbm": -66,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 95,
+          "pings_sent": 49,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 6,
+      "at": "2026-09-21T21:58:17.180Z",
+      "elapsed_ms": 779,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 555859
+    },
+    {
+      "seq": 7,
+      "at": "2026-09-21T21:58:21.402Z",
+      "elapsed_ms": 5001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 4221
+    },
+    {
+      "seq": 8,
+      "at": "2026-09-21T21:58:21.402Z",
+      "elapsed_ms": 5001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 40
+    },
+    {
+      "seq": 9,
+      "at": "2026-09-21T21:58:21.540Z",
+      "elapsed_ms": 5139,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 138,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 560150,
+        "memory_free_bytes": 288416,
+        "wifi_rssi_dbm": -66,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 96,
+          "pings_sent": 49,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 10,
+      "at": "2026-09-21T21:58:22.226Z",
+      "elapsed_ms": 5825,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 560870
+    },
+    {
+      "seq": 11,
+      "at": "2026-09-21T21:58:26.404Z",
+      "elapsed_ms": 10003,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 4177
+    },
+    {
+      "seq": 12,
+      "at": "2026-09-21T21:58:26.404Z",
+      "elapsed_ms": 10003,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 41
+    },
+    {
+      "seq": 13,
+      "at": "2026-09-21T21:58:26.554Z",
+      "elapsed_ms": 10153,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 150,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 565163,
+        "memory_free_bytes": 251808,
+        "wifi_rssi_dbm": -66,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 97,
+          "pings_sent": 50,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 14,
+      "at": "2026-09-21T21:58:27.107Z",
+      "elapsed_ms": 10706,
+      "event": "operator_mark",
+      "name": "native-exploration-poll-phase"
+    },
+    {
+      "seq": 15,
+      "at": "2026-09-21T21:58:27.199Z",
+      "elapsed_ms": 10798,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 565882
+    },
+    {
+      "seq": 16,
+      "at": "2026-09-21T21:58:31.402Z",
+      "elapsed_ms": 15001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 4203
+    },
+    {
+      "seq": 17,
+      "at": "2026-09-21T21:58:31.402Z",
+      "elapsed_ms": 15001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 42
+    },
+    {
+      "seq": 18,
+      "at": "2026-09-21T21:58:31.538Z",
+      "elapsed_ms": 15137,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 136,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 570146,
+        "memory_free_bytes": 215632,
+        "wifi_rssi_dbm": -66,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 98,
+          "pings_sent": 50,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 19,
+      "at": "2026-09-21T21:58:32.205Z",
+      "elapsed_ms": 15804,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 570885
+    },
+    {
+      "seq": 20,
+      "at": "2026-09-21T21:58:36.402Z",
+      "elapsed_ms": 20001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": true,
+      "inboundAgeMs": 4196
+    },
+    {
+      "seq": 21,
+      "at": "2026-09-21T21:58:36.402Z",
+      "elapsed_ms": 20001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 43
+    },
+    {
+      "seq": 22,
+      "at": "2026-09-21T21:58:36.547Z",
+      "elapsed_ms": 20146,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 145,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 575151,
+        "memory_free_bytes": 73792,
+        "wifi_rssi_dbm": -68,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 99,
+          "pings_sent": 51,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 23,
+      "at": "2026-09-21T21:58:37.232Z",
+      "elapsed_ms": 20831,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 575893
+    },
+    {
+      "seq": 24,
+      "at": "2026-09-21T21:58:41.402Z",
+      "elapsed_ms": 25001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 4169
+    },
+    {
+      "seq": 25,
+      "at": "2026-09-21T21:58:41.402Z",
+      "elapsed_ms": 25001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 44
+    },
+    {
+      "seq": 26,
+      "at": "2026-09-21T21:58:41.533Z",
+      "elapsed_ms": 25132,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 130,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 580148,
+        "memory_free_bytes": 163424,
+        "wifi_rssi_dbm": -68,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 100,
+          "pings_sent": 51,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 27,
+      "at": "2026-09-21T21:58:42.251Z",
+      "elapsed_ms": 25850,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 580935
+    },
+    {
+      "seq": 28,
+      "at": "2026-09-21T21:58:46.401Z",
+      "elapsed_ms": 30000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 4150
+    },
+    {
+      "seq": 29,
+      "at": "2026-09-21T21:58:46.402Z",
+      "elapsed_ms": 30001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 45
+    },
+    {
+      "seq": 30,
+      "at": "2026-09-21T21:58:46.539Z",
+      "elapsed_ms": 30138,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 138,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 585150,
+        "memory_free_bytes": 64336,
+        "wifi_rssi_dbm": -68,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 101,
+          "pings_sent": 52,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 31,
+      "at": "2026-09-21T21:58:47.258Z",
+      "elapsed_ms": 30857,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 585939
+    },
+    {
+      "seq": 32,
+      "at": "2026-09-21T21:58:51.402Z",
+      "elapsed_ms": 35001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 4144
+    },
+    {
+      "seq": 33,
+      "at": "2026-09-21T21:58:51.402Z",
+      "elapsed_ms": 35001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 46
+    },
+    {
+      "seq": 34,
+      "at": "2026-09-21T21:58:51.551Z",
+      "elapsed_ms": 35150,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 149,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 590158,
+        "memory_free_bytes": 283216,
+        "wifi_rssi_dbm": -69,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 102,
+          "pings_sent": 52,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 35,
+      "at": "2026-09-21T21:58:52.289Z",
+      "elapsed_ms": 35888,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 590970
+    },
+    {
+      "seq": 36,
+      "at": "2026-09-21T21:58:56.402Z",
+      "elapsed_ms": 40001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 4113
+    },
+    {
+      "seq": 37,
+      "at": "2026-09-21T21:58:56.402Z",
+      "elapsed_ms": 40001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 47
+    },
+    {
+      "seq": 38,
+      "at": "2026-09-21T21:58:56.536Z",
+      "elapsed_ms": 40135,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 134,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 595150,
+        "memory_free_bytes": 180752,
+        "wifi_rssi_dbm": -68,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 103,
+          "pings_sent": 53,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 39,
+      "at": "2026-09-21T21:58:57.318Z",
+      "elapsed_ms": 40917,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 595998
+    },
+    {
+      "seq": 40,
+      "at": "2026-09-21T21:59:01.402Z",
+      "elapsed_ms": 45001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 4085
+    },
+    {
+      "seq": 41,
+      "at": "2026-09-21T21:59:01.402Z",
+      "elapsed_ms": 45001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 48
+    },
+    {
+      "seq": 42,
+      "at": "2026-09-21T21:59:01.542Z",
+      "elapsed_ms": 45141,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 140,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 600158,
+        "memory_free_bytes": 74256,
+        "wifi_rssi_dbm": -69,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 104,
+          "pings_sent": 53,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 43,
+      "at": "2026-09-21T21:59:02.348Z",
+      "elapsed_ms": 45947,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 601032
+    },
+    {
+      "seq": 44,
+      "at": "2026-09-21T21:59:06.401Z",
+      "elapsed_ms": 50000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 4053
+    },
+    {
+      "seq": 45,
+      "at": "2026-09-21T21:59:06.401Z",
+      "elapsed_ms": 50000,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 49
+    },
+    {
+      "seq": 46,
+      "at": "2026-09-21T21:59:06.549Z",
+      "elapsed_ms": 50148,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 148,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 605162,
+        "memory_free_bytes": 298208,
+        "wifi_rssi_dbm": -68,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 105,
+          "pings_sent": 54,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 47,
+      "at": "2026-09-21T21:59:07.395Z",
+      "elapsed_ms": 50994,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 606066
+    },
+    {
+      "seq": 48,
+      "at": "2026-09-21T21:59:11.402Z",
+      "elapsed_ms": 55001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 4007
+    },
+    {
+      "seq": 49,
+      "at": "2026-09-21T21:59:11.402Z",
+      "elapsed_ms": 55001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 50
+    },
+    {
+      "seq": 50,
+      "at": "2026-09-21T21:59:11.537Z",
+      "elapsed_ms": 55136,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 135,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 610151,
+        "memory_free_bytes": 194608,
+        "wifi_rssi_dbm": -68,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 106,
+          "pings_sent": 54,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 51,
+      "at": "2026-09-21T21:59:12.457Z",
+      "elapsed_ms": 56056,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 611136
+    },
+    {
+      "seq": 52,
+      "at": "2026-09-21T21:59:16.402Z",
+      "elapsed_ms": 60001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3945
+    },
+    {
+      "seq": 53,
+      "at": "2026-09-21T21:59:16.402Z",
+      "elapsed_ms": 60001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 51
+    },
+    {
+      "seq": 54,
+      "at": "2026-09-21T21:59:16.533Z",
+      "elapsed_ms": 60132,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 131,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 615147,
+        "memory_free_bytes": 88992,
+        "wifi_rssi_dbm": -69,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 107,
+          "pings_sent": 55,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 55,
+      "at": "2026-09-21T21:59:17.455Z",
+      "elapsed_ms": 61054,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 616138
+    },
+    {
+      "seq": 56,
+      "at": "2026-09-21T21:59:21.401Z",
+      "elapsed_ms": 65000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3946
+    },
+    {
+      "seq": 57,
+      "at": "2026-09-21T21:59:21.401Z",
+      "elapsed_ms": 65000,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 52
+    },
+    {
+      "seq": 58,
+      "at": "2026-09-21T21:59:21.557Z",
+      "elapsed_ms": 65156,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 156,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 620167,
+        "memory_free_bytes": 308656,
+        "wifi_rssi_dbm": -69,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 108,
+          "pings_sent": 55,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 59,
+      "at": "2026-09-21T21:59:22.490Z",
+      "elapsed_ms": 66089,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 621171
+    },
+    {
+      "seq": 60,
+      "at": "2026-09-21T21:59:26.402Z",
+      "elapsed_ms": 70001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3912
+    },
+    {
+      "seq": 61,
+      "at": "2026-09-21T21:59:26.402Z",
+      "elapsed_ms": 70001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 53
+    },
+    {
+      "seq": 62,
+      "at": "2026-09-21T21:59:26.541Z",
+      "elapsed_ms": 70140,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 139,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 625153,
+        "memory_free_bytes": 206544,
+        "wifi_rssi_dbm": -68,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 109,
+          "pings_sent": 56,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 63,
+      "at": "2026-09-21T21:59:27.520Z",
+      "elapsed_ms": 71119,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 626203
+    },
+    {
+      "seq": 64,
+      "at": "2026-09-21T21:59:31.411Z",
+      "elapsed_ms": 75010,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3891
+    },
+    {
+      "seq": 65,
+      "at": "2026-09-21T21:59:31.411Z",
+      "elapsed_ms": 75010,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 54
+    },
+    {
+      "seq": 66,
+      "at": "2026-09-21T21:59:31.546Z",
+      "elapsed_ms": 75145,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 135,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 630153,
+        "memory_free_bytes": 103552,
+        "wifi_rssi_dbm": -69,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 110,
+          "pings_sent": 56,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 67,
+      "at": "2026-09-21T21:59:32.552Z",
+      "elapsed_ms": 76151,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 631234
+    },
+    {
+      "seq": 68,
+      "at": "2026-09-21T21:59:36.402Z",
+      "elapsed_ms": 80001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3850
+    },
+    {
+      "seq": 69,
+      "at": "2026-09-21T21:59:36.402Z",
+      "elapsed_ms": 80001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 55
+    },
+    {
+      "seq": 70,
+      "at": "2026-09-21T21:59:36.559Z",
+      "elapsed_ms": 80158,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 157,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 635152,
+        "memory_free_bytes": 1600,
+        "wifi_rssi_dbm": -69,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 111,
+          "pings_sent": 57,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 71,
+      "at": "2026-09-21T21:59:37.585Z",
+      "elapsed_ms": 81184,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 636265
+    },
+    {
+      "seq": 72,
+      "at": "2026-09-21T21:59:41.401Z",
+      "elapsed_ms": 85000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3816
+    },
+    {
+      "seq": 73,
+      "at": "2026-09-21T21:59:41.401Z",
+      "elapsed_ms": 85000,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 56
+    },
+    {
+      "seq": 74,
+      "at": "2026-09-21T21:59:41.547Z",
+      "elapsed_ms": 85146,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 146,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 640155,
+        "memory_free_bytes": 221376,
+        "wifi_rssi_dbm": -70,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 112,
+          "pings_sent": 57,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 75,
+      "at": "2026-09-21T21:59:42.590Z",
+      "elapsed_ms": 86189,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 641267
+    },
+    {
+      "seq": 76,
+      "at": "2026-09-21T21:59:43.058Z",
+      "elapsed_ms": 86657,
+      "event": "operator_mark",
+      "name": "native-final-walk-request"
+    },
+    {
+      "seq": 77,
+      "at": "2026-09-21T21:59:46.401Z",
+      "elapsed_ms": 90000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3811
+    },
+    {
+      "seq": 78,
+      "at": "2026-09-21T21:59:46.401Z",
+      "elapsed_ms": 90000,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 57
+    },
+    {
+      "seq": 79,
+      "at": "2026-09-21T21:59:46.546Z",
+      "elapsed_ms": 90145,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 145,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 645152,
+        "memory_free_bytes": 118832,
+        "wifi_rssi_dbm": -70,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 113,
+          "pings_sent": 58,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 80,
+      "at": "2026-09-21T21:59:47.591Z",
+      "elapsed_ms": 91190,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 646275
+    },
+    {
+      "seq": 81,
+      "at": "2026-09-21T21:59:51.401Z",
+      "elapsed_ms": 95001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3810
+    },
+    {
+      "seq": 82,
+      "at": "2026-09-21T21:59:51.402Z",
+      "elapsed_ms": 95001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 58
+    },
+    {
+      "seq": 83,
+      "at": "2026-09-21T21:59:51.561Z",
+      "elapsed_ms": 95160,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 159,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 650158,
+        "memory_free_bytes": 15408,
+        "wifi_rssi_dbm": -69,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 114,
+          "pings_sent": 58,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 84,
+      "at": "2026-09-21T21:59:52.650Z",
+      "elapsed_ms": 96249,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 651332
+    },
+    {
+      "seq": 85,
+      "at": "2026-09-21T21:59:56.401Z",
+      "elapsed_ms": 100000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3751
+    },
+    {
+      "seq": 86,
+      "at": "2026-09-21T21:59:56.401Z",
+      "elapsed_ms": 100000,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 59
+    },
+    {
+      "seq": 87,
+      "at": "2026-09-21T21:59:56.538Z",
+      "elapsed_ms": 100137,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 137,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 655153,
+        "memory_free_bytes": 220944,
+        "wifi_rssi_dbm": -69,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 115,
+          "pings_sent": 59,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 88,
+      "at": "2026-09-21T21:59:57.657Z",
+      "elapsed_ms": 101256,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 656340
+    },
+    {
+      "seq": 89,
+      "at": "2026-09-21T22:00:01.401Z",
+      "elapsed_ms": 105000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3744
+    },
+    {
+      "seq": 90,
+      "at": "2026-09-21T22:00:01.401Z",
+      "elapsed_ms": 105000,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 60
+    },
+    {
+      "seq": 91,
+      "at": "2026-09-21T22:00:01.558Z",
+      "elapsed_ms": 105157,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 157,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 660156,
+        "memory_free_bytes": 115776,
+        "wifi_rssi_dbm": -69,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 116,
+          "pings_sent": 59,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 92,
+      "at": "2026-09-21T22:00:02.699Z",
+      "elapsed_ms": 106298,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 661373
+    },
+    {
+      "seq": 93,
+      "at": "2026-09-21T22:00:06.401Z",
+      "elapsed_ms": 110000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3702
+    },
+    {
+      "seq": 94,
+      "at": "2026-09-21T22:00:06.401Z",
+      "elapsed_ms": 110000,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 61
+    },
+    {
+      "seq": 95,
+      "at": "2026-09-21T22:00:06.470Z",
+      "elapsed_ms": 110069,
+      "event": "operator_mark",
+      "name": "owner-confirms-pretest-power-or-reset"
+    },
+    {
+      "seq": 96,
+      "at": "2026-09-21T22:00:06.567Z",
+      "elapsed_ms": 110166,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 166,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 665156,
+        "memory_free_bytes": 10240,
+        "wifi_rssi_dbm": -69,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 117,
+          "pings_sent": 60,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 97,
+      "at": "2026-09-21T22:00:07.731Z",
+      "elapsed_ms": 111330,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 666405
+    },
+    {
+      "seq": 98,
+      "at": "2026-09-21T22:00:11.401Z",
+      "elapsed_ms": 115000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3670
+    },
+    {
+      "seq": 99,
+      "at": "2026-09-21T22:00:11.401Z",
+      "elapsed_ms": 115000,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 62
+    },
+    {
+      "seq": 100,
+      "at": "2026-09-21T22:00:11.543Z",
+      "elapsed_ms": 115142,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 142,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 670158,
+        "memory_free_bytes": 221376,
+        "wifi_rssi_dbm": -68,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 118,
+          "pings_sent": 60,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 101,
+      "at": "2026-09-21T22:00:12.733Z",
+      "elapsed_ms": 116332,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 671410
+    },
+    {
+      "seq": 102,
+      "at": "2026-09-21T22:00:16.402Z",
+      "elapsed_ms": 120001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3669
+    },
+    {
+      "seq": 103,
+      "at": "2026-09-21T22:00:16.402Z",
+      "elapsed_ms": 120001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 63
+    },
+    {
+      "seq": 104,
+      "at": "2026-09-21T22:00:16.549Z",
+      "elapsed_ms": 120148,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 147,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 675158,
+        "memory_free_bytes": 119168,
+        "wifi_rssi_dbm": -69,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 119,
+          "pings_sent": 61,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 105,
+      "at": "2026-09-21T22:00:17.766Z",
+      "elapsed_ms": 121365,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 676441
+    },
+    {
+      "seq": 106,
+      "at": "2026-09-21T22:00:21.402Z",
+      "elapsed_ms": 125001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3636
+    },
+    {
+      "seq": 107,
+      "at": "2026-09-21T22:00:21.402Z",
+      "elapsed_ms": 125001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 64
+    },
+    {
+      "seq": 108,
+      "at": "2026-09-21T22:00:21.564Z",
+      "elapsed_ms": 125163,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 162,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 680154,
+        "memory_free_bytes": 15408,
+        "wifi_rssi_dbm": -68,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 120,
+          "pings_sent": 61,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 109,
+      "at": "2026-09-21T22:00:22.787Z",
+      "elapsed_ms": 126386,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 681469
+    },
+    {
+      "seq": 110,
+      "at": "2026-09-21T22:00:26.402Z",
+      "elapsed_ms": 130001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3615
+    },
+    {
+      "seq": 111,
+      "at": "2026-09-21T22:00:26.402Z",
+      "elapsed_ms": 130001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 65
+    },
+    {
+      "seq": 112,
+      "at": "2026-09-21T22:00:26.544Z",
+      "elapsed_ms": 130143,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 142,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 685156,
+        "memory_free_bytes": 221376,
+        "wifi_rssi_dbm": -69,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 121,
+          "pings_sent": 61,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 113,
+      "at": "2026-09-21T22:00:27.850Z",
+      "elapsed_ms": 131449,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 686533
+    },
+    {
+      "seq": 114,
+      "at": "2026-09-21T22:00:31.401Z",
+      "elapsed_ms": 135000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3551
+    },
+    {
+      "seq": 115,
+      "at": "2026-09-21T22:00:31.401Z",
+      "elapsed_ms": 135000,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 66
+    },
+    {
+      "seq": 116,
+      "at": "2026-09-21T22:00:31.538Z",
+      "elapsed_ms": 135137,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 137,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 690149,
+        "memory_free_bytes": 118960,
+        "wifi_rssi_dbm": -68,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 122,
+          "pings_sent": 62,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 117,
+      "at": "2026-09-21T22:00:32.885Z",
+      "elapsed_ms": 136484,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 691567
+    },
+    {
+      "seq": 118,
+      "at": "2026-09-21T22:00:36.402Z",
+      "elapsed_ms": 140001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3517
+    },
+    {
+      "seq": 119,
+      "at": "2026-09-21T22:00:36.402Z",
+      "elapsed_ms": 140001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 67
+    },
+    {
+      "seq": 120,
+      "at": "2026-09-21T22:00:36.574Z",
+      "elapsed_ms": 140173,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 172,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 695154,
+        "memory_free_bytes": 12704,
+        "wifi_rssi_dbm": -69,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 123,
+          "pings_sent": 62,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 121,
+      "at": "2026-09-21T22:00:37.898Z",
+      "elapsed_ms": 141497,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 696580
+    },
+    {
+      "seq": 122,
+      "at": "2026-09-21T22:00:41.414Z",
+      "elapsed_ms": 145013,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3516
+    },
+    {
+      "seq": 123,
+      "at": "2026-09-21T22:00:41.414Z",
+      "elapsed_ms": 145013,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 68
+    },
+    {
+      "seq": 124,
+      "at": "2026-09-21T22:00:41.543Z",
+      "elapsed_ms": 145142,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 129,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 700156,
+        "memory_free_bytes": 221376,
+        "wifi_rssi_dbm": -69,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 124,
+          "pings_sent": 63,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 125,
+      "at": "2026-09-21T22:00:42.941Z",
+      "elapsed_ms": 146540,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 701617
+    },
+    {
+      "seq": 126,
+      "at": "2026-09-21T22:00:46.402Z",
+      "elapsed_ms": 150001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3460
+    },
+    {
+      "seq": 127,
+      "at": "2026-09-21T22:00:46.402Z",
+      "elapsed_ms": 150001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 69
+    },
+    {
+      "seq": 128,
+      "at": "2026-09-21T22:00:46.547Z",
+      "elapsed_ms": 150146,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 145,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 705151,
+        "memory_free_bytes": 119808,
+        "wifi_rssi_dbm": -68,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 125,
+          "pings_sent": 63,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 129,
+      "at": "2026-09-21T22:00:47.951Z",
+      "elapsed_ms": 151550,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 706633
+    },
+    {
+      "seq": 130,
+      "at": "2026-09-21T22:00:51.401Z",
+      "elapsed_ms": 155000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3450
+    },
+    {
+      "seq": 131,
+      "at": "2026-09-21T22:00:51.401Z",
+      "elapsed_ms": 155000,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 70
+    },
+    {
+      "seq": 132,
+      "at": "2026-09-21T22:00:51.558Z",
+      "elapsed_ms": 155157,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 157,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 710150,
+        "memory_free_bytes": 15872,
+        "wifi_rssi_dbm": -68,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 126,
+          "pings_sent": 64,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 133,
+      "at": "2026-09-21T22:00:52.984Z",
+      "elapsed_ms": 156583,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 711667
+    },
+    {
+      "seq": 134,
+      "at": "2026-09-21T22:00:56.401Z",
+      "elapsed_ms": 160000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3417
+    },
+    {
+      "seq": 135,
+      "at": "2026-09-21T22:00:56.401Z",
+      "elapsed_ms": 160000,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 71
+    },
+    {
+      "seq": 136,
+      "at": "2026-09-21T22:00:56.547Z",
+      "elapsed_ms": 160146,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 145,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 715151,
+        "memory_free_bytes": 221376,
+        "wifi_rssi_dbm": -68,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 127,
+          "pings_sent": 64,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 137,
+      "at": "2026-09-21T22:00:57.999Z",
+      "elapsed_ms": 161598,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 716685
+    },
+    {
+      "seq": 138,
+      "at": "2026-09-21T22:01:01.402Z",
+      "elapsed_ms": 165001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3403
+    },
+    {
+      "seq": 139,
+      "at": "2026-09-21T22:01:01.402Z",
+      "elapsed_ms": 165001,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 72
+    },
+    {
+      "seq": 140,
+      "at": "2026-09-21T22:01:01.539Z",
+      "elapsed_ms": 165138,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 137,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 720150,
+        "memory_free_bytes": 112496,
+        "wifi_rssi_dbm": -70,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 128,
+          "pings_sent": 65,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 141,
+      "at": "2026-09-21T22:01:03.063Z",
+      "elapsed_ms": 166662,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 721738
+    },
+    {
+      "seq": 142,
+      "at": "2026-09-21T22:01:06.401Z",
+      "elapsed_ms": 170000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3338
+    },
+    {
+      "seq": 143,
+      "at": "2026-09-21T22:01:06.401Z",
+      "elapsed_ms": 170000,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 73
+    },
+    {
+      "seq": 144,
+      "at": "2026-09-21T22:01:06.564Z",
+      "elapsed_ms": 170163,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 162,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 725154,
+        "memory_free_bytes": 4128,
+        "wifi_rssi_dbm": -71,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 129,
+          "pings_sent": 65,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 145,
+      "at": "2026-09-21T22:01:08.067Z",
+      "elapsed_ms": 171666,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 726745
+    },
+    {
+      "seq": 146,
+      "at": "2026-09-21T22:01:11.401Z",
+      "elapsed_ms": 175000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 3334
+    },
+    {
+      "seq": 147,
+      "at": "2026-09-21T22:01:11.401Z",
+      "elapsed_ms": 175000,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 74
+    },
+    {
+      "seq": 148,
+      "at": "2026-09-21T22:01:11.546Z",
+      "elapsed_ms": 175145,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": true,
+      "ok": true,
+      "latency_ms": 145,
+      "controller": {
+        "firmware": "owlbot-pico-7.14",
+        "uptime_ms": 730159,
+        "memory_free_bytes": 221376,
+        "wifi_rssi_dbm": -70,
+        "reset_cause": 1,
+        "link": {
+          "failures": 3,
+          "connections": 1,
+          "radio_resets": 4,
+          "heartbeats_sent": 130,
+          "pings_sent": 66,
+          "stage": "serving",
+          "io": "dispatch",
+          "close_code": null,
+          "faults": [
+            {
+              "at_ms": 17949,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 36451,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            },
+            {
+              "at_ms": 56952,
+              "stage": "wifi_association",
+              "io": "idle",
+              "error": "Wi-Fi association did not complete"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seq": 149,
+      "at": "2026-09-21T22:01:13.091Z",
+      "elapsed_ms": 176690,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 731770
+    },
+    {
+      "seq": 150,
+      "at": "2026-09-21T22:01:16.402Z",
+      "elapsed_ms": 180001,
+      "event": "stopped",
+      "reason": "duration_expired",
+      "forced": 0
+    }
+  ],
+  "debuggingGaps": 0
+}

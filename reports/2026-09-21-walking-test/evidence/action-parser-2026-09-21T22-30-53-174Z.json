@@ -1,0 +1,521 @@
+{
+  "at": "2026-09-21T22:30:54.364Z",
+  "testStart": 1790029158571,
+  "paused": false,
+  "inFlight": false,
+  "motion": false,
+  "camOn": true,
+  "bodyReady": true,
+  "bodyRxAgeMs": 19265,
+  "rows": [
+    {
+      "t": 1790029426421,
+      "e": "reply_status",
+      "parsed": true,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "say",
+      "chars": 251
+    },
+    {
+      "t": 1790029426421,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "requested"
+    },
+    {
+      "t": 1790029426421,
+      "e": "gesture",
+      "n": "turn left",
+      "r": "play"
+    },
+    {
+      "t": 1790029426422,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "started",
+      "reason": "commands_sent_unverified"
+    },
+    {
+      "t": 1790029426422,
+      "e": "think",
+      "nf": 3,
+      "moved": "started:gesture",
+      "ms": 2308
+    },
+    {
+      "t": 1790029431442,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "completed",
+      "reason": "command_window_ended_unverified"
+    },
+    {
+      "t": 1790029439275,
+      "e": "reply_status",
+      "parsed": false,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "unknown",
+      "chars": 121
+    },
+    {
+      "t": 1790029439393,
+      "e": "think",
+      "nf": 3,
+      "moved": "still",
+      "ms": 2371
+    },
+    {
+      "t": 1790029448045,
+      "e": "reply_status",
+      "parsed": false,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "unknown",
+      "chars": 97
+    },
+    {
+      "t": 1790029448160,
+      "e": "think",
+      "nf": 3,
+      "moved": "still",
+      "ms": 2941
+    },
+    {
+      "t": 1790029464259,
+      "e": "reply_status",
+      "parsed": false,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "unknown",
+      "chars": 71
+    },
+    {
+      "t": 1790029464352,
+      "e": "think",
+      "nf": 3,
+      "moved": "still",
+      "ms": 3681
+    },
+    {
+      "t": 1790029474098,
+      "e": "reply_status",
+      "parsed": false,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "unknown",
+      "chars": 432
+    },
+    {
+      "t": 1790029474098,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "requested"
+    },
+    {
+      "t": 1790029474098,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "accepted",
+      "reason": "loading_policy"
+    },
+    {
+      "t": 1790029474098,
+      "e": "think",
+      "nf": 3,
+      "moved": "accepted:walk:fwd",
+      "ms": 3275
+    },
+    {
+      "t": 1790029474102,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "started",
+      "reason": "stance_commands"
+    },
+    {
+      "t": 1790029475317,
+      "e": "walk_start"
+    },
+    {
+      "t": 1790029483331,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "completed",
+      "reason": "done"
+    },
+    {
+      "t": 1790029483331,
+      "e": "walk_end",
+      "why": "done",
+      "ms": 8013
+    },
+    {
+      "t": 1790029498110,
+      "e": "reply_status",
+      "parsed": false,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "unknown",
+      "chars": 91
+    },
+    {
+      "t": 1790029498209,
+      "e": "think",
+      "nf": 3,
+      "moved": "still",
+      "ms": 1991
+    },
+    {
+      "t": 1790029523976,
+      "e": "reply_status",
+      "parsed": false,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "unknown",
+      "chars": 84
+    },
+    {
+      "t": 1790029524086,
+      "e": "think",
+      "nf": 3,
+      "moved": "still",
+      "ms": 2460
+    },
+    {
+      "t": 1790029550957,
+      "e": "reply_status",
+      "parsed": false,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "unknown",
+      "chars": 99
+    },
+    {
+      "t": 1790029551058,
+      "e": "think",
+      "nf": 3,
+      "moved": "still",
+      "ms": 4004
+    },
+    {
+      "t": 1790029574424,
+      "e": "reply_status",
+      "parsed": false,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "unknown",
+      "chars": 108
+    },
+    {
+      "t": 1790029574508,
+      "e": "think",
+      "nf": 3,
+      "moved": "still",
+      "ms": 2042
+    },
+    {
+      "t": 1790029600146,
+      "e": "reply_status",
+      "parsed": false,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "unknown",
+      "chars": 86
+    },
+    {
+      "t": 1790029600238,
+      "e": "think",
+      "nf": 3,
+      "moved": "still",
+      "ms": 2341
+    },
+    {
+      "t": 1790029620060,
+      "e": "reply_status",
+      "parsed": true,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "say",
+      "chars": 594
+    },
+    {
+      "t": 1790029620066,
+      "e": "think",
+      "nf": 3,
+      "moved": "still",
+      "ms": 3928
+    },
+    {
+      "t": 1790029626702,
+      "e": "reply_status",
+      "parsed": true,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "say",
+      "chars": 340
+    },
+    {
+      "t": 1790029626708,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "requested"
+    },
+    {
+      "t": 1790029626708,
+      "e": "gesture",
+      "n": "turn left",
+      "r": "play"
+    },
+    {
+      "t": 1790029626708,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "started",
+      "reason": "commands_sent_unverified"
+    },
+    {
+      "t": 1790029626708,
+      "e": "think",
+      "nf": 3,
+      "moved": "started:gesture",
+      "ms": 3409
+    },
+    {
+      "t": 1790029631729,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "completed",
+      "reason": "command_window_ended_unverified"
+    },
+    {
+      "t": 1790029650890,
+      "e": "reply_status",
+      "parsed": false,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "unknown",
+      "chars": 85
+    },
+    {
+      "t": 1790029650984,
+      "e": "think",
+      "nf": 3,
+      "moved": "still",
+      "ms": 2096
+    },
+    {
+      "t": 1790029654827,
+      "e": "reply_status",
+      "parsed": false,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "unknown",
+      "chars": 78
+    },
+    {
+      "t": 1790029654931,
+      "e": "think",
+      "nf": 3,
+      "moved": "still",
+      "ms": 2565
+    },
+    {
+      "t": 1790029664288,
+      "e": "reply_status",
+      "parsed": false,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "unknown",
+      "chars": 96
+    },
+    {
+      "t": 1790029664288,
+      "e": "think",
+      "nf": 3,
+      "moved": "still",
+      "ms": 1709
+    },
+    {
+      "t": 1790029669992,
+      "e": "reply_status",
+      "parsed": true,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "say",
+      "chars": 246
+    },
+    {
+      "t": 1790029669993,
+      "e": "think",
+      "nf": 3,
+      "moved": "still",
+      "ms": 3597
+    },
+    {
+      "t": 1790029678094,
+      "e": "reply_status",
+      "parsed": true,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "say",
+      "chars": 367
+    },
+    {
+      "t": 1790029678094,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "requested"
+    },
+    {
+      "t": 1790029678094,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "accepted",
+      "reason": "loading_policy"
+    },
+    {
+      "t": 1790029678094,
+      "e": "think",
+      "nf": 3,
+      "moved": "accepted:walk:fwd",
+      "ms": 3462
+    },
+    {
+      "t": 1790029678100,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "started",
+      "reason": "stance_commands"
+    },
+    {
+      "t": 1790029679316,
+      "e": "walk_start"
+    },
+    {
+      "t": 1790029687352,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "completed",
+      "reason": "done"
+    },
+    {
+      "t": 1790029687352,
+      "e": "walk_end",
+      "why": "done",
+      "ms": 8036
+    },
+    {
+      "t": 1790029738589,
+      "e": "reply_status",
+      "parsed": false,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "unknown",
+      "chars": 102
+    },
+    {
+      "t": 1790029738682,
+      "e": "think",
+      "nf": 3,
+      "moved": "still",
+      "ms": 2160
+    },
+    {
+      "t": 1790029786014,
+      "e": "reply_status",
+      "parsed": false,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "unknown",
+      "chars": 112
+    },
+    {
+      "t": 1790029786126,
+      "e": "think",
+      "nf": 3,
+      "moved": "still",
+      "ms": 2358
+    },
+    {
+      "t": 1790029827802,
+      "e": "reply_status",
+      "parsed": true,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "say",
+      "chars": 173
+    },
+    {
+      "t": 1790029827803,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "requested"
+    },
+    {
+      "t": 1790029827803,
+      "e": "gesture",
+      "n": "look left",
+      "r": "play"
+    },
+    {
+      "t": 1790029827804,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "started",
+      "reason": "commands_sent_unverified"
+    },
+    {
+      "t": 1790029827804,
+      "e": "think",
+      "nf": 3,
+      "moved": "started:gesture",
+      "ms": 4331
+    },
+    {
+      "t": 1790029838090,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "completed",
+      "reason": "command_window_ended_unverified"
+    },
+    {
+      "t": 1790029848212,
+      "e": "reply_status",
+      "parsed": false,
+      "complete": true,
+      "finish": "stop",
+      "transport": "complete",
+      "firstField": "unknown",
+      "chars": 61
+    },
+    {
+      "t": 1790029848298,
+      "e": "think",
+      "nf": 3,
+      "moved": "still",
+      "ms": 2188
+    }
+  ]
+}

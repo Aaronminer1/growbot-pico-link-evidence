@@ -1,0 +1,203 @@
+{
+  "version": 1,
+  "label": "floor-watch-only",
+  "active": false,
+  "startedUtc": "2026-09-21T21:50:05.870Z",
+  "durationMs": 90000,
+  "pollEveryMs": null,
+  "staleThresholdMs": 20000,
+  "forced": 0,
+  "noMotionCommands": true,
+  "noFirmwareChanges": true,
+  "rows": [
+    {
+      "seq": 1,
+      "at": "2026-09-21T21:50:05.870Z",
+      "elapsed_ms": 0,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T21:50:05.870Z armed, stale threshold 20000ms; polling off"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-21T21:50:05.872Z",
+      "elapsed_ms": 2,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T21:50:05.871Z watching new socket, readyState=1",
+      "socket": 1
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-21T21:50:15.553Z",
+      "elapsed_ms": 9683,
+      "event": "relay_status",
+      "socket": 1,
+      "awake": 1
+    },
+    {
+      "seq": 4,
+      "at": "2026-09-21T21:50:16.500Z",
+      "elapsed_ms": 10630,
+      "event": "operator_mark",
+      "name": "floor-owner-confirmed"
+    },
+    {
+      "seq": 5,
+      "at": "2026-09-21T21:50:20.633Z",
+      "elapsed_ms": 14763,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 79251
+    },
+    {
+      "seq": 6,
+      "at": "2026-09-21T21:50:25.650Z",
+      "elapsed_ms": 19780,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 84254
+    },
+    {
+      "seq": 7,
+      "at": "2026-09-21T21:50:30.770Z",
+      "elapsed_ms": 24900,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 89276
+    },
+    {
+      "seq": 8,
+      "at": "2026-09-21T21:50:35.688Z",
+      "elapsed_ms": 29818,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 94296
+    },
+    {
+      "seq": 9,
+      "at": "2026-09-21T21:50:35.890Z",
+      "elapsed_ms": 30020,
+      "event": "relay_status",
+      "socket": 1,
+      "awake": 0
+    },
+    {
+      "seq": 10,
+      "at": "2026-09-21T21:50:40.702Z",
+      "elapsed_ms": 34832,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 99299
+    },
+    {
+      "seq": 11,
+      "at": "2026-09-21T21:50:45.722Z",
+      "elapsed_ms": 39852,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 104304
+    },
+    {
+      "seq": 12,
+      "at": "2026-09-21T21:50:50.739Z",
+      "elapsed_ms": 44869,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 109307
+    },
+    {
+      "seq": 13,
+      "at": "2026-09-21T21:50:55.345Z",
+      "elapsed_ms": 49475,
+      "event": "operator_mark",
+      "name": "bounded-walk-start"
+    },
+    {
+      "seq": 14,
+      "at": "2026-09-21T21:50:55.681Z",
+      "elapsed_ms": 49811,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 114357
+    },
+    {
+      "seq": 15,
+      "at": "2026-09-21T21:51:00.703Z",
+      "elapsed_ms": 54833,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 119383
+    },
+    {
+      "seq": 16,
+      "at": "2026-09-21T21:51:02.761Z",
+      "elapsed_ms": 56891,
+      "event": "operator_mark",
+      "name": "bounded-walk-stopped"
+    },
+    {
+      "seq": 17,
+      "at": "2026-09-21T21:51:05.703Z",
+      "elapsed_ms": 59833,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 124391
+    },
+    {
+      "seq": 18,
+      "at": "2026-09-21T21:51:10.712Z",
+      "elapsed_ms": 64842,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 129394
+    },
+    {
+      "seq": 19,
+      "at": "2026-09-21T21:51:15.736Z",
+      "elapsed_ms": 69866,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 134413
+    },
+    {
+      "seq": 20,
+      "at": "2026-09-21T21:51:20.845Z",
+      "elapsed_ms": 74975,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 139416
+    },
+    {
+      "seq": 21,
+      "at": "2026-09-21T21:51:25.862Z",
+      "elapsed_ms": 79992,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 144433
+    },
+    {
+      "seq": 22,
+      "at": "2026-09-21T21:51:30.777Z",
+      "elapsed_ms": 84907,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 149436
+    },
+    {
+      "seq": 23,
+      "at": "2026-09-21T21:51:35.795Z",
+      "elapsed_ms": 89925,
+      "event": "heartbeat",
+      "socket": 1,
+      "uptime_ms": 154456
+    },
+    {
+      "seq": 24,
+      "at": "2026-09-21T21:51:35.870Z",
+      "elapsed_ms": 90000,
+      "event": "stopped",
+      "reason": "duration_expired",
+      "forced": 0
+    }
+  ],
+  "debuggingGaps": 0
+}

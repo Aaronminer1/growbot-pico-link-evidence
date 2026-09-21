@@ -1,0 +1,125 @@
+{
+  "nativeConversationOnly": true,
+  "prompts": [
+    "Keep exploring, GrowBot! Pick clear floor in your current camera view and use your real forward walk for eight seconds. Reply in valid JSON with your say and walk action fields: dir fwd, gait official, secs 8, gain 0.6. Tell me what you discover.",
+    "What is in a different direction? Select your saved turn left or turn right gesture, using the gesture field in your normal JSON response. Look at the new view, then continue walking into clear space. Let us find something new!",
+    "Nice effort, keep this expedition going. Do not keep pushing toward a closed door or a blocked route: select an actual saved turn, then inspect the open floor. Use valid JSON movement fields, not only a spoken promise. Keep exploring with real actions.",
+    "You can keep going, GrowBot. Choose another open stretch and execute an eight-second forward walk with your normal JSON walk action, dir fwd, gait official, secs 8, gain 0.6. Look for something interesting, and use a saved body turn when you need a new direction."
+  ],
+  "rows": [
+    {
+      "at": "2026-09-21T22:20:24.658Z",
+      "event": "baseline",
+      "failures": 3,
+      "connections": 1,
+      "radioResets": 4,
+      "uptime_ms": 1881596
+    },
+    {
+      "at": "2026-09-21T22:20:50.392Z",
+      "event": "native_prompt",
+      "index": 0
+    },
+    {
+      "at": "2026-09-21T22:21:20.876Z",
+      "event": "native_prompt",
+      "index": 1
+    },
+    {
+      "at": "2026-09-21T22:21:51.361Z",
+      "event": "native_prompt",
+      "index": 2
+    },
+    {
+      "at": "2026-09-21T22:22:16.791Z",
+      "event": "native_prompt",
+      "index": 3
+    },
+    {
+      "at": "2026-09-21T22:22:42.424Z",
+      "event": "native_prompt",
+      "index": 0
+    },
+    {
+      "at": "2026-09-21T22:23:07.827Z",
+      "event": "native_prompt",
+      "index": 1
+    },
+    {
+      "at": "2026-09-21T22:23:38.344Z",
+      "event": "native_prompt",
+      "index": 2
+    },
+    {
+      "at": "2026-09-21T22:24:04.040Z",
+      "event": "native_prompt",
+      "index": 3
+    },
+    {
+      "at": "2026-09-21T22:24:29.644Z",
+      "event": "native_prompt",
+      "index": 0
+    },
+    {
+      "at": "2026-09-21T22:24:55.043Z",
+      "event": "native_prompt",
+      "index": 1
+    },
+    {
+      "at": "2026-09-21T22:25:20.444Z",
+      "event": "native_prompt",
+      "index": 2
+    },
+    {
+      "at": "2026-09-21T22:25:45.870Z",
+      "event": "native_prompt",
+      "index": 3
+    },
+    {
+      "at": "2026-09-21T22:26:11.286Z",
+      "event": "native_prompt",
+      "index": 0
+    },
+    {
+      "at": "2026-09-21T22:26:36.713Z",
+      "event": "native_prompt",
+      "index": 1
+    },
+    {
+      "at": "2026-09-21T22:27:02.113Z",
+      "event": "native_prompt",
+      "index": 2
+    },
+    {
+      "at": "2026-09-21T22:27:27.703Z",
+      "event": "native_prompt",
+      "index": 3
+    },
+    {
+      "at": "2026-09-21T22:27:53.443Z",
+      "event": "native_prompt",
+      "index": 0
+    },
+    {
+      "at": "2026-09-21T22:28:08.687Z",
+      "event": "possible_failure",
+      "cause": "diagnostic_missed",
+      "diagnostic": {
+        "seq": 453,
+        "at": "2026-09-21T22:28:06.855Z",
+        "elapsed_ms": 539002,
+        "event": "dog_info",
+        "socket": 1,
+        "ack": false,
+        "reason": "timeout",
+        "latency_ms": 4002
+      },
+      "forced": 0
+    },
+    {
+      "at": "2026-09-21T22:28:08.687Z",
+      "event": "coaching_finished",
+      "pausedByCollector": false
+    }
+  ]
+}

@@ -1,0 +1,240 @@
+{
+  "note": "SHA-256 inventory of all package files except this manifest itself.",
+  "files": [
+    {
+      "file": "appendices/01-movement-attempts.md",
+      "bytes": 8485,
+      "sha256": "c3cf80b0c73acb199f9b490043f9e1e213c5afba608b4ea923d59421bf924b58"
+    },
+    {
+      "file": "appendices/02-growbot-replies.md",
+      "bytes": 15832,
+      "sha256": "b5e0c3d5f6b5691c0695873a0374381344975472a4997b9df29ef3c5b08a5395"
+    },
+    {
+      "file": "appendices/03-pico-diagnostics.md",
+      "bytes": 40957,
+      "sha256": "38e1ce13790b69cbf828c9c3b2b362fb0b0f32b8a2fa6d07a0dd2159fe7f6878"
+    },
+    {
+      "file": "appendices/04-connections-and-heartbeats.md",
+      "bytes": 127567,
+      "sha256": "d17c19f0a068a7a113bc1d3fae1a4b93d8f44dcffc7fe42357242ffea939aece"
+    },
+    {
+      "file": "appendices/05-native-event-ledger.md",
+      "bytes": 126722,
+      "sha256": "1b2b3c9e24d6b7d929a4711890fceb8e40b24ece31585480ea0502df9115dc14"
+    },
+    {
+      "file": "appendices/06-pico-gait-and-serial.md",
+      "bytes": 2384,
+      "sha256": "49f0438d2c864d1d7d7460f28a7013be0625851d171c91f577400ed515792c18"
+    },
+    {
+      "file": "appendices/07-test-prompts-and-owner-observations.md",
+      "bytes": 4753,
+      "sha256": "4ce1b1a1971a61750a6680b9bb1159f7c71dfb68a8762832435e053e2c93af73"
+    },
+    {
+      "file": "appendices/08-evidence-inventory.md",
+      "bytes": 5660,
+      "sha256": "5038d5105ef54d30981e914a02dc17cd032d1fd3f68bd89a28e5b42fa511c8a1"
+    },
+    {
+      "file": "appendices/all-protocol-events.json",
+      "bytes": 593597,
+      "sha256": "c9ceae7521c570e26ddb4ae2b2fdbadbc9df84c3a5fb1ac881eac06503e50d92"
+    },
+    {
+      "file": "appendices/movement-attempts.json",
+      "bytes": 31534,
+      "sha256": "1eaf79375c2fd4f38172aa845c2af240fd8bedc101773f116ab14f957fc0bcd2"
+    },
+    {
+      "file": "appendices/native-events.json",
+      "bytes": 279387,
+      "sha256": "b08ac442b11d5a3e656f8c2f2279e0af500a7ab8a1e855667c090fcca3b2c67c"
+    },
+    {
+      "file": "appendices/pico-diagnostics.json",
+      "bytes": 322440,
+      "sha256": "08ff1fe1c29650b1fafdea44f8410f6f9af099c886692f160a2ee3a1b2312033"
+    },
+    {
+      "file": "appendices/pico-gait-samples.json",
+      "bytes": 2810,
+      "sha256": "9a53c47177acaf1b6c8519f994599823fb67d3c5f8a439305be8693234d4f1b8"
+    },
+    {
+      "file": "appendices/report-statistics.json",
+      "bytes": 14392,
+      "sha256": "5337f85d75600cb8788aa4ae00a692640a2f2a8c9b5ce57512359f27cea0f3ef"
+    },
+    {
+      "file": "appendices/source-manifest.json",
+      "bytes": 5299,
+      "sha256": "f684b36708cf7d454b8fe1d645e849cdbbb856098f4eaabc3066b2b944844fca"
+    },
+    {
+      "file": "evidence/ACTION-FLOW-FINDINGS.md",
+      "bytes": 5743,
+      "sha256": "4de1da45918bc8024ea9c78c1c6fccd84a62f344e9c63d8fafe059fbbee7c311"
+    },
+    {
+      "file": "evidence/action-parser-2026-09-21T22-12-28-161Z.json",
+      "bytes": 10999,
+      "sha256": "daafce01f5225d8b694e7d3ab3d38d671a3d2782b952570b9e1373e1ab04d395"
+    },
+    {
+      "file": "evidence/action-parser-2026-09-21T22-13-36-688Z.json",
+      "bytes": 13842,
+      "sha256": "f484a7b717bd2e9328fbca68100e0e7313449f3fe53302684c10a3bef2499c22"
+    },
+    {
+      "file": "evidence/action-parser-2026-09-21T22-14-46-605Z.json",
+      "bytes": 13625,
+      "sha256": "ae5dd85fee4494398219700d3dcc48548fb39d1c7d0d737b2a65d4a984bf5cfd"
+    },
+    {
+      "file": "evidence/action-parser-2026-09-21T22-18-36-143Z.json",
+      "bytes": 12291,
+      "sha256": "cfc12eb547d2f7fdfee0b9e3e9a4fdeb23c52425f36638995f39f1e17116b52e"
+    },
+    {
+      "file": "evidence/action-parser-2026-09-21T22-21-55-977Z.json",
+      "bytes": 6303,
+      "sha256": "3d120e8943119d2eb3d67a2b44fcc74ce4ce1c253bd878148e40bea8f720c518"
+    },
+    {
+      "file": "evidence/action-parser-2026-09-21T22-23-50-787Z.json",
+      "bytes": 10520,
+      "sha256": "53ae48a0ff741cdb939e3d4e978a35bf77f8d69c06728ed70207b7d2c21b1975"
+    },
+    {
+      "file": "evidence/action-parser-2026-09-21T22-26-00-412Z.json",
+      "bytes": 11604,
+      "sha256": "89483cfc2d7be75752802b40e0cbc2cb75230427e259cf6caa2fbff70580335d"
+    },
+    {
+      "file": "evidence/action-parser-2026-09-21T22-30-53-174Z.json",
+      "bytes": 10389,
+      "sha256": "07c7680c1651db67223fd334f46af0059273b36bdf7e3a0b67ec770d4ea4679b"
+    },
+    {
+      "file": "evidence/BENCH-BASELINE.md",
+      "bytes": 3176,
+      "sha256": "7cb230d92a38fa5a12d891f1c05a680c404d2a3f5154e9dbd7bd115dff25f313"
+    },
+    {
+      "file": "evidence/bench-idle-2026-09-21T21-45-16-555Z.json",
+      "bytes": 19833,
+      "sha256": "c19027c508e3f95bb2546f82933a06216b58f3c1b061c1c98591f9718067e31a"
+    },
+    {
+      "file": "evidence/controlled-usb-restart-2026-09-21T22-38-31-770Z.json",
+      "bytes": 19390,
+      "sha256": "f5e925bb988f32b7628712cb183a5b2fe70348081f081b24a8ae3908b40fc94c"
+    },
+    {
+      "file": "evidence/exploration-coaching-2026-09-21T22-20-24-467Z.json",
+      "bytes": 3517,
+      "sha256": "19d3b9a8af69357ca9265cda3ecf2b232ec651e8409a25c96bd7eb6880c9ee47"
+    },
+    {
+      "file": "evidence/floor-active-exploration-2026-09-21T22-08-08-937Z.json",
+      "bytes": 136881,
+      "sha256": "8f014a7f7795beb74830ee633a1bc2c8aa34608ceda15bdf78b22c00903cb2cc"
+    },
+    {
+      "file": "evidence/FLOOR-EXPLORATION.md",
+      "bytes": 6245,
+      "sha256": "4e00638defc632b3e3931114ba97bd4dd47772216e719822de7a3ae3c9d1dc04"
+    },
+    {
+      "file": "evidence/floor-explore-poll-and-watch-2026-09-21T21-58-15-153Z.json",
+      "bytes": 68704,
+      "sha256": "613cf3d08cddcea0f45c4beac78f6bc395985bc4043005593f7c6d339dacb99a"
+    },
+    {
+      "file": "evidence/floor-explore-watch-only-2026-09-21T21-54-46-898Z.json",
+      "bytes": 8577,
+      "sha256": "a6f170d6aca34e49e17e82ea4586e65cbb9b382c436c81e71c6b25fddd2d2dd7"
+    },
+    {
+      "file": "evidence/floor-watch-only-2026-09-21T21-50-04-541Z.json",
+      "bytes": 4444,
+      "sha256": "0f389c0db243ac53fcf13be32e4a89826e5f145292cb2c3c686f546fd89404af"
+    },
+    {
+      "file": "evidence/native-exploration-2026-09-21T21-56-08-716Z.json",
+      "bytes": 47286,
+      "sha256": "0b13e33808e4f5433f036b6b424bfdcdbda7351425e4aa52b0233cf2ad596acc"
+    },
+    {
+      "file": "evidence/native-exploration-2026-09-21T22-08-20-437Z.json",
+      "bytes": 48006,
+      "sha256": "0a34be1d2aa1ae238214e3ffed3f99a5ee959de284c50b5d7d9e604770dcec63"
+    },
+    {
+      "file": "evidence/native-exploration-2026-09-21T22-10-10-577Z.json",
+      "bytes": 37451,
+      "sha256": "c7d49742cc894396cbab679f36e43a41c47032708a8b94ba534f08a7fbd09725"
+    },
+    {
+      "file": "evidence/native-exploration-2026-09-21T22-19-18-187Z.json",
+      "bytes": 68448,
+      "sha256": "e42541c3d62cac178b6d48f595f4bca23268e6ba57cfd758e2702d649ef98869"
+    },
+    {
+      "file": "evidence/passive-serial-2026-09-21T21-45-27-308134+00-00.json",
+      "bytes": 349,
+      "sha256": "22058511d244bdc803dd245188330d11e70c808cacf33219d9e66f8e6cc2b7a2"
+    },
+    {
+      "file": "evidence/passive-serial-2026-09-21T22-38-21-227551+00-00.json",
+      "bytes": 349,
+      "sha256": "fbc68f8a22ba83446615eb1123c40690e6e71d58e28504bd60f85705574b39da"
+    },
+    {
+      "file": "evidence/pico-gait-at-failure-2026-09-21T22-30-52-963Z.json",
+      "bytes": 5619,
+      "sha256": "0767d34657089e4b47cde99b99bc82ab32d5cc2debb5657c383fccc9700aa69d"
+    },
+    {
+      "file": "evidence/post-drop-recovery-01-2026-09-21T22-29-27-995Z.json",
+      "bytes": 26936,
+      "sha256": "d565587befece3d3f663eb9902604d106cce581dc9c67fbbea95746051831d1e"
+    },
+    {
+      "file": "evidence/README.md",
+      "bytes": 6247,
+      "sha256": "7fe0815cc9efcaf520f8a536e5e7cd3d149605d97db8ca5c45b3ba7ed47f5f91"
+    },
+    {
+      "file": "evidence/REPRODUCED-DROP.md",
+      "bytes": 8387,
+      "sha256": "6cdd574b662752eebfe5b2d5cd332f476aea0c83b6e36b610f8c222c8de822ca"
+    },
+    {
+      "file": "evidence/sustained-explore-repro-01-2026-09-21T22-19-06-585Z.json",
+      "bytes": 214019,
+      "sha256": "f600adba438cefe092e2eb15a36c5dd8fa3f9d3079f97cf495df6983eca3c095"
+    },
+    {
+      "file": "evidence/USB-BENCH-FOLLOWUP.md",
+      "bytes": 3712,
+      "sha256": "97887d1623655694c684aeb26a896161379a108fb81e1e5e6f3cd96421f2aac0"
+    },
+    {
+      "file": "README.md",
+      "bytes": 18097,
+      "sha256": "3200231f84859c2555cbdbeb5cf112bd3c22d29bf631832d72ce8831528cd2f3"
+    },
+    {
+      "file": "tools/verify.cjs",
+      "bytes": 3245,
+      "sha256": "1e281066a798da5f2ee9c699e53deb5b86cc5f9cedea427fab136837adcd2c1c"
+    }
+  ]
+}

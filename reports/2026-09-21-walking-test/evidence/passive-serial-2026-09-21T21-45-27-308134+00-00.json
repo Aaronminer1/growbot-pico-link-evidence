@@ -1,0 +1,12 @@
+{
+  "startUtc": "2026-09-21T21:45:27.308134+00:00",
+  "duration_s": 45.191,
+  "port": "COM5",
+  "serialWrites": 0,
+  "dtr": false,
+  "rts": false,
+  "completeLinesObserved": 0,
+  "last80SanitizedLines": [],
+  "partialLineAtEnd": false,
+  "classification": "Not classified automatically; inspect evidence. Silence alone is not a hang."
+}

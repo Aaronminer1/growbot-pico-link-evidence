@@ -1,0 +1,1179 @@
+{
+  "version": 1,
+  "label": "post-drop-recovery-01",
+  "active": false,
+  "startedUtc": "2026-09-21T22:29:29.381Z",
+  "durationMs": 180000,
+  "pollEveryMs": 5000,
+  "staleThresholdMs": 20000,
+  "forced": 5,
+  "noMotionCommands": true,
+  "noFirmwareChanges": true,
+  "rows": [
+    {
+      "seq": 1,
+      "at": "2026-09-21T22:29:29.381Z",
+      "elapsed_ms": 0,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T22:29:29.381Z armed, stale threshold 20000ms; polling 5000ms"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-21T22:29:29.381Z",
+      "elapsed_ms": 0,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T22:29:29.381Z watching new socket, readyState=1",
+      "socket": 1
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-21T22:29:29.382Z",
+      "elapsed_ms": 1,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 1
+    },
+    {
+      "seq": 4,
+      "at": "2026-09-21T22:29:29.382Z",
+      "elapsed_ms": 1,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 288
+    },
+    {
+      "seq": 5,
+      "at": "2026-09-21T22:29:33.382Z",
+      "elapsed_ms": 4001,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4000
+    },
+    {
+      "seq": 6,
+      "at": "2026-09-21T22:29:34.381Z",
+      "elapsed_ms": 5000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 5000
+    },
+    {
+      "seq": 7,
+      "at": "2026-09-21T22:29:34.381Z",
+      "elapsed_ms": 5000,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 289
+    },
+    {
+      "seq": 8,
+      "at": "2026-09-21T22:29:38.381Z",
+      "elapsed_ms": 9000,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4000
+    },
+    {
+      "seq": 9,
+      "at": "2026-09-21T22:29:39.381Z",
+      "elapsed_ms": 10000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 10000
+    },
+    {
+      "seq": 10,
+      "at": "2026-09-21T22:29:39.381Z",
+      "elapsed_ms": 10000,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 290
+    },
+    {
+      "seq": 11,
+      "at": "2026-09-21T22:29:40.028Z",
+      "elapsed_ms": 10647,
+      "event": "operator_mark",
+      "name": "post-drop-no-new-movement-prompts"
+    },
+    {
+      "seq": 12,
+      "at": "2026-09-21T22:29:43.381Z",
+      "elapsed_ms": 14000,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4000
+    },
+    {
+      "seq": 13,
+      "at": "2026-09-21T22:29:44.381Z",
+      "elapsed_ms": 15000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 15000
+    },
+    {
+      "seq": 14,
+      "at": "2026-09-21T22:29:44.381Z",
+      "elapsed_ms": 15000,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 291
+    },
+    {
+      "seq": 15,
+      "at": "2026-09-21T22:29:48.381Z",
+      "elapsed_ms": 19000,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4000
+    },
+    {
+      "seq": 16,
+      "at": "2026-09-21T22:29:49.381Z",
+      "elapsed_ms": 20000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 20000
+    },
+    {
+      "seq": 17,
+      "at": "2026-09-21T22:29:49.381Z",
+      "elapsed_ms": 20000,
+      "event": "poll_sent",
+      "socket": 1,
+      "rid": 292
+    },
+    {
+      "seq": 18,
+      "at": "2026-09-21T22:29:50.381Z",
+      "elapsed_ms": 21000,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T22:29:50.381Z STALE 21000ms on an OPEN socket, forcing close #1",
+      "socket": 1,
+      "age_ms": 21000,
+      "forced": 1
+    },
+    {
+      "seq": 19,
+      "at": "2026-09-21T22:29:53.381Z",
+      "elapsed_ms": 24000,
+      "event": "dog_info",
+      "socket": 1,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4000
+    },
+    {
+      "seq": 20,
+      "at": "2026-09-21T22:29:54.383Z",
+      "elapsed_ms": 25002,
+      "event": "phone_state",
+      "socketState": 2,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 25002
+    },
+    {
+      "seq": 21,
+      "at": "2026-09-21T22:29:54.383Z",
+      "elapsed_ms": 25002,
+      "event": "dog_info",
+      "ack": false,
+      "reason": "socket_not_open",
+      "socketState": 2
+    },
+    {
+      "seq": 22,
+      "at": "2026-09-21T22:29:59.381Z",
+      "elapsed_ms": 30000,
+      "event": "phone_state",
+      "socketState": 2,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 30000
+    },
+    {
+      "seq": 23,
+      "at": "2026-09-21T22:29:59.381Z",
+      "elapsed_ms": 30000,
+      "event": "dog_info",
+      "ack": false,
+      "reason": "socket_not_open",
+      "socketState": 2
+    },
+    {
+      "seq": 24,
+      "at": "2026-09-21T22:30:00.435Z",
+      "elapsed_ms": 31054,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T22:30:00.435Z close code=1006 clean=false",
+      "socket": 1,
+      "code": 1006,
+      "clean": false
+    },
+    {
+      "seq": 25,
+      "at": "2026-09-21T22:30:02.381Z",
+      "elapsed_ms": 33000,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T22:30:02.381Z watching new socket, readyState=0",
+      "socket": 2
+    },
+    {
+      "seq": 26,
+      "at": "2026-09-21T22:30:02.384Z",
+      "elapsed_ms": 33003,
+      "event": "socket_open",
+      "socket": 2
+    },
+    {
+      "seq": 27,
+      "at": "2026-09-21T22:30:02.411Z",
+      "elapsed_ms": 33030,
+      "event": "relay_status",
+      "socket": 2,
+      "awake": 1
+    },
+    {
+      "seq": 28,
+      "at": "2026-09-21T22:30:04.381Z",
+      "elapsed_ms": 35000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 1970
+    },
+    {
+      "seq": 29,
+      "at": "2026-09-21T22:30:04.381Z",
+      "elapsed_ms": 35000,
+      "event": "poll_sent",
+      "socket": 2,
+      "rid": 293
+    },
+    {
+      "seq": 30,
+      "at": "2026-09-21T22:30:08.382Z",
+      "elapsed_ms": 39001,
+      "event": "dog_info",
+      "socket": 2,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4001
+    },
+    {
+      "seq": 31,
+      "at": "2026-09-21T22:30:09.381Z",
+      "elapsed_ms": 40000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 6970
+    },
+    {
+      "seq": 32,
+      "at": "2026-09-21T22:30:09.381Z",
+      "elapsed_ms": 40000,
+      "event": "poll_sent",
+      "socket": 2,
+      "rid": 294
+    },
+    {
+      "seq": 33,
+      "at": "2026-09-21T22:30:13.381Z",
+      "elapsed_ms": 44000,
+      "event": "dog_info",
+      "socket": 2,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4000
+    },
+    {
+      "seq": 34,
+      "at": "2026-09-21T22:30:14.381Z",
+      "elapsed_ms": 45000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 11970
+    },
+    {
+      "seq": 35,
+      "at": "2026-09-21T22:30:14.381Z",
+      "elapsed_ms": 45000,
+      "event": "poll_sent",
+      "socket": 2,
+      "rid": 295
+    },
+    {
+      "seq": 36,
+      "at": "2026-09-21T22:30:18.384Z",
+      "elapsed_ms": 49003,
+      "event": "dog_info",
+      "socket": 2,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4002
+    },
+    {
+      "seq": 37,
+      "at": "2026-09-21T22:30:19.381Z",
+      "elapsed_ms": 50000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 16970
+    },
+    {
+      "seq": 38,
+      "at": "2026-09-21T22:30:19.381Z",
+      "elapsed_ms": 50000,
+      "event": "poll_sent",
+      "socket": 2,
+      "rid": 296
+    },
+    {
+      "seq": 39,
+      "at": "2026-09-21T22:30:23.381Z",
+      "elapsed_ms": 54000,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T22:30:23.381Z STALE 20970ms on an OPEN socket, forcing close #2",
+      "socket": 2,
+      "age_ms": 20970,
+      "forced": 2
+    },
+    {
+      "seq": 40,
+      "at": "2026-09-21T22:30:23.381Z",
+      "elapsed_ms": 54000,
+      "event": "dog_info",
+      "socket": 2,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4000
+    },
+    {
+      "seq": 41,
+      "at": "2026-09-21T22:30:24.381Z",
+      "elapsed_ms": 55000,
+      "event": "phone_state",
+      "socketState": 2,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 21970
+    },
+    {
+      "seq": 42,
+      "at": "2026-09-21T22:30:24.381Z",
+      "elapsed_ms": 55000,
+      "event": "dog_info",
+      "ack": false,
+      "reason": "socket_not_open",
+      "socketState": 2
+    },
+    {
+      "seq": 43,
+      "at": "2026-09-21T22:30:29.381Z",
+      "elapsed_ms": 60000,
+      "event": "phone_state",
+      "socketState": 2,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": true,
+      "inboundAgeMs": 26970
+    },
+    {
+      "seq": 44,
+      "at": "2026-09-21T22:30:29.381Z",
+      "elapsed_ms": 60000,
+      "event": "dog_info",
+      "ack": false,
+      "reason": "socket_not_open",
+      "socketState": 2
+    },
+    {
+      "seq": 45,
+      "at": "2026-09-21T22:30:33.415Z",
+      "elapsed_ms": 64034,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T22:30:33.415Z close code=1006 clean=false",
+      "socket": 2,
+      "code": 1006,
+      "clean": false
+    },
+    {
+      "seq": 46,
+      "at": "2026-09-21T22:30:34.381Z",
+      "elapsed_ms": 65000,
+      "event": "phone_state",
+      "socketState": 3,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": true,
+      "inboundAgeMs": 31970
+    },
+    {
+      "seq": 47,
+      "at": "2026-09-21T22:30:34.381Z",
+      "elapsed_ms": 65000,
+      "event": "dog_info",
+      "ack": false,
+      "reason": "socket_not_open",
+      "socketState": 3
+    },
+    {
+      "seq": 48,
+      "at": "2026-09-21T22:30:35.381Z",
+      "elapsed_ms": 66000,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T22:30:35.381Z watching new socket, readyState=1",
+      "socket": 3
+    },
+    {
+      "seq": 49,
+      "at": "2026-09-21T22:30:39.381Z",
+      "elapsed_ms": 70000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 4000
+    },
+    {
+      "seq": 50,
+      "at": "2026-09-21T22:30:39.381Z",
+      "elapsed_ms": 70000,
+      "event": "poll_sent",
+      "socket": 3,
+      "rid": 299
+    },
+    {
+      "seq": 51,
+      "at": "2026-09-21T22:30:43.381Z",
+      "elapsed_ms": 74000,
+      "event": "dog_info",
+      "socket": 3,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4000
+    },
+    {
+      "seq": 52,
+      "at": "2026-09-21T22:30:44.381Z",
+      "elapsed_ms": 75000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 9000
+    },
+    {
+      "seq": 53,
+      "at": "2026-09-21T22:30:44.381Z",
+      "elapsed_ms": 75000,
+      "event": "poll_sent",
+      "socket": 3,
+      "rid": 300
+    },
+    {
+      "seq": 54,
+      "at": "2026-09-21T22:30:48.381Z",
+      "elapsed_ms": 79000,
+      "event": "dog_info",
+      "socket": 3,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4000
+    },
+    {
+      "seq": 55,
+      "at": "2026-09-21T22:30:49.382Z",
+      "elapsed_ms": 80001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 14001
+    },
+    {
+      "seq": 56,
+      "at": "2026-09-21T22:30:49.382Z",
+      "elapsed_ms": 80001,
+      "event": "poll_sent",
+      "socket": 3,
+      "rid": 301
+    },
+    {
+      "seq": 57,
+      "at": "2026-09-21T22:30:53.382Z",
+      "elapsed_ms": 84001,
+      "event": "dog_info",
+      "socket": 3,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4000
+    },
+    {
+      "seq": 58,
+      "at": "2026-09-21T22:30:54.381Z",
+      "elapsed_ms": 85000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 19000
+    },
+    {
+      "seq": 59,
+      "at": "2026-09-21T22:30:54.381Z",
+      "elapsed_ms": 85000,
+      "event": "poll_sent",
+      "socket": 3,
+      "rid": 302
+    },
+    {
+      "seq": 60,
+      "at": "2026-09-21T22:30:55.383Z",
+      "elapsed_ms": 86002,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T22:30:55.383Z STALE 20002ms on an OPEN socket, forcing close #3",
+      "socket": 3,
+      "age_ms": 20002,
+      "forced": 3
+    },
+    {
+      "seq": 61,
+      "at": "2026-09-21T22:30:58.382Z",
+      "elapsed_ms": 89001,
+      "event": "dog_info",
+      "socket": 3,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4001
+    },
+    {
+      "seq": 62,
+      "at": "2026-09-21T22:30:59.383Z",
+      "elapsed_ms": 90002,
+      "event": "phone_state",
+      "socketState": 2,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 24002
+    },
+    {
+      "seq": 63,
+      "at": "2026-09-21T22:30:59.383Z",
+      "elapsed_ms": 90002,
+      "event": "dog_info",
+      "ack": false,
+      "reason": "socket_not_open",
+      "socketState": 2
+    },
+    {
+      "seq": 64,
+      "at": "2026-09-21T22:31:04.382Z",
+      "elapsed_ms": 95001,
+      "event": "phone_state",
+      "socketState": 2,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 29001
+    },
+    {
+      "seq": 65,
+      "at": "2026-09-21T22:31:04.382Z",
+      "elapsed_ms": 95001,
+      "event": "dog_info",
+      "ack": false,
+      "reason": "socket_not_open",
+      "socketState": 2
+    },
+    {
+      "seq": 66,
+      "at": "2026-09-21T22:31:05.460Z",
+      "elapsed_ms": 96079,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T22:31:05.459Z close code=1006 clean=false",
+      "socket": 3,
+      "code": 1006,
+      "clean": false
+    },
+    {
+      "seq": 67,
+      "at": "2026-09-21T22:31:07.392Z",
+      "elapsed_ms": 98011,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T22:31:07.391Z watching new socket, readyState=1",
+      "socket": 4
+    },
+    {
+      "seq": 68,
+      "at": "2026-09-21T22:31:09.382Z",
+      "elapsed_ms": 100001,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 1991
+    },
+    {
+      "seq": 69,
+      "at": "2026-09-21T22:31:09.382Z",
+      "elapsed_ms": 100001,
+      "event": "poll_sent",
+      "socket": 4,
+      "rid": 303
+    },
+    {
+      "seq": 70,
+      "at": "2026-09-21T22:31:13.384Z",
+      "elapsed_ms": 104003,
+      "event": "dog_info",
+      "socket": 4,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4002
+    },
+    {
+      "seq": 71,
+      "at": "2026-09-21T22:31:14.381Z",
+      "elapsed_ms": 105000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 6990
+    },
+    {
+      "seq": 72,
+      "at": "2026-09-21T22:31:14.381Z",
+      "elapsed_ms": 105000,
+      "event": "poll_sent",
+      "socket": 4,
+      "rid": 304
+    },
+    {
+      "seq": 73,
+      "at": "2026-09-21T22:31:18.381Z",
+      "elapsed_ms": 109000,
+      "event": "dog_info",
+      "socket": 4,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4000
+    },
+    {
+      "seq": 74,
+      "at": "2026-09-21T22:31:19.381Z",
+      "elapsed_ms": 110000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 11990
+    },
+    {
+      "seq": 75,
+      "at": "2026-09-21T22:31:19.381Z",
+      "elapsed_ms": 110000,
+      "event": "poll_sent",
+      "socket": 4,
+      "rid": 305
+    },
+    {
+      "seq": 76,
+      "at": "2026-09-21T22:31:23.381Z",
+      "elapsed_ms": 114000,
+      "event": "dog_info",
+      "socket": 4,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4000
+    },
+    {
+      "seq": 77,
+      "at": "2026-09-21T22:31:24.381Z",
+      "elapsed_ms": 115000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 16990
+    },
+    {
+      "seq": 78,
+      "at": "2026-09-21T22:31:24.381Z",
+      "elapsed_ms": 115000,
+      "event": "poll_sent",
+      "socket": 4,
+      "rid": 306
+    },
+    {
+      "seq": 79,
+      "at": "2026-09-21T22:31:28.381Z",
+      "elapsed_ms": 119000,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T22:31:28.381Z STALE 20990ms on an OPEN socket, forcing close #4",
+      "socket": 4,
+      "age_ms": 20990,
+      "forced": 4
+    },
+    {
+      "seq": 80,
+      "at": "2026-09-21T22:31:28.381Z",
+      "elapsed_ms": 119000,
+      "event": "dog_info",
+      "socket": 4,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4000
+    },
+    {
+      "seq": 81,
+      "at": "2026-09-21T22:31:29.381Z",
+      "elapsed_ms": 120000,
+      "event": "phone_state",
+      "socketState": 2,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 21990
+    },
+    {
+      "seq": 82,
+      "at": "2026-09-21T22:31:29.381Z",
+      "elapsed_ms": 120000,
+      "event": "dog_info",
+      "ack": false,
+      "reason": "socket_not_open",
+      "socketState": 2
+    },
+    {
+      "seq": 83,
+      "at": "2026-09-21T22:31:34.381Z",
+      "elapsed_ms": 125000,
+      "event": "phone_state",
+      "socketState": 2,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 26990
+    },
+    {
+      "seq": 84,
+      "at": "2026-09-21T22:31:34.381Z",
+      "elapsed_ms": 125000,
+      "event": "dog_info",
+      "ack": false,
+      "reason": "socket_not_open",
+      "socketState": 2
+    },
+    {
+      "seq": 85,
+      "at": "2026-09-21T22:31:38.437Z",
+      "elapsed_ms": 129056,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T22:31:38.436Z close code=1006 clean=false",
+      "socket": 4,
+      "code": 1006,
+      "clean": false
+    },
+    {
+      "seq": 86,
+      "at": "2026-09-21T22:31:39.381Z",
+      "elapsed_ms": 130000,
+      "event": "phone_state",
+      "socketState": 3,
+      "relayAwake": 0,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 31990
+    },
+    {
+      "seq": 87,
+      "at": "2026-09-21T22:31:39.381Z",
+      "elapsed_ms": 130000,
+      "event": "dog_info",
+      "ack": false,
+      "reason": "socket_not_open",
+      "socketState": 3
+    },
+    {
+      "seq": 88,
+      "at": "2026-09-21T22:31:40.381Z",
+      "elapsed_ms": 131000,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T22:31:40.381Z watching new socket, readyState=1",
+      "socket": 5
+    },
+    {
+      "seq": 89,
+      "at": "2026-09-21T22:31:44.381Z",
+      "elapsed_ms": 135000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 4000
+    },
+    {
+      "seq": 90,
+      "at": "2026-09-21T22:31:44.381Z",
+      "elapsed_ms": 135000,
+      "event": "poll_sent",
+      "socket": 5,
+      "rid": 307
+    },
+    {
+      "seq": 91,
+      "at": "2026-09-21T22:31:48.381Z",
+      "elapsed_ms": 139000,
+      "event": "dog_info",
+      "socket": 5,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4000
+    },
+    {
+      "seq": 92,
+      "at": "2026-09-21T22:31:49.381Z",
+      "elapsed_ms": 140000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 9000
+    },
+    {
+      "seq": 93,
+      "at": "2026-09-21T22:31:49.381Z",
+      "elapsed_ms": 140000,
+      "event": "poll_sent",
+      "socket": 5,
+      "rid": 308
+    },
+    {
+      "seq": 94,
+      "at": "2026-09-21T22:31:53.381Z",
+      "elapsed_ms": 144000,
+      "event": "dog_info",
+      "socket": 5,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4000
+    },
+    {
+      "seq": 95,
+      "at": "2026-09-21T22:31:54.381Z",
+      "elapsed_ms": 145000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 14000
+    },
+    {
+      "seq": 96,
+      "at": "2026-09-21T22:31:54.381Z",
+      "elapsed_ms": 145000,
+      "event": "poll_sent",
+      "socket": 5,
+      "rid": 309
+    },
+    {
+      "seq": 97,
+      "at": "2026-09-21T22:31:58.381Z",
+      "elapsed_ms": 149000,
+      "event": "dog_info",
+      "socket": 5,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4000
+    },
+    {
+      "seq": 98,
+      "at": "2026-09-21T22:31:59.381Z",
+      "elapsed_ms": 150000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 19000
+    },
+    {
+      "seq": 99,
+      "at": "2026-09-21T22:31:59.381Z",
+      "elapsed_ms": 150000,
+      "event": "poll_sent",
+      "socket": 5,
+      "rid": 310
+    },
+    {
+      "seq": 100,
+      "at": "2026-09-21T22:32:01.381Z",
+      "elapsed_ms": 152000,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T22:32:01.381Z STALE 21000ms on an OPEN socket, forcing close #5",
+      "socket": 5,
+      "age_ms": 21000,
+      "forced": 5
+    },
+    {
+      "seq": 101,
+      "at": "2026-09-21T22:32:03.382Z",
+      "elapsed_ms": 154001,
+      "event": "dog_info",
+      "socket": 5,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4001
+    },
+    {
+      "seq": 102,
+      "at": "2026-09-21T22:32:04.381Z",
+      "elapsed_ms": 155000,
+      "event": "phone_state",
+      "socketState": 2,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 24000
+    },
+    {
+      "seq": 103,
+      "at": "2026-09-21T22:32:04.381Z",
+      "elapsed_ms": 155000,
+      "event": "dog_info",
+      "ack": false,
+      "reason": "socket_not_open",
+      "socketState": 2
+    },
+    {
+      "seq": 104,
+      "at": "2026-09-21T22:32:09.381Z",
+      "elapsed_ms": 160000,
+      "event": "phone_state",
+      "socketState": 2,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 29000
+    },
+    {
+      "seq": 105,
+      "at": "2026-09-21T22:32:09.381Z",
+      "elapsed_ms": 160000,
+      "event": "dog_info",
+      "ack": false,
+      "reason": "socket_not_open",
+      "socketState": 2
+    },
+    {
+      "seq": 106,
+      "at": "2026-09-21T22:32:11.419Z",
+      "elapsed_ms": 162038,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T22:32:11.419Z close code=1006 clean=false",
+      "socket": 5,
+      "code": 1006,
+      "clean": false
+    },
+    {
+      "seq": 107,
+      "at": "2026-09-21T22:32:13.381Z",
+      "elapsed_ms": 164000,
+      "event": "console",
+      "line": "[gb-stale] 2026-09-21T22:32:13.381Z watching new socket, readyState=1",
+      "socket": 6
+    },
+    {
+      "seq": 108,
+      "at": "2026-09-21T22:32:14.383Z",
+      "elapsed_ms": 165002,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 1002
+    },
+    {
+      "seq": 109,
+      "at": "2026-09-21T22:32:14.383Z",
+      "elapsed_ms": 165002,
+      "event": "poll_sent",
+      "socket": 6,
+      "rid": 311
+    },
+    {
+      "seq": 110,
+      "at": "2026-09-21T22:32:17.731Z",
+      "elapsed_ms": 168350,
+      "event": "operator_mark",
+      "name": "owner-untouched-robot-stuck-midstride"
+    },
+    {
+      "seq": 111,
+      "at": "2026-09-21T22:32:18.384Z",
+      "elapsed_ms": 169003,
+      "event": "dog_info",
+      "socket": 6,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4001
+    },
+    {
+      "seq": 112,
+      "at": "2026-09-21T22:32:19.381Z",
+      "elapsed_ms": 170000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 6000
+    },
+    {
+      "seq": 113,
+      "at": "2026-09-21T22:32:19.381Z",
+      "elapsed_ms": 170000,
+      "event": "poll_sent",
+      "socket": 6,
+      "rid": 312
+    },
+    {
+      "seq": 114,
+      "at": "2026-09-21T22:32:23.388Z",
+      "elapsed_ms": 174007,
+      "event": "dog_info",
+      "socket": 6,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4007
+    },
+    {
+      "seq": 115,
+      "at": "2026-09-21T22:32:24.381Z",
+      "elapsed_ms": 175000,
+      "event": "phone_state",
+      "socketState": 1,
+      "relayAwake": 1,
+      "paused": false,
+      "hidden": false,
+      "motionActive": false,
+      "inboundAgeMs": 11000
+    },
+    {
+      "seq": 116,
+      "at": "2026-09-21T22:32:24.381Z",
+      "elapsed_ms": 175000,
+      "event": "poll_sent",
+      "socket": 6,
+      "rid": 313
+    },
+    {
+      "seq": 117,
+      "at": "2026-09-21T22:32:28.381Z",
+      "elapsed_ms": 179000,
+      "event": "dog_info",
+      "socket": 6,
+      "ack": false,
+      "reason": "timeout",
+      "latency_ms": 4000
+    },
+    {
+      "seq": 118,
+      "at": "2026-09-21T22:32:29.382Z",
+      "elapsed_ms": 180001,
+      "event": "stopped",
+      "reason": "duration_expired",
+      "forced": 5
+    }
+  ],
+  "debuggingGaps": 0
+}

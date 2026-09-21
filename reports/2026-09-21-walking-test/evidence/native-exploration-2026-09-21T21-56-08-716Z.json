@@ -1,0 +1,2211 @@
+{
+  "note": "Browser action reports are not physical-motion verification. Only new robot test replies are included; no user transcripts.",
+  "samples": [
+    {
+      "at": "2026-09-21T21:56:09.940Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:56:13.024Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:56:16.088Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:56:19.166Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": true,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:56:22.359Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": true,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:56:25.434Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:56:28.516Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": true,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:56:31.588Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": true,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:56:34.742Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": true,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:56:37.925Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": true,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:56:41.015Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": true,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:56:44.088Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": true,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:56:47.153Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:56:50.229Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:56:53.300Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:56:56.375Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:56:59.460Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:02.550Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:05.638Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:08.736Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:11.810Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:14.888Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:17.989Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:21.101Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:24.166Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:27.242Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:30.341Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:33.530Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:36.668Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:39.745Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:42.820Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:45.919Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:49.090Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:52.271Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:55.361Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:57:58.425Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:58:01.514Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:58:04.575Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": true,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T21:58:07.744Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": true,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T21:58:10.912Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T21:58:13.976Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T21:58:17.048Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:58:20.223Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:58:23.321Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:58:26.471Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:58:29.641Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:58:32.707Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": true,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:58:35.790Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": true,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:58:38.868Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:58:41.930Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:58:44.993Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:58:48.066Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:58:51.138Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:58:54.207Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:58:57.300Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:00.360Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:03.424Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": true,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:06.503Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": true,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:09.572Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:12.660Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:15.806Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:18.883Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:21.951Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:25.038Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:28.113Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:31.172Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:34.256Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:37.321Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:40.389Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:43.466Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:46.546Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:49.599Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:52.659Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:55.729Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T21:59:58.817Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:01.880Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:04.971Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:08.040Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:11.114Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:14.209Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:17.282Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:20.374Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:23.438Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:26.501Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:29.582Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:32.660Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:35.748Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:38.838Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:41.928Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:45.030Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:48.112Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:51.189Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:54.258Z",
+      "paused": false,
+      "inFlight": true,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:00:57.325Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:01:00.404Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:01:03.479Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:01:06.564Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:01:09.630Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:01:12.710Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:01:15.777Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": true
+    },
+    {
+      "at": "2026-09-21T22:01:18.913Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T22:01:22.080Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T22:01:25.260Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T22:01:28.348Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T22:01:31.410Z",
+      "paused": false,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": true,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T22:01:34.487Z",
+      "paused": true,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": false,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T22:01:37.575Z",
+      "paused": true,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": false,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T22:01:40.722Z",
+      "paused": true,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": false,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T22:01:43.893Z",
+      "paused": true,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": false,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T22:01:47.070Z",
+      "paused": true,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": false,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T22:01:50.242Z",
+      "paused": true,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": false,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T22:01:53.320Z",
+      "paused": true,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": false,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T22:01:56.495Z",
+      "paused": true,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": false,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T22:01:59.673Z",
+      "paused": true,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": false,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T22:02:02.840Z",
+      "paused": true,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": false,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T22:02:06.016Z",
+      "paused": true,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": false,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    },
+    {
+      "at": "2026-09-21T22:02:09.192Z",
+      "paused": true,
+      "inFlight": false,
+      "dreaming": false,
+      "hidden": false,
+      "camOn": false,
+      "motion": false,
+      "bodyReady": true,
+      "probeActive": false
+    }
+  ],
+  "events": [
+    {
+      "t": 1790027734676,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027734678,
+      "e": "voice_unavailable"
+    },
+    {
+      "t": 1790027734679,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "requested"
+    },
+    {
+      "t": 1790027734679,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "accepted",
+      "reason": "loading_policy"
+    },
+    {
+      "t": 1790027734679,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "The cardboard box by the cabinet. Walking closer, short steps.",
+      "moved": "accepted:walk:fwd",
+      "ms": 3402
+    },
+    {
+      "t": 1790027734690,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "started",
+      "reason": "stance_commands"
+    },
+    {
+      "t": 1790027735133,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027735910,
+      "e": "walk_start"
+    },
+    {
+      "t": 1790027738941,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "completed",
+      "reason": "done"
+    },
+    {
+      "t": 1790027738941,
+      "e": "walk_end",
+      "ms": 3031
+    },
+    {
+      "t": 1790027744615,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027744684,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Box straight ahead, past the bucket. Walking closer, short and slow.",
+      "moved": "still",
+      "ms": 10001
+    },
+    {
+      "t": 1790027745155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027750984,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027754348,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027754349,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "requested"
+    },
+    {
+      "t": 1790027754349,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "accepted",
+      "reason": "loading_policy"
+    },
+    {
+      "t": 1790027754349,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Box is close now. Short careful steps, path looks clear.",
+      "moved": "accepted:walk:fwd",
+      "ms": 3193
+    },
+    {
+      "t": 1790027754357,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "started",
+      "reason": "stance_commands"
+    },
+    {
+      "t": 1790027755155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027755561,
+      "e": "walk_start"
+    },
+    {
+      "t": 1790027757155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027758580,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "completed",
+      "reason": "done"
+    },
+    {
+      "t": 1790027758580,
+      "e": "walk_end",
+      "ms": 3019
+    },
+    {
+      "t": 1790027759903,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027764665,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027764666,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "requested"
+    },
+    {
+      "t": 1790027764666,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "accepted",
+      "reason": "loading_policy"
+    },
+    {
+      "t": 1790027764666,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Box is right there, almost touching. Legs felt slow that last step, ch",
+      "moved": "accepted:walk:fwd",
+      "ms": 3510
+    },
+    {
+      "t": 1790027764670,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "started",
+      "reason": "stance_commands"
+    },
+    {
+      "t": 1790027765155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027765874,
+      "e": "walk_start"
+    },
+    {
+      "t": 1790027767155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027769880,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "completed",
+      "reason": "done"
+    },
+    {
+      "t": 1790027769880,
+      "e": "walk_end",
+      "ms": 4006
+    },
+    {
+      "t": 1790027771812,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027778894,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027778895,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "requested"
+    },
+    {
+      "t": 1790027778895,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "started",
+      "reason": "commands_sent_unverified"
+    },
+    {
+      "t": 1790027778895,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Looking with my head now, box still ahead, legs waking up",
+      "moved": "started:gesture",
+      "ms": 2989
+    },
+    {
+      "t": 1790027779155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027783660,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027783916,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "completed",
+      "reason": "command_window_ended_unverified"
+    },
+    {
+      "t": 1790027788179,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027788179,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "requested"
+    },
+    {
+      "t": 1790027788180,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "started",
+      "reason": "commands_sent_unverified"
+    },
+    {
+      "t": 1790027788180,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "My head checked around. I see a cabinet, a yellow jug, a doorway. Box ",
+      "moved": "started:gesture",
+      "ms": 3024
+    },
+    {
+      "t": 1790027789155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027791186,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027791292,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Turning right now, legs feel quiet but I try the saved pose.",
+      "moved": "still",
+      "ms": 2315
+    },
+    {
+      "t": 1790027793155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027796931,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027798466,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "completed",
+      "reason": "command_window_ended_unverified"
+    },
+    {
+      "t": 1790027800665,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027800665,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "requested"
+    },
+    {
+      "t": 1790027800666,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "accepted",
+      "reason": "loading_policy"
+    },
+    {
+      "t": 1790027800666,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Turned right, I see the box by the cabinet. Walking closer.",
+      "moved": "accepted:walk:fwd",
+      "ms": 3510
+    },
+    {
+      "t": 1790027800674,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "started",
+      "reason": "stance_commands"
+    },
+    {
+      "t": 1790027801155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027801925,
+      "e": "walk_start"
+    },
+    {
+      "t": 1790027804576,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027804681,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Stopping. An exercise bike blocks my path. The left side looks open. T",
+      "moved": "still",
+      "ms": 4011
+    },
+    {
+      "t": 1790027804929,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "completed",
+      "reason": "done"
+    },
+    {
+      "t": 1790027804929,
+      "e": "walk_end",
+      "ms": 3004
+    },
+    {
+      "t": 1790027805156,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027807340,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027807415,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Looking ahead with my head first, then I turn right, «0cce5d56».",
+      "moved": "still",
+      "ms": 2729
+    },
+    {
+      "t": 1790027809155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027812587,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027817155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027817722,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027817723,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "My right turn didn't change the view, bike still ahead. I'm holding he",
+      "moved": "still",
+      "ms": 4566
+    },
+    {
+      "t": 1790027822586,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027822696,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Right turns aren't moving me, so I stop pushing that way. I'll look le",
+      "moved": "still",
+      "ms": 4333
+    },
+    {
+      "t": 1790027823155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027831016,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027834037,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027834038,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "I can see the box clearly from here, beside the dresser. Checking it w",
+      "moved": "still",
+      "ms": 2882
+    },
+    {
+      "t": 1790027835155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027839155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027841155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027847155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027847464,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027847465,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Box check done: it's behind the bike, flaps open, something white insi",
+      "moved": "still",
+      "ms": 4309
+    },
+    {
+      "t": 1790027851248,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027851318,
+      "e": "action_outcome",
+      "action": "walk:back",
+      "state": "requested"
+    },
+    {
+      "t": 1790027851318,
+      "e": "action_outcome",
+      "action": "walk:back",
+      "state": "blocked",
+      "reason": "not_admitted"
+    },
+    {
+      "t": 1790027851318,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Okay «0cce5d56», walking over there now, past the bike to the box.",
+      "moved": "still",
+      "ms": 3588
+    },
+    {
+      "t": 1790027853155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027856374,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027863207,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027863289,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "I see the box, just right of the bike. Walking toward it now.",
+      "moved": "still",
+      "ms": 6133
+    },
+    {
+      "t": 1790027865155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027865427,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027865428,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "You're right, no movement recorded. Using my saved turn right gesture ",
+      "moved": "still",
+      "ms": 2138
+    },
+    {
+      "t": 1790027867155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027868713,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027869155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027875145,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027878301,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027878302,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Turn worked, new view. The box is right by the dresser now, past the b",
+      "moved": "still",
+      "ms": 3146
+    },
+    {
+      "t": 1790027879155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027883731,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027883732,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "requested"
+    },
+    {
+      "t": 1790027883733,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "started",
+      "reason": "commands_sent_unverified"
+    },
+    {
+      "t": 1790027883733,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Centering my head ahead, «0cce5d56». Then I'll keep walking to the box.",
+      "moved": "started:gesture",
+      "ms": 3499
+    },
+    {
+      "t": 1790027885155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027887155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027888753,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "completed",
+      "reason": "command_window_ended_unverified"
+    },
+    {
+      "t": 1790027889155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027894634,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027894745,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Talking forward, «0cce5d56». The box slid out of view, it's off to my left ",
+      "moved": "still",
+      "ms": 2501
+    },
+    {
+      "t": 1790027895155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027904151,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027908613,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027908689,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "No box in this view, just the cabinet and doorway. Turning left to fin",
+      "moved": "still",
+      "ms": 3533
+    },
+    {
+      "t": 1790027909155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027912314,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027912314,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "requested"
+    },
+    {
+      "t": 1790027912315,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "accepted",
+      "reason": "loading_policy"
+    },
+    {
+      "t": 1790027912315,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Okay «0cce5d56», walking a short stretch toward the open floor by the doorw",
+      "moved": "accepted:walk:fwd",
+      "ms": 3624
+    },
+    {
+      "t": 1790027912324,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "started",
+      "reason": "stance_commands"
+    },
+    {
+      "t": 1790027913155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027913532,
+      "e": "walk_start"
+    },
+    {
+      "t": 1790027914457,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027914535,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Turning left, «0cce5d56». Done, now checking what swung into view.",
+      "moved": "still",
+      "ms": 2216
+    },
+    {
+      "t": 1790027915155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027918549,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "completed",
+      "reason": "done"
+    },
+    {
+      "t": 1790027918549,
+      "e": "walk_end",
+      "ms": 5017
+    },
+    {
+      "t": 1790027920168,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027923985,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027923986,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Turn done. Interesting detail: a yellow jug with a red cap sits by the",
+      "moved": "still",
+      "ms": 2830
+    },
+    {
+      "t": 1790027925155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027932576,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027941073,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027941073,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "The jug by the cabinet. Walking goes screen-backward, so I'll turn aro",
+      "moved": "still",
+      "ms": 3780
+    },
+    {
+      "t": 1790027941155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027951155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027955701,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027955803,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "The jug sits left of center, close. Walking backward toward it, since ",
+      "moved": "still",
+      "ms": 6424
+    },
+    {
+      "t": 1790027957155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027964415,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027983883,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027983891,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "I hear you, «0cce5d56». Singing your tune back, bigger.",
+      "moved": "still",
+      "ms": 2819
+    },
+    {
+      "t": 1790027985155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027987155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027988296,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027991267,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027991352,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Clear floor ahead, yes. Short forward walk now, then I'll stop and loo",
+      "moved": "still",
+      "ms": 7458
+    },
+    {
+      "t": 1790027993157,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790027994110,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790027994205,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Floor ahead is clear, walking forward a short stretch, then I'll stop ",
+      "moved": "still",
+      "ms": 2368
+    },
+    {
+      "t": 1790027995155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790028001155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790028016851,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790028016954,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "You're right, the view never changed. My legs aren't answering. Trying",
+      "moved": "still",
+      "ms": 2722
+    },
+    {
+      "t": 1790028017155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790028025148,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790028056891,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790028057013,
+      "e": "think",
+      "k": "tick",
+      "nf": 1,
+      "say": "Still no travel, legs limp. Two tries failed, I'm stopping. «0cce5d56», my ",
+      "moved": "still",
+      "ms": 3857
+    },
+    {
+      "t": 1790028057155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790028066997,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790028087937,
+      "e": "reply_status"
+    },
+    {
+      "t": 1790028087938,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "say": "Still no movement, the view never changed. My legs are stuck, «0cce5d56». C",
+      "moved": "still",
+      "ms": 2666
+    },
+    {
+      "t": 1790028089155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790028091155,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790028093155,
+      "e": "voice_outcome"
+    }
+  ]
+}

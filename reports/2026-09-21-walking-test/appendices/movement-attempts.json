@@ -1,0 +1,1219 @@
+[
+  {
+    "id": "A001",
+    "action": "walk:fwd",
+    "startedAt": 1790027734679,
+    "lifecycle": [
+      {
+        "eventId": "E0003",
+        "t": 1790027734679,
+        "utc": "2026-09-21T21:55:34.679Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0004",
+        "t": 1790027734679,
+        "utc": "2026-09-21T21:55:34.679Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0006",
+        "t": 1790027734690,
+        "utc": "2026-09-21T21:55:34.690Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0009",
+        "t": 1790027738941,
+        "utc": "2026-09-21T21:55:38.941Z",
+        "state": "completed",
+        "reason": "done"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T21:55:34.679Z",
+    "lastUtc": "2026-09-21T21:55:38.941Z",
+    "replyEvent": "E0005",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A002",
+    "action": "walk:fwd",
+    "startedAt": 1790027754349,
+    "lifecycle": [
+      {
+        "eventId": "E0016",
+        "t": 1790027754349,
+        "utc": "2026-09-21T21:55:54.349Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0017",
+        "t": 1790027754349,
+        "utc": "2026-09-21T21:55:54.349Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0019",
+        "t": 1790027754357,
+        "utc": "2026-09-21T21:55:54.357Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0023",
+        "t": 1790027758580,
+        "utc": "2026-09-21T21:55:58.580Z",
+        "state": "completed",
+        "reason": "done"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T21:55:54.349Z",
+    "lastUtc": "2026-09-21T21:55:58.580Z",
+    "replyEvent": "E0018",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A003",
+    "action": "walk:fwd",
+    "startedAt": 1790027764666,
+    "lifecycle": [
+      {
+        "eventId": "E0027",
+        "t": 1790027764666,
+        "utc": "2026-09-21T21:56:04.666Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0028",
+        "t": 1790027764666,
+        "utc": "2026-09-21T21:56:04.666Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0030",
+        "t": 1790027764670,
+        "utc": "2026-09-21T21:56:04.670Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0034",
+        "t": 1790027769880,
+        "utc": "2026-09-21T21:56:09.880Z",
+        "state": "completed",
+        "reason": "done"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T21:56:04.666Z",
+    "lastUtc": "2026-09-21T21:56:09.880Z",
+    "replyEvent": "E0029",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A004",
+    "action": "gesture",
+    "startedAt": 1790027778895,
+    "lifecycle": [
+      {
+        "eventId": "E0038",
+        "t": 1790027778895,
+        "utc": "2026-09-21T21:56:18.895Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0039",
+        "t": 1790027778895,
+        "utc": "2026-09-21T21:56:18.895Z",
+        "state": "started",
+        "reason": "commands_sent_unverified"
+      },
+      {
+        "eventId": "E0043",
+        "t": 1790027783916,
+        "utc": "2026-09-21T21:56:23.916Z",
+        "state": "completed",
+        "reason": "command_window_ended_unverified"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T21:56:18.895Z",
+    "lastUtc": "2026-09-21T21:56:23.916Z",
+    "replyEvent": "E0040",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A005",
+    "action": "gesture",
+    "startedAt": 1790027788179,
+    "lifecycle": [
+      {
+        "eventId": "E0045",
+        "t": 1790027788179,
+        "utc": "2026-09-21T21:56:28.179Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0046",
+        "t": 1790027788180,
+        "utc": "2026-09-21T21:56:28.180Z",
+        "state": "started",
+        "reason": "commands_sent_unverified"
+      },
+      {
+        "eventId": "E0053",
+        "t": 1790027798466,
+        "utc": "2026-09-21T21:56:38.466Z",
+        "state": "completed",
+        "reason": "command_window_ended_unverified"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T21:56:28.179Z",
+    "lastUtc": "2026-09-21T21:56:38.466Z",
+    "replyEvent": "E0047",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A006",
+    "action": "walk:fwd",
+    "startedAt": 1790027800665,
+    "lifecycle": [
+      {
+        "eventId": "E0055",
+        "t": 1790027800665,
+        "utc": "2026-09-21T21:56:40.665Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0056",
+        "t": 1790027800666,
+        "utc": "2026-09-21T21:56:40.666Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0058",
+        "t": 1790027800674,
+        "utc": "2026-09-21T21:56:40.674Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0063",
+        "t": 1790027804929,
+        "utc": "2026-09-21T21:56:44.929Z",
+        "state": "completed",
+        "reason": "done"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T21:56:40.665Z",
+    "lastUtc": "2026-09-21T21:56:44.929Z",
+    "replyEvent": "E0057",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A007",
+    "action": "walk:back",
+    "startedAt": 1790027851318,
+    "lifecycle": [
+      {
+        "eventId": "E0086",
+        "t": 1790027851318,
+        "utc": "2026-09-21T21:57:31.318Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0087",
+        "t": 1790027851318,
+        "utc": "2026-09-21T21:57:31.318Z",
+        "state": "blocked",
+        "reason": "not_admitted"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "blocked",
+    "utc": "2026-09-21T21:57:31.318Z",
+    "lastUtc": "2026-09-21T21:57:31.318Z",
+    "replyEvent": "E0088",
+    "softwareOutcome": "blocked",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A008",
+    "action": "gesture",
+    "startedAt": 1790027883732,
+    "lifecycle": [
+      {
+        "eventId": "E0104",
+        "t": 1790027883732,
+        "utc": "2026-09-21T21:58:03.732Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0105",
+        "t": 1790027883733,
+        "utc": "2026-09-21T21:58:03.733Z",
+        "state": "started",
+        "reason": "commands_sent_unverified"
+      },
+      {
+        "eventId": "E0109",
+        "t": 1790027888753,
+        "utc": "2026-09-21T21:58:08.753Z",
+        "state": "completed",
+        "reason": "command_window_ended_unverified"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T21:58:03.732Z",
+    "lastUtc": "2026-09-21T21:58:08.753Z",
+    "replyEvent": "E0106",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A009",
+    "action": "walk:fwd",
+    "startedAt": 1790027912314,
+    "lifecycle": [
+      {
+        "eventId": "E0119",
+        "t": 1790027912314,
+        "utc": "2026-09-21T21:58:32.314Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0120",
+        "t": 1790027912315,
+        "utc": "2026-09-21T21:58:32.315Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0122",
+        "t": 1790027912324,
+        "utc": "2026-09-21T21:58:32.324Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0128",
+        "t": 1790027918549,
+        "utc": "2026-09-21T21:58:38.549Z",
+        "state": "completed",
+        "reason": "done"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T21:58:32.314Z",
+    "lastUtc": "2026-09-21T21:58:38.549Z",
+    "replyEvent": "E0121",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A010",
+    "action": "walk:fwd",
+    "startedAt": 1790028503314,
+    "lifecycle": [
+      {
+        "eventId": "E0170",
+        "t": 1790028503314,
+        "utc": "2026-09-21T22:08:23.314Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0171",
+        "t": 1790028503314,
+        "utc": "2026-09-21T22:08:23.314Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0173",
+        "t": 1790028503316,
+        "utc": "2026-09-21T22:08:23.316Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0177",
+        "t": 1790028512582,
+        "utc": "2026-09-21T22:08:32.582Z",
+        "state": "completed",
+        "reason": "done"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:08:23.314Z",
+    "lastUtc": "2026-09-21T22:08:32.582Z",
+    "replyEvent": "E0172",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A011",
+    "action": "walk:fwd",
+    "startedAt": 1790028528039,
+    "lifecycle": [
+      {
+        "eventId": "E0184",
+        "t": 1790028528039,
+        "utc": "2026-09-21T22:08:48.039Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0185",
+        "t": 1790028528039,
+        "utc": "2026-09-21T22:08:48.039Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0187",
+        "t": 1790028528045,
+        "utc": "2026-09-21T22:08:48.045Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0192",
+        "t": 1790028537285,
+        "utc": "2026-09-21T22:08:57.285Z",
+        "state": "completed",
+        "reason": "done"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:08:48.039Z",
+    "lastUtc": "2026-09-21T22:08:57.285Z",
+    "replyEvent": "E0186",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A012",
+    "action": "walk:fwd",
+    "startedAt": 1790028556811,
+    "lifecycle": [
+      {
+        "eventId": "E0203",
+        "t": 1790028556811,
+        "utc": "2026-09-21T22:09:16.811Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0204",
+        "t": 1790028556812,
+        "utc": "2026-09-21T22:09:16.812Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0206",
+        "t": 1790028556820,
+        "utc": "2026-09-21T22:09:16.820Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0213",
+        "t": 1790028565963,
+        "utc": "2026-09-21T22:09:25.963Z",
+        "state": "cancelled",
+        "reason": "superseded"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "cancelled",
+    "utc": "2026-09-21T22:09:16.811Z",
+    "lastUtc": "2026-09-21T22:09:25.963Z",
+    "replyEvent": "E0205",
+    "softwareOutcome": "cancelled",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A013",
+    "action": "walk:fwd",
+    "startedAt": 1790028565962,
+    "lifecycle": [
+      {
+        "eventId": "E0212",
+        "t": 1790028565962,
+        "utc": "2026-09-21T22:09:25.962Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0214",
+        "t": 1790028565963,
+        "utc": "2026-09-21T22:09:25.963Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0216",
+        "t": 1790028565967,
+        "utc": "2026-09-21T22:09:25.967Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0221",
+        "t": 1790028575192,
+        "utc": "2026-09-21T22:09:35.192Z",
+        "state": "completed",
+        "reason": "done"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:09:25.962Z",
+    "lastUtc": "2026-09-21T22:09:35.192Z",
+    "replyEvent": "E0215",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A014",
+    "action": "gesture",
+    "startedAt": 1790028585164,
+    "lifecycle": [
+      {
+        "eventId": "E0229",
+        "t": 1790028585164,
+        "utc": "2026-09-21T22:09:45.164Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0231",
+        "t": 1790028585165,
+        "utc": "2026-09-21T22:09:45.165Z",
+        "state": "started",
+        "reason": "commands_sent_unverified"
+      },
+      {
+        "eventId": "E0233",
+        "t": 1790028590191,
+        "utc": "2026-09-21T22:09:50.191Z",
+        "state": "completed",
+        "reason": "command_window_ended_unverified"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:09:45.164Z",
+    "lastUtc": "2026-09-21T22:09:50.191Z",
+    "gestureName": "look up",
+    "replyEvent": "E0232",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A015",
+    "action": "gesture",
+    "startedAt": 1790028651558,
+    "lifecycle": [
+      {
+        "eventId": "E0258",
+        "t": 1790028651558,
+        "utc": "2026-09-21T22:10:51.558Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0259",
+        "t": 1790028651558,
+        "utc": "2026-09-21T22:10:51.558Z",
+        "state": "started",
+        "reason": "commands_sent_unverified"
+      },
+      {
+        "eventId": "E0262",
+        "t": 1790028656579,
+        "utc": "2026-09-21T22:10:56.579Z",
+        "state": "completed",
+        "reason": "command_window_ended_unverified"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:10:51.558Z",
+    "lastUtc": "2026-09-21T22:10:56.579Z",
+    "gestureName": "turn right",
+    "replyEvent": "E0261",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A016",
+    "action": "walk:fwd",
+    "startedAt": 1790028750958,
+    "lifecycle": [
+      {
+        "eventId": "E0286",
+        "t": 1790028750958,
+        "utc": "2026-09-21T22:12:30.958Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0287",
+        "t": 1790028750958,
+        "utc": "2026-09-21T22:12:30.958Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0289",
+        "t": 1790028750968,
+        "utc": "2026-09-21T22:12:30.968Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0294",
+        "t": 1790028760187,
+        "utc": "2026-09-21T22:12:40.187Z",
+        "state": "completed",
+        "reason": "done"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:12:30.958Z",
+    "lastUtc": "2026-09-21T22:12:40.187Z",
+    "replyEvent": "E0288",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A017",
+    "action": "walk:fwd",
+    "startedAt": 1790028819375,
+    "lifecycle": [
+      {
+        "eventId": "E0319",
+        "t": 1790028819375,
+        "utc": "2026-09-21T22:13:39.375Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0320",
+        "t": 1790028819375,
+        "utc": "2026-09-21T22:13:39.375Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0322",
+        "t": 1790028819384,
+        "utc": "2026-09-21T22:13:39.384Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0326",
+        "t": 1790028828594,
+        "utc": "2026-09-21T22:13:48.594Z",
+        "state": "completed",
+        "reason": "done"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:13:39.375Z",
+    "lastUtc": "2026-09-21T22:13:48.594Z",
+    "replyEvent": "E0321",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A018",
+    "action": "walk:fwd",
+    "startedAt": 1790028945994,
+    "lifecycle": [
+      {
+        "eventId": "E0329",
+        "t": 1790028945994,
+        "utc": "2026-09-21T22:15:45.994Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0330",
+        "t": 1790028945994,
+        "utc": "2026-09-21T22:15:45.994Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0332",
+        "t": 1790028946004,
+        "utc": "2026-09-21T22:15:46.004Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0334",
+        "t": 1790028955238,
+        "utc": "2026-09-21T22:15:55.238Z",
+        "state": "completed",
+        "reason": "done"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:15:45.994Z",
+    "lastUtc": "2026-09-21T22:15:55.238Z",
+    "replyEvent": "E0331",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A019",
+    "action": "walk:fwd",
+    "startedAt": 1790028973063,
+    "lifecycle": [
+      {
+        "eventId": "E0339",
+        "t": 1790028973063,
+        "utc": "2026-09-21T22:16:13.063Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0340",
+        "t": 1790028973063,
+        "utc": "2026-09-21T22:16:13.063Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0342",
+        "t": 1790028973068,
+        "utc": "2026-09-21T22:16:13.068Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0344",
+        "t": 1790028982308,
+        "utc": "2026-09-21T22:16:22.308Z",
+        "state": "completed",
+        "reason": "done"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:16:13.063Z",
+    "lastUtc": "2026-09-21T22:16:22.308Z",
+    "replyEvent": "E0341",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A020",
+    "action": "gesture",
+    "startedAt": 1790028995582,
+    "lifecycle": [
+      {
+        "eventId": "E0347",
+        "t": 1790028995582,
+        "utc": "2026-09-21T22:16:35.582Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0349",
+        "t": 1790028995582,
+        "utc": "2026-09-21T22:16:35.582Z",
+        "state": "started",
+        "reason": "commands_sent_unverified"
+      },
+      {
+        "eventId": "E0351",
+        "t": 1790029000603,
+        "utc": "2026-09-21T22:16:40.603Z",
+        "state": "completed",
+        "reason": "command_window_ended_unverified"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:16:35.582Z",
+    "lastUtc": "2026-09-21T22:16:40.603Z",
+    "gestureName": "turn left",
+    "replyEvent": "E0350",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A021",
+    "action": "walk:fwd",
+    "startedAt": 1790029067570,
+    "lifecycle": [
+      {
+        "eventId": "E0357",
+        "t": 1790029067570,
+        "utc": "2026-09-21T22:17:47.570Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0358",
+        "t": 1790029067570,
+        "utc": "2026-09-21T22:17:47.570Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0360",
+        "t": 1790029067573,
+        "utc": "2026-09-21T22:17:47.573Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0362",
+        "t": 1790029072809,
+        "utc": "2026-09-21T22:17:52.809Z",
+        "state": "completed",
+        "reason": "done"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:17:47.570Z",
+    "lastUtc": "2026-09-21T22:17:52.809Z",
+    "replyEvent": "E0359",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A022",
+    "action": "gesture",
+    "startedAt": 1790029165767,
+    "lifecycle": [
+      {
+        "eventId": "E0366",
+        "t": 1790029165767,
+        "utc": "2026-09-21T22:19:25.767Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0368",
+        "t": 1790029165768,
+        "utc": "2026-09-21T22:19:25.768Z",
+        "state": "started",
+        "reason": "commands_sent_unverified"
+      },
+      {
+        "eventId": "E0372",
+        "t": 1790029170797,
+        "utc": "2026-09-21T22:19:30.797Z",
+        "state": "completed",
+        "reason": "command_window_ended_unverified"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:19:25.767Z",
+    "lastUtc": "2026-09-21T22:19:30.797Z",
+    "gestureName": "turn left",
+    "replyEvent": "E0369",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A023",
+    "action": "gesture",
+    "startedAt": 1790029230205,
+    "lifecycle": [
+      {
+        "eventId": "E0382",
+        "t": 1790029230205,
+        "utc": "2026-09-21T22:20:30.205Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0383",
+        "t": 1790029230205,
+        "utc": "2026-09-21T22:20:30.205Z",
+        "state": "started",
+        "reason": "commands_sent_unverified"
+      },
+      {
+        "eventId": "E0388",
+        "t": 1790029235227,
+        "utc": "2026-09-21T22:20:35.227Z",
+        "state": "completed",
+        "reason": "command_window_ended_unverified"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:20:30.205Z",
+    "lastUtc": "2026-09-21T22:20:35.227Z",
+    "gestureName": "turn left",
+    "replyEvent": "E0384",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A024",
+    "action": "walk:fwd",
+    "startedAt": 1790029254751,
+    "lifecycle": [
+      {
+        "eventId": "E0394",
+        "t": 1790029254751,
+        "utc": "2026-09-21T22:20:54.751Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0395",
+        "t": 1790029254751,
+        "utc": "2026-09-21T22:20:54.751Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0397",
+        "t": 1790029254755,
+        "utc": "2026-09-21T22:20:54.755Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0403",
+        "t": 1790029264007,
+        "utc": "2026-09-21T22:21:04.007Z",
+        "state": "completed",
+        "reason": "done"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:20:54.751Z",
+    "lastUtc": "2026-09-21T22:21:04.007Z",
+    "replyEvent": "E0396",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A025",
+    "action": "gesture",
+    "startedAt": 1790029307068,
+    "lifecycle": [
+      {
+        "eventId": "E0419",
+        "t": 1790029307068,
+        "utc": "2026-09-21T22:21:47.068Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0421",
+        "t": 1790029307069,
+        "utc": "2026-09-21T22:21:47.069Z",
+        "state": "started",
+        "reason": "commands_sent_unverified"
+      },
+      {
+        "eventId": "E0424",
+        "t": 1790029312089,
+        "utc": "2026-09-21T22:21:52.089Z",
+        "state": "completed",
+        "reason": "command_window_ended_unverified"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:21:47.068Z",
+    "lastUtc": "2026-09-21T22:21:52.089Z",
+    "gestureName": "turn left",
+    "replyEvent": "E0422",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A026",
+    "action": "walk:fwd",
+    "startedAt": 1790029366205,
+    "lifecycle": [
+      {
+        "eventId": "E0439",
+        "t": 1790029366205,
+        "utc": "2026-09-21T22:22:46.205Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0440",
+        "t": 1790029366205,
+        "utc": "2026-09-21T22:22:46.205Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0442",
+        "t": 1790029366210,
+        "utc": "2026-09-21T22:22:46.210Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0446",
+        "t": 1790029375430,
+        "utc": "2026-09-21T22:22:55.430Z",
+        "state": "completed",
+        "reason": "done"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:22:46.205Z",
+    "lastUtc": "2026-09-21T22:22:55.430Z",
+    "replyEvent": "E0441",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A027",
+    "action": "gesture",
+    "startedAt": 1790029412590,
+    "lifecycle": [
+      {
+        "eventId": "E0453",
+        "t": 1790029412590,
+        "utc": "2026-09-21T22:23:32.590Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0454",
+        "t": 1790029412590,
+        "utc": "2026-09-21T22:23:32.590Z",
+        "state": "started",
+        "reason": "commands_sent_unverified"
+      },
+      {
+        "eventId": "E0459",
+        "t": 1790029417610,
+        "utc": "2026-09-21T22:23:37.610Z",
+        "state": "completed",
+        "reason": "command_window_ended_unverified"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:23:32.590Z",
+    "lastUtc": "2026-09-21T22:23:37.610Z",
+    "gestureName": "turn left",
+    "replyEvent": "E0455",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A028",
+    "action": "gesture",
+    "startedAt": 1790029426421,
+    "lifecycle": [
+      {
+        "eventId": "E0465",
+        "t": 1790029426421,
+        "utc": "2026-09-21T22:23:46.421Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0467",
+        "t": 1790029426422,
+        "utc": "2026-09-21T22:23:46.422Z",
+        "state": "started",
+        "reason": "commands_sent_unverified"
+      },
+      {
+        "eventId": "E0471",
+        "t": 1790029431442,
+        "utc": "2026-09-21T22:23:51.442Z",
+        "state": "completed",
+        "reason": "command_window_ended_unverified"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:23:46.421Z",
+    "lastUtc": "2026-09-21T22:23:51.442Z",
+    "gestureName": "turn left",
+    "replyEvent": "E0468",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A029",
+    "action": "walk:fwd",
+    "startedAt": 1790029474098,
+    "lifecycle": [
+      {
+        "eventId": "E0485",
+        "t": 1790029474098,
+        "utc": "2026-09-21T22:24:34.098Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0486",
+        "t": 1790029474098,
+        "utc": "2026-09-21T22:24:34.098Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0488",
+        "t": 1790029474102,
+        "utc": "2026-09-21T22:24:34.102Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0491",
+        "t": 1790029483331,
+        "utc": "2026-09-21T22:24:43.331Z",
+        "state": "completed",
+        "reason": "done"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:24:34.098Z",
+    "lastUtc": "2026-09-21T22:24:43.331Z",
+    "replyEvent": "E0487",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A030",
+    "action": "gesture",
+    "startedAt": 1790029626708,
+    "lifecycle": [
+      {
+        "eventId": "E0518",
+        "t": 1790029626708,
+        "utc": "2026-09-21T22:27:06.708Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0519",
+        "t": 1790029626708,
+        "utc": "2026-09-21T22:27:06.708Z",
+        "state": "started",
+        "reason": "commands_sent_unverified"
+      },
+      {
+        "eventId": "E0524",
+        "t": 1790029631729,
+        "utc": "2026-09-21T22:27:11.729Z",
+        "state": "completed",
+        "reason": "command_window_ended_unverified"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:27:06.708Z",
+    "lastUtc": "2026-09-21T22:27:11.729Z",
+    "gestureName": "turn left",
+    "replyEvent": "E0520",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  },
+  {
+    "id": "A031",
+    "action": "walk:fwd",
+    "startedAt": 1790029678094,
+    "lifecycle": [
+      {
+        "eventId": "E0543",
+        "t": 1790029678094,
+        "utc": "2026-09-21T22:27:58.094Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0544",
+        "t": 1790029678094,
+        "utc": "2026-09-21T22:27:58.094Z",
+        "state": "accepted",
+        "reason": "loading_policy"
+      },
+      {
+        "eventId": "E0546",
+        "t": 1790029678100,
+        "utc": "2026-09-21T22:27:58.100Z",
+        "state": "started",
+        "reason": "stance_commands"
+      },
+      {
+        "eventId": "E0551",
+        "t": 1790029687352,
+        "utc": "2026-09-21T22:28:07.352Z",
+        "state": "completed",
+        "reason": "done"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:27:58.094Z",
+    "lastUtc": "2026-09-21T22:28:07.352Z",
+    "replyEvent": "E0545",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Owner reported stuck mid-stride; physical completion contradicted"
+  },
+  {
+    "id": "A032",
+    "action": "gesture",
+    "startedAt": 1790029827803,
+    "lifecycle": [
+      {
+        "eventId": "E0560",
+        "t": 1790029827803,
+        "utc": "2026-09-21T22:30:27.803Z",
+        "state": "requested"
+      },
+      {
+        "eventId": "E0562",
+        "t": 1790029827804,
+        "utc": "2026-09-21T22:30:27.804Z",
+        "state": "started",
+        "reason": "commands_sent_unverified"
+      },
+      {
+        "eventId": "E0564",
+        "t": 1790029838090,
+        "utc": "2026-09-21T22:30:38.090Z",
+        "state": "completed",
+        "reason": "command_window_ended_unverified"
+      }
+    ],
+    "inferredAssociation": true,
+    "terminal": "completed",
+    "utc": "2026-09-21T22:30:27.803Z",
+    "lastUtc": "2026-09-21T22:30:38.090Z",
+    "gestureName": "look left",
+    "replyEvent": "E0563",
+    "softwareOutcome": "completed",
+    "physicalOutcome": "Not individually measured"
+  }
+]

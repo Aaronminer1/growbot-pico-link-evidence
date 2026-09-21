@@ -1,0 +1,252 @@
+{
+  "at": "2026-09-21T22:30:54.159Z",
+  "paused": false,
+  "inFlight": false,
+  "motion": false,
+  "bodyReady": true,
+  "wsState": 1,
+  "bodyRxAgeMs": 19060,
+  "samples": [
+    {
+      "at": "2026-09-21T22:27:27.979Z",
+      "uptime_ms": 2306596,
+      "active": false,
+      "mode": "idle",
+      "errorPresent": false,
+      "walking": false,
+      "cycles": 3,
+      "phases": 27,
+      "reversals": 0,
+      "lastStop": "support_pattern_timeout",
+      "poseGapMs": 203,
+      "phaseTimeoutMs": 1100,
+      "bodyMotion": false
+    },
+    {
+      "at": "2026-09-21T22:27:33.037Z",
+      "uptime_ms": 2311611,
+      "active": false,
+      "mode": "idle",
+      "errorPresent": false,
+      "walking": false,
+      "cycles": 3,
+      "phases": 27,
+      "reversals": 0,
+      "lastStop": "support_pattern_timeout",
+      "poseGapMs": 203,
+      "phaseTimeoutMs": 1100,
+      "bodyMotion": false
+    },
+    {
+      "at": "2026-09-21T22:27:37.984Z",
+      "uptime_ms": 2316594,
+      "active": false,
+      "mode": "idle",
+      "errorPresent": false,
+      "walking": false,
+      "cycles": 3,
+      "phases": 27,
+      "reversals": 0,
+      "lastStop": "support_pattern_timeout",
+      "poseGapMs": 203,
+      "phaseTimeoutMs": 1100,
+      "bodyMotion": false
+    },
+    {
+      "at": "2026-09-21T22:27:43.016Z",
+      "uptime_ms": 2321605,
+      "active": false,
+      "mode": "idle",
+      "errorPresent": false,
+      "walking": false,
+      "cycles": 3,
+      "phases": 27,
+      "reversals": 0,
+      "lastStop": "support_pattern_timeout",
+      "poseGapMs": 203,
+      "phaseTimeoutMs": 1100,
+      "bodyMotion": false
+    },
+    {
+      "at": "2026-09-21T22:27:47.984Z",
+      "uptime_ms": 2326593,
+      "active": false,
+      "mode": "idle",
+      "errorPresent": false,
+      "walking": false,
+      "cycles": 3,
+      "phases": 27,
+      "reversals": 0,
+      "lastStop": "support_pattern_timeout",
+      "poseGapMs": 203,
+      "phaseTimeoutMs": 1100,
+      "bodyMotion": false
+    },
+    {
+      "at": "2026-09-21T22:27:52.988Z",
+      "uptime_ms": 2331598,
+      "active": false,
+      "mode": "idle",
+      "errorPresent": false,
+      "walking": false,
+      "cycles": 3,
+      "phases": 27,
+      "reversals": 0,
+      "lastStop": "support_pattern_timeout",
+      "poseGapMs": 203,
+      "phaseTimeoutMs": 1100,
+      "bodyMotion": false
+    },
+    {
+      "at": "2026-09-21T22:27:57.988Z",
+      "uptime_ms": 2336599,
+      "active": false,
+      "mode": "idle",
+      "errorPresent": false,
+      "walking": false,
+      "cycles": 3,
+      "phases": 27,
+      "reversals": 0,
+      "lastStop": "support_pattern_timeout",
+      "poseGapMs": 203,
+      "phaseTimeoutMs": 1100,
+      "bodyMotion": false
+    }
+  ],
+  "actions": [
+    {
+      "t": 1790029426421,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "requested"
+    },
+    {
+      "t": 1790029426422,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "started",
+      "reason": "commands_sent_unverified"
+    },
+    {
+      "t": 1790029431442,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "completed",
+      "reason": "command_window_ended_unverified"
+    },
+    {
+      "t": 1790029474098,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "requested"
+    },
+    {
+      "t": 1790029474098,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "accepted",
+      "reason": "loading_policy"
+    },
+    {
+      "t": 1790029474102,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "started",
+      "reason": "stance_commands"
+    },
+    {
+      "t": 1790029475317,
+      "e": "walk_start"
+    },
+    {
+      "t": 1790029483331,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "completed",
+      "reason": "done"
+    },
+    {
+      "t": 1790029483331,
+      "e": "walk_end",
+      "why": "done",
+      "ms": 8013
+    },
+    {
+      "t": 1790029626708,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "requested"
+    },
+    {
+      "t": 1790029626708,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "started",
+      "reason": "commands_sent_unverified"
+    },
+    {
+      "t": 1790029631729,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "completed",
+      "reason": "command_window_ended_unverified"
+    },
+    {
+      "t": 1790029678094,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "requested"
+    },
+    {
+      "t": 1790029678094,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "accepted",
+      "reason": "loading_policy"
+    },
+    {
+      "t": 1790029678100,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "started",
+      "reason": "stance_commands"
+    },
+    {
+      "t": 1790029679316,
+      "e": "walk_start"
+    },
+    {
+      "t": 1790029687352,
+      "e": "action_outcome",
+      "action": "walk:fwd",
+      "state": "completed",
+      "reason": "done"
+    },
+    {
+      "t": 1790029687352,
+      "e": "walk_end",
+      "why": "done",
+      "ms": 8036
+    },
+    {
+      "t": 1790029827803,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "requested"
+    },
+    {
+      "t": 1790029827804,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "started",
+      "reason": "commands_sent_unverified"
+    },
+    {
+      "t": 1790029838090,
+      "e": "action_outcome",
+      "action": "gesture",
+      "state": "completed",
+      "reason": "command_window_ended_unverified"
+    }
+  ]
+}
