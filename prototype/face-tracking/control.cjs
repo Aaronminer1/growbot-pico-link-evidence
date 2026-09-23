@@ -5,14 +5,14 @@ const path = require('node:path');
 const {evaluate} = require('../../evidence/collection-method/growbot_browser_probe.cjs');
 
 const command = process.argv[2] || 'status';
-const modes = new Set(['observe', 'track', 'coexist']);
+const modes = new Set(['observe', 'track', 'coexist', 'attend']);
 const source = fs.readFileSync(path.join(__dirname, 'face-tracker.js'), 'utf8');
 const inject = `${source}\n//# sourceURL=growbot-stationary-face-tracker.js\n`;
 
 async function run() {
   if (command === 'install') return evaluate(`window.GrowBotFaceTrack?.uninstallTool?.();window.GrowBotFaceTrack?.stop?.();(0,eval)(${JSON.stringify(inject)}); GrowBotFaceTrack.installTool()`);
   if (command === 'uninstall') return evaluate('window.GrowBotFaceTrack?.uninstallTool?.() ?? {installed:false}');
-  if (command === 'preflight') return evaluate('(async()=>{if(!window.GrowBotFaceTrack)throw Error("Install prototype first");const r=await window.GrowBotFaceTrack.preflight();return {baseline:r.baseline,head:{support_enabled:r.head.support_enabled,speed_us_s:r.head.speed_us_s,physical_feedback:r.head.physical_feedback}}})()');
+  if (command === 'preflight') return evaluate('(async()=>{if(!window.GrowBotFaceTrack)throw Error("Install prototype first");const r=await window.GrowBotFaceTrack.preflight();return {baseline:r.baseline,head:{support_enabled:r.head.support_enabled,max_speed_us_s:r.head.max_speed_us_s,physical_feedback:r.head.physical_feedback}}})()');
   if (command === 'stop') return evaluate('window.GrowBotFaceTrack?.stop() ?? {running:false}');
   if (command === 'status') return evaluate('window.GrowBotFaceTrack?.status() ?? {installed:false}');
   if (command === 'look') {
@@ -28,6 +28,6 @@ async function run() {
     // Preserve the optional model tool when reinjecting an updated tracker.
     return evaluate(`(async()=>{const hadTool=!!window.GrowBotFaceTrack?.status?.().toolAvailable;window.GrowBotFaceTrack?.uninstallTool?.();window.GrowBotFaceTrack?.stop?.();(0,eval)(${JSON.stringify(inject)});if(hadTool)window.GrowBotFaceTrack.installTool();return await window.GrowBotFaceTrack.start({mode:${JSON.stringify(command)},panSign:${panSign},tiltSign:${tiltSign}})})()`);
   }
-  throw Error('Usage: node control.cjs install|uninstall|observe|preflight|track|coexist [panSign tiltSign]|look <left|right|up|down|ahead>|status|stop');
+  throw Error('Usage: node control.cjs install|uninstall|observe|preflight|track|coexist|attend [panSign tiltSign]|look <left|right|up|down|ahead>|status|stop');
 }
 run().then(result => console.log(JSON.stringify(result, null, 2))).catch(error => {console.error(error.message); process.exitCode = 1;});

@@ -9,7 +9,7 @@
 })(typeof window === "undefined" ? globalThis : window, function (root) {
   "use strict";
 
-  const VERSION = "stationary-0.1";
+  const VERSION = "stationary-0.2";
   const PACKAGE = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/+esm";
   const WASM = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm";
   const MODEL = "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite";
@@ -21,17 +21,31 @@
   let lastFace = null, count = 0, frames = 0, lastFrameAt = null, lastError = null, lastAck = null;
   let target = {pan: 0, tilt: 0};
   let baseline = {pan: 0, tilt: 0};
+  let headSampledAt = 0;
   let axisStep = {pan: 0.026, tilt: 0.13}, lastAxis = "tilt";
   let yieldUntil = 0, bodyBusy = false, lastBodyCheck = 0;
   let watchedSocket = null, originalSend = null, wrappedSend = null;
   let deadline = 0, originalMoveLegs = null, wrappedMoveLegs = null;
   let originalSendTxtFrom = null, wrappedSendTxtFrom = null;
   let motionSpeech = false;
+  let attentionUntil = 0, nextAttentionAt = 0, faceStreak = 0, needsResync = false;
+  let walkGateSeq = 0, walkGateBusy = false, walkGateError = null;
+  let originalRunGait = null, wrappedRunGait = null;
+  let originalStopMotion = null, wrappedStopMotion = null;
   const GUIDE_START = "[FACE_TRACK_TOOL_START]";
   const GUIDE_END = "[FACE_TRACK_TOOL_END]";
+  function headAim(pose) {
+    return {
+      pan: pose.pan < -0.12 ? "left" : pose.pan > 0.12 ? "right" : "ahead",
+      tilt: pose.tilt < -0.12 ? "down" : pose.tilt > 0.12 ? "up" : "level",
+    };
+  }
   function guideText() {
+    const aim = headSampledAt ? headAim(target) : null;
     return "\n\n" + GUIDE_START + "\n" +
-      "OPTIONAL FACE TRACKING TOOL (stationary, head only): If you want to briefly follow a person's face with your head, emit gesture:\"track face\" in this reply. It runs for at most 20 seconds, then shuts itself off. To stop sooner, emit gesture:\"stop tracking\". These two commands are tool signals, not leg poses. Your usual saved look gestures still work and take priority. Do not call face tracking while walking or claim it recognizes who the person is. Do not leave it running continuously.\n" +
+      (aim ? "COMMANDED HEAD AIM RELATIVE TO BODY: " + aim.pan + " / " + aim.tilt + ". This is a Pico target, not physical position feedback.\n" :
+        "COMMANDED HEAD AIM: unknown until a fresh Pico head reading. Do not assume the camera faces forward.\n") +
+      "OPTIONAL FACE TRACKING TOOL (stationary, head only): If you want to briefly follow a person's face with your head, emit gesture:\"track face\" in this reply. It runs for at most 20 seconds, then shuts itself off. To stop sooner, emit gesture:\"stop tracking\". These two commands are tool signals, not leg poses. Your usual saved look gestures still work and take priority. When natural attention is enabled, a face can draw a brief glance without a request; you may instead look at an object your own vision finds interesting. Do not claim to identify someone from face position alone. Before a new walk, the attention tool returns the commanded head aim forward; if it cannot confirm that command, do not claim to have walked.\n" +
       (motionSpeech ?
         "MOTION SPEECH ON FOR TROUBLESHOOTING: You may briefly speak the requested motion and its result, but do not claim physical movement from an ACK alone.\n" :
         "MOTION SPEECH OFF: Body motion requests, directions, saved look gestures, and face tracking are normally silent. If your reply is only a movement, omit say or leave it empty. Do not read the motion request aloud or announce 'face tracking on.' Continue ordinary conversation when the person actually asks to talk.\n") + GUIDE_END;
@@ -43,8 +57,12 @@
     return before + value.slice(end + GUIDE_END.length);
   }
   function refreshGuide() {
+    if (!wrappedMoveLegs) return;
     const guide = root.document && root.document.getElementById("moveGuide");
-    if (guide) guide.value = removeGuide(guide.value) + guideText();
+    if (guide) {
+      const next = removeGuide(guide.value) + guideText();
+      if (guide.value !== next) guide.value = next;
+    }
   }
   // The selfie camera is mirrored relative to this robot's physical pan axis.
   // Bench verification found -1/-1 tracks the person on both axes.
@@ -111,10 +129,21 @@
       try {
         const message = JSON.parse(data);
         if (!String(message.rid || "").startsWith("face-track-")) {
-          if (["act", "routine"].includes(message.t)) yieldUntil = Math.max(yieldUntil, Date.now() + 12000);
-          else if (["pose", "stop"].includes(message.t)) yieldUntil = Math.max(yieldUntil, Date.now() + 2500);
-          else if (message.t === "dog_cal" && (message.channel_action === "head_move" || message.body_action === "head"))
+          if (["act", "routine"].includes(message.t)) {
             yieldUntil = Math.max(yieldUntil, Date.now() + 12000);
+            needsResync = true;
+            attentionUntil = 0;
+            headSampledAt = 0;
+            refreshGuide();
+          }
+          else if (["pose", "stop"].includes(message.t)) yieldUntil = Math.max(yieldUntil, Date.now() + 2500);
+          else if (message.t === "dog_cal" && (message.channel_action === "head_move" || message.body_action === "head")) {
+            yieldUntil = Math.max(yieldUntil, Date.now() + 12000);
+            needsResync = true;
+            attentionUntil = 0;
+            headSampledAt = 0;
+            refreshGuide();
+          }
         }
       } catch { /* Native GrowBot owns the transport; do not interfere. */ }
       return originalSend.call(this, data);
@@ -184,6 +213,8 @@
       target[axis] = toSemantic(pulse, ch);
       baseline[axis] = target[axis];
     }
+    headSampledAt = Date.now();
+    refreshGuide();
     return {head: state, baseline: {...baseline}, bodyBusy: !!(
       map.named_walk?.running || map.named_turn?.running ||
       map.saved_body_command?.active || map.stock_pose?.active)};
@@ -207,6 +238,53 @@
       reply.saved_body_command?.active || reply.stock_pose?.active ||
       reply.stock_pose?.stock_walk?.running);
     return bodyBusy;
+  }
+  function travelDirection(spec) {
+    const dir = String(spec && spec.dir || "fwd").toLowerCase();
+    return /^(fwd|forward|ahead|go|straight|walk|closer|left|right)$/.test(dir) ||
+      ["spin_left", "spin_right"].includes(spec && spec.gait);
+  }
+  async function headForward(stillCurrent = () => true) {
+    const check = () => {
+      if (!stillCurrent() || root.paused || root._pauseHard || root.document.hidden)
+        throw Error("Head-forward preparation cancelled");
+      socket();
+    };
+    check();
+    // An independent saved look may still be finishing. Let it complete,
+    // rather than turning a natural look-then-walk choice into a refusal.
+    let preflight;
+    for (let tries = 0; tries < 20; tries++) {
+      check();
+      preflight = await headPreflight();
+      check();
+      if (!preflight.bodyBusy) break;
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    if (preflight.bodyBusy) throw Error("Body remained busy; walk withheld");
+    for (const axis of ["pan", "tilt"]) {
+      if (Math.abs(target[axis]) < 0.02) continue;
+      check();
+      await send({t: "dog_cal", body_version: 1, body_action: "head", axis, position: 0});
+      check();
+    }
+    // Commanded targets, not encoder feedback. Wait for the Pico's paced head
+    // controller to finish before forwarding the walk to GrowBot.
+    for (let tries = 0; tries < 60; tries++) {
+      check();
+      const state = (await send({t: "dog_cal", channel_action: "head_info"})).state;
+      check();
+      if (!state?.moving) {
+        target.pan = target.tilt = 0;
+        headSampledAt = Date.now();
+        refreshGuide();
+        attentionUntil = 0;
+        nextAttentionAt = Date.now() + 12000;
+        return {commandedForward: true, physicalFeedback: false};
+      }
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    throw Error("Head did not finish centering before the walk");
   }
   function savedLookFrames(name) {
     const op = {"look left": 3, "look right": 4, "look up": 5,
@@ -239,18 +317,24 @@
     const frames = savedLookFrames(name);
     // The existing Pico decoder recognizes only these exact saved frames.
     yieldUntil = Date.now() + 12000;
+    needsResync = true; headSampledAt = 0; refreshGuide();
     const reply = await send({t: "act", mode: "replace", steps: frames});
     lastAck = {source: "saved look", name, accepted: true, physicalFeedback: false, at: Date.now()};
     return {name, accepted: true, command: reply.saved_body_command || null};
   }
   function schedule(token) {
-    if (running && token === generation) timer = setTimeout(() => tick(token), PERIOD_MS);
+    if (running && token === generation) timer = setTimeout(() => tick(token),
+      mode === "attend" && Date.now() >= attentionUntil ? 500 : PERIOD_MS);
   }
   async function tick(token) {
     if (!running || token !== generation) return;
+    if (mode === "attend" && root.runGait !== wrappedRunGait) {
+      stop("GrowBot replaced the walk handler; attention needs reinstalling");
+      return;
+    }
     if (deadline && Date.now() >= deadline) { stop("Tracking window ended"); return; }
     if (mode === "track" && (!root.paused || root._pauseHard) ||
-        mode === "coexist" && (root.paused || root._pauseHard)) {
+        ["coexist", "attend"].includes(mode) && (root.paused || root._pauseHard || root.document.hidden)) {
       stop("GrowBot was resumed or hard-paused");
       return;
     }
@@ -265,16 +349,33 @@
         lastFrameAt = Date.now();
         count = result.detections.length;
         lastFace = smoothFace(chooseFace(result.detections, lastFace, v.videoWidth, v.videoHeight), lastFace);
-        if (mode === "coexist" && Date.now() >= yieldUntil) await refreshBodyBusy();
+        faceStreak = lastFace ? Math.min(3, faceStreak + 1) : 0;
+        if (["coexist", "attend"].includes(mode) && Date.now() >= yieldUntil) await refreshBodyBusy();
         // The read-only body check can outlive an operator stop or pause.
         // Never let that delayed reply authorize a new physical command.
         if (!running || token !== generation || (deadline && Date.now() >= deadline) ||
             (mode === "track" && (!root.paused || root._pauseHard)) ||
-            (mode === "coexist" && (root.paused || root._pauseHard))) {
+            (["coexist", "attend"].includes(mode) && (root.paused || root._pauseHard || root.document.hidden))) {
           if (token === generation) stop("Tracking window ended or GrowBot paused");
           return;
         }
-        if (["track", "coexist"].includes(mode) && lastFace && !pending &&
+        if (needsResync && Date.now() >= yieldUntil && !bodyBusy && !walkGateBusy) {
+          await headPreflight();
+          needsResync = false;
+          if (!running || token !== generation || root.paused && mode !== "track" || root._pauseHard ||
+              root.document.hidden || deadline && Date.now() >= deadline) return;
+        }
+        if (mode === "attend" && Date.now() >= yieldUntil && !bodyBusy && !walkGateBusy &&
+            root._motion?.kind !== "walk") {
+          if (faceStreak >= 3 && Date.now() >= nextAttentionAt && Date.now() >= attentionUntil) {
+            attentionUntil = Date.now() + 4500;
+            nextAttentionAt = Date.now() + 12000;
+          }
+        }
+        if (mode === "attend" && (bodyBusy || walkGateBusy || root._motion?.kind === "walk"))
+          attentionUntil = 0;
+        const faceAttention = mode === "attend" && Date.now() < attentionUntil;
+        if ((["track", "coexist"].includes(mode) || faceAttention) && lastFace && !pending &&
             Date.now() >= yieldUntil && !bodyBusy) {
           const next = nextTarget(target, lastFace, options, axisStep);
           const panWanted = Math.abs(next.pan - target.pan) >= 0.008;
@@ -287,6 +388,8 @@
               const ack = await send({t: "dog_cal", body_version: 1, body_action: "head", axis, position: Number(next[axis].toFixed(3))});
               if (token !== generation) return;
               target[axis] = next[axis];
+              headSampledAt = Date.now();
+              refreshGuide();
               lastAxis = axis;
               lastAck = {axis, position: target[axis], accepted: true, physicalFeedback: false, at: Date.now()};
             } finally { pending = false; }
@@ -302,6 +405,8 @@
   }
   function stop(reason = "Stopped by operator") {
     running = false; mode = "off"; generation++;
+    walkGateSeq++; walkGateBusy = false;
+    attentionUntil = 0; nextAttentionAt = 0; faceStreak = 0;
     if (timer) clearTimeout(timer);
     timer = null; pending = false;
     lastFace = null; count = 0;
@@ -316,7 +421,7 @@
     stop("Restarting");
     const setupToken = generation;
     const desired = config.mode || "observe";
-    if (!["observe", "track", "coexist"].includes(desired)) throw Error("mode must be observe, track, or coexist");
+    if (!["observe", "track", "coexist", "attend"].includes(desired)) throw Error("mode must be observe, track, coexist, or attend");
     const duration = config.durationMs === undefined ? 20000 : config.durationMs;
     if (desired !== "observe" && (!Number.isFinite(duration) || duration < 1000 || duration > 60000))
       throw Error("Tracking duration must be 1-60 seconds");
@@ -332,12 +437,12 @@
       if (!root.paused) root.setPaused(true, false); // Stop autonomous gait, retain live camera/socket.
       if (!root.paused || root._pauseHard || !video()) throw Error("Could not enter stationary tracking mode");
       preflight = await headPreflight();
-    } else if (desired === "coexist") {
+    } else if (["coexist", "attend"].includes(desired)) {
       if (root.paused || root._pauseHard) throw Error("GrowBot must be awake for coexist mode");
       preflight = await headPreflight();
     }
     if (setupToken !== generation) throw Error("Tracking startup was cancelled");
-    if (preflight && !preflight.bodyBusy && Math.abs(target.tilt) > 0.35) {
+    if (desired !== "attend" && preflight && !preflight.bodyBusy && Math.abs(target.tilt) > 0.35) {
       // Prepare a neutral vertical posture for the on-demand tracking window.
       // The Pico ramps this at its fixed 150 us/s limit; never snap to center.
       await send({t: "dog_cal", body_version: 1, body_action: "head", axis: "tilt", position: 0});
@@ -353,11 +458,13 @@
     await loadDetector();
     if (setupToken !== generation) throw Error("Tracking startup was cancelled");
     if (desired === "track" && (!root.paused || root._pauseHard) ||
-        desired === "coexist" && (root.paused || root._pauseHard))
+        ["coexist", "attend"].includes(desired) && (root.paused || root._pauseHard))
       throw Error("GrowBot changed pause state during tracking startup");
     mode = desired; running = true; lastVideoTime = -1; lastFace = null; count = 0; frames = 0; lastFrameAt = null; lastError = null;
     yieldUntil = 0; bodyBusy = false; lastBodyCheck = 0; lastAxis = "tilt";
-    if (desired !== "observe") deadline = Date.now() + duration;
+    attentionUntil = 0; nextAttentionAt = Date.now() + 1500; faceStreak = 0; needsResync = false;
+    deadline = (["track", "coexist"].includes(desired) ||
+      desired === "attend" && config.durationMs !== undefined) ? Date.now() + duration : 0;
     const token = ++generation;
     tick(token);
     return status();
@@ -365,22 +472,31 @@
   function status() {
     return {version: VERSION, mode, running, faces: count, frames, lastFrameAt,
       face: lastFace && {cx: +lastFace.cx.toFixed(3), cy: +lastFace.cy.toFixed(3), area: +lastFace.area.toFixed(3)},
-      target: {...target}, baseline: {...baseline}, axisStep: {...axisStep}, lastAck, lastError,
+      target: {...target}, baseline: {...baseline}, headAim: headSampledAt ? headAim(target) : null,
+      headSampledAt, axisStep: {...axisStep}, lastAck, lastError,
       yieldingToGrowBot: Date.now() < yieldUntil, bodyBusy,
+      attentionActive: mode === "attend" && Date.now() < attentionUntil,
+      nextAttentionMs: mode === "attend" ? Math.max(0, nextAttentionAt - Date.now()) : 0,
+      walkGateBusy, walkGateError,
       remainingMs: deadline ? Math.max(0, deadline - Date.now()) : 0,
-      toolAvailable: !!wrappedMoveLegs && !!wrappedSendTxtFrom, motionSpeech,
+      toolAvailable: !!wrappedMoveLegs && !!wrappedSendTxtFrom && !!wrappedRunGait, motionSpeech,
       cameraReady: !!video(), socketReady: !!(root._body && root._body.ready && root._body.ws && root._body.ws.readyState === 1)};
   }
   function installTool() {
     if (wrappedMoveLegs) return status();
-    if (root.MODE !== "legs" || typeof root.moveLegs !== "function" || typeof root.sendTxtFrom !== "function")
+    if (root.MODE !== "legs" || typeof root.moveLegs !== "function" ||
+        typeof root.sendTxtFrom !== "function" || typeof root.runGait !== "function" ||
+        typeof root.stopMotion !== "function")
       throw Error("GrowBot action or user-message path unavailable");
     const guide = root.document.getElementById("moveGuide");
     if (!guide) throw Error("GrowBot's editable movement guide is unavailable");
     originalMoveLegs = root.moveLegs;
     wrappedMoveLegs = function (request) {
       const name = String(request && request.gesture || "").toLowerCase().replace(/\s+/g, " ").trim();
-      if (name !== "track face" && name !== "stop tracking") return originalMoveLegs.apply(this, arguments);
+      if (name !== "track face" && name !== "stop tracking") {
+        walkGateSeq++; walkGateBusy = false; attentionUntil = 0;
+        return originalMoveLegs.apply(this, arguments);
+      }
       let attempt = null;
       try { if (typeof root._moveRequest === "function") attempt = root._moveRequest(name); } catch { /* Diagnostic only. */ }
       if (name === "stop tracking") {
@@ -396,11 +512,45 @@
         try { root._moveReport(attempt, "accepted", "face_tracking_already_active"); } catch {}
         return;
       }
+      if (running && mode === "attend") {
+        attentionUntil = Date.now() + 4500;
+        nextAttentionAt = Date.now() + 12000;
+        try { root._moveReport(attempt, "accepted", "face_attention_requested_briefly"); } catch {}
+        return;
+      }
       try { root._moveReport(attempt, "accepted", "face_tracking_requested_20s"); } catch {}
       start({mode: "coexist", durationMs: 20000}).catch(error => {
         lastError = error.message || String(error);
         try { root._moveReport(attempt, "blocked", "face_track_failed:" + lastError); } catch {}
       });
+    };
+    originalRunGait = root.runGait;
+    wrappedRunGait = function (spec) {
+      if (mode !== "attend" || !travelDirection(spec) || root._motion?.kind === "walk") {
+        walkGateSeq++; walkGateBusy = false;
+        return originalRunGait.apply(this, arguments);
+      }
+      const self = this, args = arguments, gate = ++walkGateSeq;
+      walkGateBusy = true; walkGateError = null; attentionUntil = 0;
+      Promise.resolve().then(() => headForward(() => gate === walkGateSeq && mode === "attend"))
+        .then(() => {
+          if (gate !== walkGateSeq || mode !== "attend" || root.paused || root._pauseHard || root.document.hidden)
+            return;
+          walkGateBusy = false;
+          originalRunGait.apply(self, args);
+        })
+        .catch(error => {
+          if (gate !== walkGateSeq) return; // Superseded by Stop or another motion.
+          walkGateError = error.message || String(error);
+          lastError = "Walk withheld: " + walkGateError;
+          try { root.setErr(lastError); } catch {}
+        })
+        .finally(() => { if (gate === walkGateSeq) walkGateBusy = false; });
+    };
+    originalStopMotion = root.stopMotion;
+    wrappedStopMotion = function () {
+      walkGateSeq++; walkGateBusy = false; attentionUntil = 0;
+      return originalStopMotion.apply(this, arguments);
     };
     originalSendTxtFrom = root.sendTxtFrom;
     wrappedSendTxtFrom = function (message) {
@@ -413,7 +563,10 @@
       }
       const intent = userFaceIntent(message);
       if (intent === "stop") stop("Stopped by direct user command");
-      else if (intent === "start" && !(running && mode === "coexist")) {
+      else if (intent === "start" && running && mode === "attend") {
+        attentionUntil = Date.now() + 4500;
+        nextAttentionAt = Date.now() + 12000;
+      } else if (intent === "start" && !(running && mode === "coexist")) {
         if (!root.paused && !root._pauseHard && video())
           start({mode: "coexist", durationMs: 20000}).catch(error => {
             lastError = error.message || String(error);
@@ -428,6 +581,8 @@
       return originalSendTxtFrom.apply(this, arguments);
     };
     root.moveLegs = wrappedMoveLegs;
+    root.runGait = wrappedRunGait;
+    root.stopMotion = wrappedStopMotion;
     root.sendTxtFrom = wrappedSendTxtFrom;
     refreshGuide();
     return status();
@@ -435,13 +590,17 @@
   function uninstallTool() {
     stop("Tool uninstalled");
     if (root.moveLegs === wrappedMoveLegs) root.moveLegs = originalMoveLegs;
+    if (root.runGait === wrappedRunGait) root.runGait = originalRunGait;
+    if (root.stopMotion === wrappedStopMotion) root.stopMotion = originalStopMotion;
     if (root.sendTxtFrom === wrappedSendTxtFrom) root.sendTxtFrom = originalSendTxtFrom;
     originalMoveLegs = wrappedMoveLegs = null;
+    originalRunGait = wrappedRunGait = null;
+    originalStopMotion = wrappedStopMotion = null;
     originalSendTxtFrom = wrappedSendTxtFrom = null;
     const guide = root.document && root.document.getElementById("moveGuide");
     if (guide) guide.value = removeGuide(guide.value);
     return status();
   }
-  return {start, stop, status, preflight: headPreflight, look, installTool, uninstallTool,
-    _test: {chooseFace, smoothFace, nextTarget, toSemantic, savedLookFrames, userFaceIntent, speechToggleIntent}};
+  return {start, stop, status, preflight: headPreflight, headForward, look, installTool, uninstallTool,
+    _test: {chooseFace, smoothFace, nextTarget, toSemantic, savedLookFrames, userFaceIntent, speechToggleIntent, travelDirection, headAim}};
 });
