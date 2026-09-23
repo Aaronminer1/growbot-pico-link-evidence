@@ -6,6 +6,7 @@ not official GrowBot firmware or an installation package.
 
 ## Start here
 
+- **[GrowBot body integration: installed version, walk/turn/head command paths and saved gestures](INTEGRATION-NOTE.md)**
 - **[Latest walking test: reproduced drop, movement ledger and recovery results](reports/2026-09-21-walking-test/README.md)**
 - **[Full report and open questions](evidence/READ-ME-FIRST.md)**
 - [Live controller and heartbeat observations](evidence/live-telemetry.json)
