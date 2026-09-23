@@ -9,7 +9,7 @@
 })(typeof window === "undefined" ? globalThis : window, function (root) {
   "use strict";
 
-  const VERSION = "stationary-0.2";
+  const VERSION = "stationary-0.3";
   const PACKAGE = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/+esm";
   const WASM = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm";
   const MODEL = "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite";
@@ -20,9 +20,12 @@
   let generation = 0, seq = 0, pending = false, lastVideoTime = -1;
   let lastFace = null, count = 0, frames = 0, lastFrameAt = null, lastError = null, lastAck = null;
   let target = {pan: 0, tilt: 0};
+  let commanded = {pan: 0, tilt: 0};
   let baseline = {pan: 0, tilt: 0};
+  let headChannels = {pan: null, tilt: null};
+  let panInverted = null;
   let headSampledAt = 0;
-  let axisStep = {pan: 0.026, tilt: 0.13}, lastAxis = "tilt";
+  let axisStep = {pan: 0.08, tilt: 0.2}, panBurst = 0;
   let yieldUntil = 0, bodyBusy = false, lastBodyCheck = 0;
   let watchedSocket = null, originalSend = null, wrappedSend = null;
   let deadline = 0, originalMoveLegs = null, wrappedMoveLegs = null;
@@ -34,14 +37,15 @@
   let originalStopMotion = null, wrappedStopMotion = null;
   const GUIDE_START = "[FACE_TRACK_TOOL_START]";
   const GUIDE_END = "[FACE_TRACK_TOOL_END]";
-  function headAim(pose) {
+  function headAim(pose, inverted = false) {
+    const pan = inverted ? -pose.pan : pose.pan;
     return {
-      pan: pose.pan < -0.12 ? "left" : pose.pan > 0.12 ? "right" : "ahead",
+      pan: pan < -0.12 ? "left" : pan > 0.12 ? "right" : "ahead",
       tilt: pose.tilt < -0.12 ? "down" : pose.tilt > 0.12 ? "up" : "level",
     };
   }
   function guideText() {
-    const aim = headSampledAt ? headAim(target) : null;
+    const aim = headSampledAt && panInverted !== null ? headAim(commanded, panInverted) : null;
     return "\n\n" + GUIDE_START + "\n" +
       (aim ? "COMMANDED HEAD AIM RELATIVE TO BODY: " + aim.pan + " / " + aim.tilt + ". This is a Pico target, not physical position feedback.\n" :
         "COMMANDED HEAD AIM: unknown until a fresh Pico head reading. Do not assume the camera faces forward.\n") +
@@ -95,14 +99,14 @@
       cy: previous.cy * 0.45 + current.cy * 0.55,
       area: previous.area * 0.45 + current.area * 0.55};
   }
-  function nextTarget(current, face, signs, steps = {pan: 0.026, tilt: 0.13}) {
+  function nextTarget(current, face, signs, steps = {pan: 0.08, tilt: 0.2}) {
     const errorX = 2 * face.cx - 1;
     // This mounted selfie camera sees a comfortably placed face around 42%
     // image height. Centering on 50% spent the entire upward servo range.
     const errorY = 2 * (face.cy - (signs.verticalAim ?? 0.42));
     return {
-      pan: clamp(current.pan + (Math.abs(errorX) > DEADBAND ? clamp(errorX * 0.10 * signs.panSign, -steps.pan, steps.pan) : 0), -LIMIT, LIMIT),
-      tilt: clamp(current.tilt + (Math.abs(errorY) > DEADBAND ? clamp(errorY * 0.30 * signs.tiltSign, -steps.tilt, steps.tilt) : 0), -LIMIT, LIMIT),
+      pan: clamp(current.pan + (Math.abs(errorX) > DEADBAND ? clamp(errorX * 0.22 * signs.panSign, -steps.pan, steps.pan) : 0), -LIMIT, LIMIT),
+      tilt: clamp(current.tilt + (Math.abs(errorY) > DEADBAND ? clamp(errorY * 0.35 * signs.tiltSign, -steps.tilt, steps.tilt) : 0), -LIMIT, LIMIT),
     };
   }
   function video() {
@@ -195,7 +199,10 @@
     const map = await send({t: "dog_cal", channel_action: "info"});
     const state = info.state;
     const channels = map.channel_state && map.channel_state.channels || [];
-    if (!state || !state.support_enabled || !Number.isFinite(state.max_speed_us_s) || state.max_speed_us_s > 150)
+    panInverted = typeof map.saved_body_command?.pan_inverted === "boolean" ?
+      map.saved_body_command.pan_inverted : null;
+    if (!state || !state.support_enabled || !Number.isFinite(state.max_speed_us_s) ||
+        state.max_speed_us_s > 200 || state.max_speed_us_s < 100)
       throw Error("Head support or speed limit is not configured");
     for (const axis of ["pan", "tilt"]) {
       const cfg = state.config && state.config[axis];
@@ -205,19 +212,79 @@
         throw Error("Head " + axis + " calibration labels do not match");
       if (Math.min(ch.a_us, ch.b_us) >= ch.center_us || Math.max(ch.a_us, ch.b_us) <= ch.center_us)
         throw Error("Head " + axis + " center is outside saved endpoints");
-      // Match normalized per-frame travel to the same physical pulse rate on
-      // narrow tilt and wide pan calibrations. Pico still enforces 150 us/s.
+      headChannels[axis] = ch;
+      // Aim a short distance ahead of the Pico's CURRENT commanded PWM, not
+      // ahead of our previous target. This prevents an old target backlog.
+      // The Pico still enforces its reported mechanical speed cap on both axes.
       const span = Math.max(Math.abs(ch.a_us - ch.center_us), Math.abs(ch.b_us - ch.center_us));
-      axisStep[axis] = clamp(120 * PERIOD_MS / 1000 / span, 0.015, 0.16);
+      axisStep[axis] = axis === "pan" ?
+        clamp(state.max_speed_us_s * PERIOD_MS * 2.5 / 1000 / span, 0.03, 0.15) :
+        clamp(state.max_speed_us_s * PERIOD_MS * 1.7 / 1000 / span, 0.04, 0.30);
       const pulse = (state.targets && state.targets[axis]) ?? (state.last_commanded && state.last_commanded[axis]) ?? ch.center_us;
       target[axis] = toSemantic(pulse, ch);
+      commanded[axis] = toSemantic((state.commanded && state.commanded[axis]) ??
+        (state.last_commanded && state.last_commanded[axis]) ?? pulse, ch);
       baseline[axis] = target[axis];
     }
     headSampledAt = Date.now();
     refreshGuide();
-    return {head: state, baseline: {...baseline}, bodyBusy: !!(
+    return {head: state, saved: map.saved_body_command, baseline: {...baseline}, bodyBusy: !!(
       map.named_walk?.running || map.named_turn?.running ||
       map.saved_body_command?.active || map.stock_pose?.active)};
+  }
+  async function quickLook(name) {
+    if (mode !== "attend" || !["look left", "look right"].includes(name))
+      throw Error("Quick look requires natural attention and a left/right direction");
+    if (root.paused || root._pauseHard || root._motion?.kind === "walk")
+      throw Error("Quick look is unavailable while paused or walking");
+    const token = generation, motionToken = ++walkGateSeq;
+    walkGateBusy = false; attentionUntil = 0;
+    yieldUntil = Date.now() + 11000;
+    for (let tries = 0; pending && tries < 15; tries++)
+      await new Promise(resolve => setTimeout(resolve, 200));
+    if (pending || token !== generation || motionToken !== walkGateSeq)
+      throw Error("Quick look was superseded by an in-flight head move");
+    const preflight = await headPreflight();
+    if (token !== generation || motionToken !== walkGateSeq || mode !== "attend" ||
+        root.paused || root._pauseHard || root._motion?.kind === "walk")
+      throw Error("Quick look was superseded");
+    if (preflight.bodyBusy) throw Error("Another body command is still active");
+    if (preflight.saved?.pan_inverted !== true && preflight.saved?.pan_inverted !== false)
+      throw Error("Saved-look pan mapping is unknown");
+    const position = quickLookPosition(name, preflight.saved.pan_inverted);
+    const ack = await send({t: "dog_cal", body_version: 1, body_action: "head", axis: "pan", position});
+    if (token !== generation || motionToken !== walkGateSeq) throw Error("Quick look was superseded");
+    target.pan = position;
+    const desiredPulse = ack.state?.targets?.pan;
+    if (!Number.isFinite(desiredPulse)) throw Error("Pico did not report a pan target");
+    const pwm = ack.state?.commanded?.pan;
+    if (Number.isFinite(pwm)) commanded.pan = toSemantic(pwm, headChannels.pan);
+    headSampledAt = Date.now();
+    needsResync = true;
+    refreshGuide();
+    for (let tries = 0; tries < 20; tries++) {
+      if (token !== generation || motionToken !== walkGateSeq || root.paused || root._pauseHard)
+        throw Error("Quick look was interrupted");
+      const state = (await send({t: "dog_cal", channel_action: "head_info"})).state;
+      if (token !== generation || motionToken !== walkGateSeq) throw Error("Quick look was interrupted");
+      const currentPulse = state?.commanded?.pan;
+      if (!Number.isFinite(currentPulse)) throw Error("Pico pan state unavailable");
+      commanded.pan = toSemantic(currentPulse, headChannels.pan);
+      headSampledAt = Date.now();
+      refreshGuide();
+      if (!state.moving) {
+        if (Math.abs(currentPulse - desiredPulse) > 3)
+          throw Error("Head stopped before reaching the short-look target");
+        yieldUntil = Date.now() + 3000;
+        nextAttentionAt = Date.now() + 6000;
+        lastAck = {source: "quick look", name, position, accepted: true,
+          targetReachedByCommandedState: true, physicalFeedback: false, at: Date.now()};
+        return {name, position, accepted: true, targetReachedByCommandedState: true,
+          physicalFeedback: false};
+      }
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    throw Error("Quick look timed out before the Pico reached its target");
   }
   async function loadDetector() {
     if (detector) return detector;
@@ -243,6 +310,11 @@
     const dir = String(spec && spec.dir || "fwd").toLowerCase();
     return /^(fwd|forward|ahead|go|straight|walk|closer|left|right)$/.test(dir) ||
       ["spin_left", "spin_right"].includes(spec && spec.gait);
+  }
+  function quickLookPosition(name, panInverted) {
+    if (!["look left", "look right"].includes(name) || typeof panInverted !== "boolean")
+      throw Error("Quick look needs a direction and calibrated pan mapping");
+    return (name === "look left" ? -1 : 1) * (panInverted ? -1 : 1) * 0.30;
   }
   async function headForward(stillCurrent = () => true) {
     const check = () => {
@@ -275,7 +347,11 @@
       const state = (await send({t: "dog_cal", channel_action: "head_info"})).state;
       check();
       if (!state?.moving) {
+        if (["pan", "tilt"].some(axis => !Number.isFinite(state.commanded?.[axis]) ||
+            Math.abs(state.commanded[axis] - headChannels[axis].center_us) > 3))
+          throw Error("Head stopped before reaching forward");
         target.pan = target.tilt = 0;
+        commanded.pan = commanded.tilt = 0;
         headSampledAt = Date.now();
         refreshGuide();
         attentionUntil = 0;
@@ -377,20 +453,23 @@
         const faceAttention = mode === "attend" && Date.now() < attentionUntil;
         if ((["track", "coexist"].includes(mode) || faceAttention) && lastFace && !pending &&
             Date.now() >= yieldUntil && !bodyBusy) {
-          const next = nextTarget(target, lastFace, options, axisStep);
-          const panWanted = Math.abs(next.pan - target.pan) >= 0.008;
-          const tiltWanted = Math.abs(next.tilt - target.tilt) >= 0.008;
-          const axis = panWanted && tiltWanted ? (lastAxis === "pan" ? "tilt" : "pan") :
-            panWanted ? "pan" : "tilt";
-          if (Math.abs(next[axis] - target[axis]) >= 0.008) {
+          const next = nextTarget(commanded, lastFace, options, axisStep);
+          const panWanted = Math.abs(next.pan - commanded.pan) >= 0.008;
+          const tiltWanted = Math.abs(next.tilt - commanded.tilt) >= 0.008;
+          // Two pan opportunities per tilt opportunity when both need motion.
+          // This makes face-following pan responsive without extra wire traffic.
+          const axis = panWanted && (!tiltWanted || panBurst < 2) ? "pan" : "tilt";
+          if (Math.abs(next[axis] - commanded[axis]) >= 0.008) {
             pending = true;
             try {
               const ack = await send({t: "dog_cal", body_version: 1, body_action: "head", axis, position: Number(next[axis].toFixed(3))});
               if (token !== generation) return;
               target[axis] = next[axis];
+              const pwm = ack.state && ack.state.commanded && ack.state.commanded[axis];
+              if (Number.isFinite(pwm) && headChannels[axis]) commanded[axis] = toSemantic(pwm, headChannels[axis]);
               headSampledAt = Date.now();
               refreshGuide();
-              lastAxis = axis;
+              panBurst = axis === "pan" ? panBurst + 1 : 0;
               lastAck = {axis, position: target[axis], accepted: true, physicalFeedback: false, at: Date.now()};
             } finally { pending = false; }
           }
@@ -444,7 +523,7 @@
     if (setupToken !== generation) throw Error("Tracking startup was cancelled");
     if (desired !== "attend" && preflight && !preflight.bodyBusy && Math.abs(target.tilt) > 0.35) {
       // Prepare a neutral vertical posture for the on-demand tracking window.
-      // The Pico ramps this at its fixed 150 us/s limit; never snap to center.
+      // The Pico ramps this at its reported mechanical limit; never snap to center.
       await send({t: "dog_cal", body_version: 1, body_action: "head", axis: "tilt", position: 0});
       for (let tries = 0; tries < 14; tries++) {
         if (setupToken !== generation) throw Error("Tracking startup was cancelled");
@@ -461,8 +540,9 @@
         ["coexist", "attend"].includes(desired) && (root.paused || root._pauseHard))
       throw Error("GrowBot changed pause state during tracking startup");
     mode = desired; running = true; lastVideoTime = -1; lastFace = null; count = 0; frames = 0; lastFrameAt = null; lastError = null;
-    yieldUntil = 0; bodyBusy = false; lastBodyCheck = 0; lastAxis = "tilt";
-    attentionUntil = 0; nextAttentionAt = Date.now() + 1500; faceStreak = 0; needsResync = false;
+    yieldUntil = 0; bodyBusy = false; lastBodyCheck = 0; panBurst = 0;
+    needsResync = !!preflight?.bodyBusy;
+    attentionUntil = 0; nextAttentionAt = Date.now() + 1500; faceStreak = 0;
     deadline = (["track", "coexist"].includes(desired) ||
       desired === "attend" && config.durationMs !== undefined) ? Date.now() + duration : 0;
     const token = ++generation;
@@ -472,7 +552,9 @@
   function status() {
     return {version: VERSION, mode, running, faces: count, frames, lastFrameAt,
       face: lastFace && {cx: +lastFace.cx.toFixed(3), cy: +lastFace.cy.toFixed(3), area: +lastFace.area.toFixed(3)},
-      target: {...target}, baseline: {...baseline}, headAim: headSampledAt ? headAim(target) : null,
+      target: {...target}, commanded: {...commanded}, baseline: {...baseline},
+      headAim: headSampledAt && panInverted !== null ? headAim(commanded, panInverted) : null,
+      panInverted,
       headSampledAt, axisStep: {...axisStep}, lastAck, lastError,
       yieldingToGrowBot: Date.now() < yieldUntil, bodyBusy,
       attentionActive: mode === "attend" && Date.now() < attentionUntil,
@@ -493,6 +575,19 @@
     originalMoveLegs = root.moveLegs;
     wrappedMoveLegs = function (request) {
       const name = String(request && request.gesture || "").toLowerCase().replace(/\s+/g, " ").trim();
+      if (mode === "attend" && ["look left", "look right"].includes(name) &&
+          root._motion?.kind !== "walk") {
+        attentionUntil = 0;
+        let attempt = null;
+        try { if (typeof root._moveRequest === "function") attempt = root._moveRequest(name); } catch {}
+        quickLook(name).then(() => {
+          try { root._moveReport(attempt, "accepted", "paced_head_target_sent_unverified"); } catch {}
+        }).catch(error => {
+          lastError = error.message || String(error);
+          try { root._moveReport(attempt, "blocked", "quick_look_failed:" + lastError); } catch {}
+        });
+        return;
+      }
       if (name !== "track face" && name !== "stop tracking") {
         walkGateSeq++; walkGateBusy = false; attentionUntil = 0;
         return originalMoveLegs.apply(this, arguments);
@@ -601,6 +696,6 @@
     if (guide) guide.value = removeGuide(guide.value);
     return status();
   }
-  return {start, stop, status, preflight: headPreflight, headForward, look, installTool, uninstallTool,
-    _test: {chooseFace, smoothFace, nextTarget, toSemantic, savedLookFrames, userFaceIntent, speechToggleIntent, travelDirection, headAim}};
+  return {start, stop, status, preflight: headPreflight, headForward, look, quickLook, installTool, uninstallTool,
+    _test: {chooseFace, smoothFace, nextTarget, toSemantic, savedLookFrames, userFaceIntent, speechToggleIntent, travelDirection, headAim, quickLookPosition}};
 });

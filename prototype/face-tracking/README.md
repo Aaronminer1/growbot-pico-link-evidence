@@ -1,5 +1,7 @@
 # Stationary face-tracking prototype
 
+The separate [Pico head-speed trial](FIRMWARE-SPEED-TRIAL.md) records the 150 → 200 µs/s change, read-back hashes, and rollback path. The physical result is still pending the powered bench comparison.
+
 This optional, temporary browser injection uses GrowBot's existing **selfie camera** and the calibrated Pico `dog_cal` head lane. It does not edit growbot.dev, change the saved gestures, reflash the Pico, walk, or turn the body. No camera images are saved or sent to the relay: MediaPipe inference runs in the phone browser, and only normalized pan/tilt targets cross the controller link. The pinned detector code, WASM, and model are fetched over HTTPS from jsDelivr and Google's model storage on first use.
 
 ## Preconditions
@@ -8,7 +10,7 @@ This optional, temporary browser injection uses GrowBot's existing **selfie came
 - Phone remote debugging connected and forwarded to `tcp:9223` for this test helper.
 - For `track` only: robot stationary on a stable surface, head physically supported, servo power explicitly confirmed on, and a person nearby who can use the hardware power switch. First try `observe` with servo power off.
 - Pico head calibration must identify Pan A=Left, B=Right and Tilt A=Down, B=Up, with head support enabled. The script verifies these before motion.
-- The existing Pico's head speed limit (150 microseconds/second) is not changed. Software targets stay within 60% of each saved calibrated range. Per-frame target steps are scaled from each axis's saved pulse range for approximately 120 microseconds/second maximum requested travel, and the Pico imposes its own hard limit.
+- The installed Pico reports a head speed limit no greater than **200 microseconds/second**. The 23 September speed trial raised this firmware cap from 150 to 200; the tracker reads the reported cap and refuses a larger one. Software targets stay within 60% of each saved calibrated range, and the Pico imposes its own hard limit.
 
 ## Commands
 
@@ -23,6 +25,10 @@ Face tracking is **not exclusive head authority**. While tracking, `node control
 `node control.cjs attend` enables a **session-only** natural-attention mode; `node control.cjs stop` turns it off. It does not require the person to say “follow my face.” While GrowBot is awake and stationary, three consecutive face detections may draw a brief head-only look (up to 4.5 seconds, at most once per 12 seconds). He can still choose a saved look gesture to inspect something else; that gesture gets priority and the tracker resynchronizes from the Pico's commanded head position before considering another face. This face detector cannot tell what object is interesting, recognize a person, or establish what GrowBot is thinking. His existing camera/brain path must choose non-face interests.
 
 The session-only movement guide now includes a coarse **commanded head aim relative to the body** (left/ahead/right and down/level/up), or “unknown” while a native look is in flight. This gives the agent a usable orientation cue while avoiding a false claim of servo-position sensing. A saved look, direct user command, or walk request outranks automatic face attention.
+
+During `attend`, GrowBot's discretionary `look left` and `look right` choices are translated to a **30% pan arc** through the calibrated head lane, instead of the firmware's full 60% saved-look sweep. This shortens the distance even with a bounded motor speed. The tracker renews the Pico's three-second head lease until its commanded state reaches the target; otherwise a longer crossover would freeze partway through. Other saved looks and turns retain their native `act` path. `node control.cjs quicklook left|right` exercises the same head-only path. The shorter arc is a session-local prototype, not a GrowBot website change. The controller ACK still does not prove physical motion.
+
+Face following also uses the Pico ACK's latest **commanded PWM** as the base for each new target. It does not accumulate targets while the servo lags behind; that would create a large queue-like lead and abrupt reversals. Pan gets two update opportunities for each tilt update when both axes need correction. The smaller target lead is allowed to overlap the Pico's ramp, while the firmware caps physical slew at its reported limit. The guide's left/right label incorporates this robot's saved pan inversion, which was checked against the owner's observed left look. No physical encoder exists to confirm exact head angle.
 
 While this mode is enabled, the temporary phone-side hook holds a **new** walk or body turn long enough to finish an independent look gesture, command both head axes to neutral at the Pico's saved speed limit, and wait for the Pico's `head_info.moving` flag to clear. If the controller disconnects, the command times out, GrowBot pauses, or another action supersedes it, the pending walk is withheld. A Stop cancels a pending handoff. A walk already in progress is left to GrowBot's normal control path; this is not a navigation or collision-avoidance system. The Pico reports commanded targets, not encoder measurements, so “head forward” is a controller-state claim, not proof that the mechanism physically reached center.
 

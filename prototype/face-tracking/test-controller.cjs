@@ -12,7 +12,7 @@ const channels = [
     a_us: 1060, b_us: 650, center_us: 855},
 ];
 
-function harness(onCommand = () => {}) {
+function harness(onCommand = () => {}, freezeMotion = false) {
   const pulses = {pan: 2000, tilt: 732};
   const commands = [];
   const listeners = new Map();
@@ -31,14 +31,14 @@ function harness(onCommand = () => {}) {
       if (request.channel_action === 'head_info') reply.state = {
         support_enabled: true, max_speed_us_s: 150,
         config: {pan: {channel: 8}, tilt: {channel: 9}},
-        targets: {...pulses}, moving: false,
+        targets: {...pulses}, commanded: {...pulses}, moving: false,
       };
       if (request.channel_action === 'info') {
         reply.channel_state = {channels};
         reply.named_walk = {running: false};
         reply.named_turn = {running: false};
       }
-      if (request.body_action === 'head')
+      if (request.body_action === 'head' && !freezeMotion)
         pulses[request.axis] = request.axis === 'pan' ? 1500 : 855;
       queueMicrotask(() => {
         for (const fn of listeners.get('message') || []) fn({data: JSON.stringify(reply)});
@@ -70,5 +70,8 @@ function harness(onCommand = () => {}) {
   });
   await assert.rejects(cancelled.tracker.headForward(() => current), /cancelled/);
   assert.deepEqual(cancelled.commands.filter(x => x.body_action === 'head').map(x => x.axis), ['pan']);
+
+  const frozen = harness(() => {}, true);
+  await assert.rejects(frozen.tracker.headForward(), /stopped before reaching forward/);
   console.log('Offline head-forward and cancellation tests passed');
 })().catch(error => { console.error(error); process.exitCode = 1; });

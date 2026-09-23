@@ -21,6 +21,11 @@ async function run() {
       throw Error('Specify one of the five saved look gestures');
     return evaluate(`window.GrowBotFaceTrack.look(${JSON.stringify(name)})`);
   }
+  if (command === 'quicklook') {
+    const name = 'look ' + process.argv.slice(3).join(' ').replace(/^look\s+/i, '');
+    if (!['look left', 'look right'].includes(name)) throw Error('Specify left or right');
+    return evaluate(`window.GrowBotFaceTrack.quickLook(${JSON.stringify(name)})`);
+  }
   if (modes.has(command)) {
     const panSign = process.argv[3] === undefined ? -1 : Number(process.argv[3]);
     const tiltSign = process.argv[4] === undefined ? -1 : Number(process.argv[4]);
@@ -28,6 +33,6 @@ async function run() {
     // Preserve the optional model tool when reinjecting an updated tracker.
     return evaluate(`(async()=>{const hadTool=!!window.GrowBotFaceTrack?.status?.().toolAvailable;window.GrowBotFaceTrack?.uninstallTool?.();window.GrowBotFaceTrack?.stop?.();(0,eval)(${JSON.stringify(inject)});if(hadTool)window.GrowBotFaceTrack.installTool();return await window.GrowBotFaceTrack.start({mode:${JSON.stringify(command)},panSign:${panSign},tiltSign:${tiltSign}})})()`);
   }
-  throw Error('Usage: node control.cjs install|uninstall|observe|preflight|track|coexist|attend [panSign tiltSign]|look <left|right|up|down|ahead>|status|stop');
+  throw Error('Usage: node control.cjs install|uninstall|observe|preflight|track|coexist|attend [panSign tiltSign]|look <left|right|up|down|ahead>|quicklook <left|right>|status|stop');
 }
 run().then(result => console.log(JSON.stringify(result, null, 2))).catch(error => {console.error(error.message); process.exitCode = 1;});
