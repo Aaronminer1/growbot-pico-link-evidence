@@ -15,6 +15,7 @@ const channels = [
 function harness(onCommand = () => {}, freezeMotion = false) {
   const pulses = {pan: 2000, tilt: 732};
   const commands = [];
+  let headRun = 0;
   const listeners = new Map();
   const ws = {
     readyState: 1,
@@ -31,7 +32,7 @@ function harness(onCommand = () => {}, freezeMotion = false) {
       if (request.channel_action === 'head_info') reply.state = {
         support_enabled: true, max_speed_us_s: 150,
         config: {pan: {channel: 8}, tilt: {channel: 9}},
-        targets: {...pulses}, commanded: {...pulses}, moving: false,
+        targets: {...pulses}, commanded: {...pulses}, moving: false, holding:true, run_id:headRun,
       };
       if (request.channel_action === 'info') {
         reply.channel_state = {channels};
@@ -40,6 +41,11 @@ function harness(onCommand = () => {}, freezeMotion = false) {
       }
       if (request.body_action === 'head' && !freezeMotion)
         pulses[request.axis] = request.axis === 'pan' ? 1500 : 855;
+      if (request.channel_action === 'head_move') {
+        headRun++;
+        if(!freezeMotion)Object.assign(pulses,{pan:1500,tilt:855});
+        reply.state={run_id:headRun};
+      }
       queueMicrotask(() => {
         for (const fn of listeners.get('message') || []) fn({data: JSON.stringify(reply)});
       });
@@ -52,7 +58,7 @@ function harness(onCommand = () => {}, freezeMotion = false) {
   };
   vm.runInNewContext(source, {window: browser, setTimeout, clearTimeout,
     performance, console}, {filename: 'face-tracker.js'});
-  return {tracker: browser.GrowBotFaceTrack, commands, pulses};
+  return {tracker: browser.GrowBotFaceTrack, commands, pulses, browser};
 }
 
 (async () => {
@@ -73,5 +79,14 @@ function harness(onCommand = () => {}, freezeMotion = false) {
 
   const frozen = harness(() => {}, true);
   await assert.rejects(frozen.tracker.headForward(), /stopped before reaching forward/);
+  const bench=harness();
+  await assert.rejects(bench.tracker.benchCenter(),/paused stationary/);
+  bench.browser.paused=true;bench.browser._pauseHard=true;
+  const centered=await bench.tracker.benchCenter();
+  assert.deepEqual(JSON.parse(JSON.stringify(centered.commanded)),{pan:1500,tilt:855});
+  assert(bench.browser.paused&&bench.browser._pauseHard,'centering must not wake GrowBot');
+  assert(bench.commands.every(m=>m.t==='dog_cal'),'bench center never sends leg gestures');
+  const failed=harness(()=>{},true);failed.browser.paused=true;
+  await assert.rejects(failed.tracker.benchCenter(),/target not reached/);
   console.log('Offline head-forward and cancellation tests passed');
 })().catch(error => { console.error(error); process.exitCode = 1; });

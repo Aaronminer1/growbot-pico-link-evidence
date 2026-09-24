@@ -9,7 +9,7 @@
 })(typeof window === "undefined" ? globalThis : window, function (root) {
   "use strict";
 
-  const VERSION = "stationary-0.3";
+  const VERSION = "stationary-0.5";
   const PACKAGE = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/+esm";
   const WASM = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm";
   const MODEL = "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite";
@@ -27,6 +27,21 @@
   let headSampledAt = 0;
   let axisStep = {pan: 0.08, tilt: 0.2}, panBurst = 0;
   let yieldUntil = 0, bodyBusy = false, lastBodyCheck = 0;
+  let attentionHeld = false, attentionRevision = 0, trackingCommands = 0;
+  const RECOVERY_LIMIT_MS = 15000, RECOVERY_ATTEMPTS = 3;
+  let recovery = {active:false,startedAt:0,nextAt:0,attempts:0,successes:0};
+  let lastFault = null;
+  function transportError(message) {
+    const error=new Error(message);error.code="head_transport";return error;
+  }
+  function holdForLook() {
+    attentionHeld = true; attentionRevision++;
+    attentionUntil = 0; needsResync = true; headSampledAt = 0;
+  }
+  function resumeAttention() {
+    attentionHeld = false; attentionRevision++; yieldUntil = 0;
+    needsResync = true; lastVideoTime = -1; lastFace = null; faceStreak = 0;
+  }
   let watchedSocket = null, originalSend = null, wrappedSend = null;
   let deadline = 0, originalMoveLegs = null, wrappedMoveLegs = null;
   let originalSendTxtFrom = null, wrappedSendTxtFrom = null;
@@ -50,6 +65,8 @@
       (aim ? "COMMANDED HEAD AIM RELATIVE TO BODY: " + aim.pan + " / " + aim.tilt + ". This is a Pico target, not physical position feedback.\n" :
         "COMMANDED HEAD AIM: unknown until a fresh Pico head reading. Do not assume the camera faces forward.\n") +
       "OPTIONAL FACE TRACKING TOOL (stationary, head only): If you want to briefly follow a person's face with your head, emit gesture:\"track face\" in this reply. It runs for at most 20 seconds, then shuts itself off. To stop sooner, emit gesture:\"stop tracking\". These two commands are tool signals, not leg poses. Your usual saved look gestures still work and take priority. When natural attention is enabled, a face can draw a brief glance without a request; you may instead look at an object your own vision finds interesting. Do not claim to identify someone from face position alone. Before a new walk, the attention tool returns the commanded head aim forward; if it cannot confirm that command, do not claim to have walked.\n" +
+      "HEAD OWNERSHIP: A deliberate look suspends face following until you explicitly select gesture:\"track face\" again. A timer does not end your interest in something else. Losing a face stops new tracking targets; it does not release head support.\n" +
+      (recovery.active ? "HEAD TRACKING LINK: recovering using read-only checks; do not claim tracking has resumed.\n" : "") +
       (motionSpeech ?
         "MOTION SPEECH ON FOR TROUBLESHOOTING: You may briefly speak the requested motion and its result, but do not claim physical movement from an ACK alone.\n" :
         "MOTION SPEECH OFF: Body motion requests, directions, saved look gestures, and face tracking are normally silent. If your reply is only a movement, omit say or leave it empty. Do not read the motion request aloud or announce 'face tracking on.' Continue ordinary conversation when the person actually asks to talk.\n") + GUIDE_END;
@@ -116,7 +133,7 @@
   }
   function socket() {
     const ws = root._body && root._body.ws;
-    if (!ws || ws.readyState !== 1 || !root._body.ready) throw Error("Pico socket is not ready");
+    if (!ws || ws.readyState !== 1 || !root._body.ready) throw transportError("Pico socket is not ready");
     return ws;
   }
   function unwatchSocket() {
@@ -134,6 +151,7 @@
         const message = JSON.parse(data);
         if (!String(message.rid || "").startsWith("face-track-")) {
           if (["act", "routine"].includes(message.t)) {
+            holdForLook();
             yieldUntil = Math.max(yieldUntil, Date.now() + 12000);
             needsResync = true;
             attentionUntil = 0;
@@ -142,6 +160,7 @@
           }
           else if (["pose", "stop"].includes(message.t)) yieldUntil = Math.max(yieldUntil, Date.now() + 2500);
           else if (message.t === "dog_cal" && (message.channel_action === "head_move" || message.body_action === "head")) {
+            holdForLook();
             yieldUntil = Math.max(yieldUntil, Date.now() + 12000);
             needsResync = true;
             attentionUntil = 0;
@@ -168,7 +187,7 @@
         ws.removeEventListener("close", onClose);
         error ? reject(error) : resolve(value);
       };
-      const onClose = () => end(Error("Pico socket closed"));
+      const onClose = () => end(transportError("Pico socket closed"));
       const onMessage = event => {
         let reply;
         try { reply = JSON.parse(event.data); } catch { return; }
@@ -176,10 +195,10 @@
         if (!reply.ok) return end(Error(reply.err || "Pico rejected head request"));
         end(null, reply);
       };
-      const timeout = setTimeout(() => end(Error("Pico head ACK timed out")), timeoutMs);
+      const timeout = setTimeout(() => end(transportError("Pico head ACK timed out")), timeoutMs);
       ws.addEventListener("message", onMessage);
       ws.addEventListener("close", onClose);
-      try { ws.send(JSON.stringify({...message, rid})); } catch (e) { end(e); }
+      try { ws.send(JSON.stringify({...message, rid})); } catch { end(transportError("Pico send failed")); }
     });
   }
   function toSemantic(pulse, channel) {
@@ -194,15 +213,25 @@
     const magnitude = Math.abs((pulse - center) / (endpoint - center));
     return clamp(towardNegative ? -magnitude : magnitude, -1, 1);
   }
-  async function headPreflight() {
-    const info = await send({t: "dog_cal", channel_action: "head_info"});
-    const map = await send({t: "dog_cal", channel_action: "info"});
+  async function headPreflight(until = 0, stillCurrent = () => true) {
+    const read = message => {
+      if(!stillCurrent())throw Error("Head read cancelled");
+      const budget=until ? Math.min(3000,until-Date.now()) : 3000;
+      if(budget<=0)throw transportError("Pico read deadline elapsed");
+      return send(message,budget);
+    };
+    const info = await read({t: "dog_cal", channel_action: "head_info"});
+    const map = await read({t: "dog_cal", channel_action: "info"});
+    if(!stillCurrent())throw Error("Head read cancelled");
     const state = info.state;
     const channels = map.channel_state && map.channel_state.channels || [];
     panInverted = typeof map.saved_body_command?.pan_inverted === "boolean" ?
       map.saved_body_command.pan_inverted : null;
+    // Only the owner-tested cadence firmware is approved above the original
+    // 200 cap. Do not silently accept arbitrary faster controllers.
+    const approvedCap = state?.head_implementation === "head-speed-400-cadence-v2" ? 400 : 200;
     if (!state || !state.support_enabled || !Number.isFinite(state.max_speed_us_s) ||
-        state.max_speed_us_s > 200 || state.max_speed_us_s < 100)
+        state.max_speed_us_s > approvedCap || state.max_speed_us_s < 100)
       throw Error("Head support or speed limit is not configured");
     for (const axis of ["pan", "tilt"]) {
       const cfg = state.config && state.config[axis];
@@ -217,9 +246,11 @@
       // ahead of our previous target. This prevents an old target backlog.
       // The Pico still enforces its reported mechanical speed cap on both axes.
       const span = Math.max(Math.abs(ch.a_us - ch.center_us), Math.abs(ch.b_us - ch.center_us));
+      // Faster firmware does not enlarge the camera's target lead in this trial.
+      const leadSpeed = Math.min(state.max_speed_us_s, 200);
       axisStep[axis] = axis === "pan" ?
-        clamp(state.max_speed_us_s * PERIOD_MS * 2.5 / 1000 / span, 0.03, 0.15) :
-        clamp(state.max_speed_us_s * PERIOD_MS * 1.7 / 1000 / span, 0.04, 0.30);
+        clamp(leadSpeed * PERIOD_MS * 2.5 / 1000 / span, 0.03, 0.15) :
+        clamp(leadSpeed * PERIOD_MS * 1.7 / 1000 / span, 0.04, 0.30);
       const pulse = (state.targets && state.targets[axis]) ?? (state.last_commanded && state.last_commanded[axis]) ?? ch.center_us;
       target[axis] = toSemantic(pulse, ch);
       commanded[axis] = toSemantic((state.commanded && state.commanded[axis]) ??
@@ -238,6 +269,7 @@
     if (root.paused || root._pauseHard || root._motion?.kind === "walk")
       throw Error("Quick look is unavailable while paused or walking");
     const token = generation, motionToken = ++walkGateSeq;
+    holdForLook();
     walkGateBusy = false; attentionUntil = 0;
     yieldUntil = Date.now() + 11000;
     for (let tries = 0; pending && tries < 15; tries++)
@@ -362,6 +394,36 @@
     }
     throw Error("Head did not finish centering before the walk");
   }
+  // Explicit operator-only bench command. Never wake the model or call a leg
+  // gesture to center the head; all automatic tracking must already be off.
+  async function benchCenter() {
+    const token = generation;
+    const check = () => {
+      if (!root.paused || root.document.hidden || running || token !== generation)
+        throw Error("Need paused stationary bench with tracking off");
+    };
+    check();
+    const preflight = await headPreflight();check();
+    if (preflight.bodyBusy) throw Error("Body is busy; bench centering withheld");
+    const ack = await send({t:"dog_cal",channel_action:"head_move",pan:0,tilt:0});
+    const run = ack.state?.run_id;
+    if (!Number.isFinite(run)) throw Error("Head command did not return a run ID");
+    for (let i=0;i<50;i++) {
+      check();
+      const state=(await send({t:"dog_cal",channel_action:"head_info"})).state;
+      check();
+      if (!state?.holding || state.run_id!==run) throw Error("Bench head command interrupted");
+      if (!state.moving) {
+        if (["pan","tilt"].some(a=>state.commanded?.[a]!==headChannels[a].center_us))
+          throw Error("Bench center target not reached by controller");
+        commanded.pan=commanded.tilt=target.pan=target.tilt=0;
+        headSampledAt=Date.now();refreshGuide();
+        return {commanded:state.commanded,holding:state.holding,runId:run,physicalFeedback:false};
+      }
+      await new Promise(resolve=>setTimeout(resolve,200));
+    }
+    throw Error("Bench centering completion timed out");
+  }
   function savedLookFrames(name) {
     const op = {"look left": 3, "look right": 4, "look up": 5,
       "look down": 6, "look ahead": 7}[name];
@@ -391,6 +453,7 @@
     if (!running || !["track", "coexist"].includes(mode)) throw Error("Tracking is not active");
     if (root._pauseHard) throw Error("Hard pause blocks head gestures");
     const frames = savedLookFrames(name);
+    holdForLook();
     // The existing Pico decoder recognizes only these exact saved frames.
     yieldUntil = Date.now() + 12000;
     needsResync = true; headSampledAt = 0; refreshGuide();
@@ -402,6 +465,59 @@
     if (running && token === generation) timer = setTimeout(() => tick(token),
       mode === "attend" && Date.now() >= attentionUntil ? 500 : PERIOD_MS);
   }
+  function trackingContextActive(token) {
+    return running && token===generation && !root.document.hidden && !root._pauseHard &&
+      !(deadline && Date.now()>=deadline) &&
+      (mode==="track" ? root.paused : ["coexist","attend"].includes(mode) ? !root.paused : true);
+  }
+  function beginRecovery(error) {
+    lastFault={at:Date.now(),reason:error.message,trackingCommands};
+    lastError=error.message;
+    recovery={active:true,startedAt:Date.now(),nextAt:Date.now()+500,attempts:0,successes:recovery.successes};
+    lastFace=null;count=0;faceStreak=0;needsResync=true;
+    refreshGuide();
+    // Do not resend the uncertain command, close/re-pair GrowBot's socket,
+    // release head support, or grant tracking a deliberately yielded head.
+  }
+  async function recoverController(token) {
+    if (Date.now()<recovery.nextAt) return;
+    if (Date.now()-recovery.startedAt>=RECOVERY_LIMIT_MS || recovery.attempts>=RECOVERY_ATTEMPTS) {
+      stop("Head communication recovery exhausted");return;
+    }
+    recovery.attempts++;
+    try {
+      watchSocket();
+      const revision=attentionRevision;
+      // Two read-only ACKs verify the calibrated head and body state. None of
+      // the recovery probes contains a movement target or renews the window.
+      const until=Math.min(recovery.startedAt+RECOVERY_LIMIT_MS,deadline||Infinity);
+      const fresh=await headPreflight(until,()=>trackingContextActive(token));
+      if (!trackingContextActive(token)) {
+        if(running&&token===generation)stop("Tracking window ended or GrowBot paused");
+        return;
+      }
+      if(Date.now()-recovery.startedAt>=RECOVERY_LIMIT_MS){stop("Head communication recovery exhausted");return;}
+      if(!fresh.head.holding)throw Error("Head support was released during recovery");
+      if(fresh.bodyBusy||fresh.head.moving||revision!==attentionRevision){
+        recovery.nextAt=Date.now()+500;return;
+      }
+      recovery.active=false;recovery.successes++;lastError=null;needsResync=false;
+      lastFace=null;count=0;faceStreak=0;
+      // Discard both the old face and the frame visible during controller
+      // verification. Only a subsequent camera frame can request a new move.
+      lastVideoTime=video()?.currentTime ?? lastVideoTime;
+      refreshGuide();
+    } catch(error) {
+      if(!trackingContextActive(token)){
+        if(running&&token===generation)stop("Tracking window ended or GrowBot paused");
+        return;
+      }
+      if(error.code!=="head_transport"){stop(error.message||String(error));return;}
+      lastFault={at:Date.now(),reason:error.message,trackingCommands};lastError=error.message;
+      if(Date.now()-recovery.startedAt>=RECOVERY_LIMIT_MS){stop("Head communication recovery exhausted");return;}
+      recovery.nextAt=Date.now()+Math.min(2000,500*Math.pow(2,recovery.attempts));
+    }
+  }
   async function tick(token) {
     if (!running || token !== generation) return;
     if (mode === "attend" && root.runGait !== wrappedRunGait) {
@@ -409,7 +525,7 @@
       return;
     }
     if (deadline && Date.now() >= deadline) { stop("Tracking window ended"); return; }
-    if (mode === "track" && (!root.paused || root._pauseHard) ||
+    if (root.document.hidden || mode === "track" && (!root.paused || root._pauseHard) ||
         ["coexist", "attend"].includes(mode) && (root.paused || root._pauseHard || root.document.hidden)) {
       stop("GrowBot was resumed or hard-paused");
       return;
@@ -417,6 +533,7 @@
     const v = video();
     if (!v) { stop("Front camera stopped"); return; }
     try {
+      if(recovery.active){await recoverController(token);schedule(token);return;}
       watchSocket();
       if (v.currentTime !== lastVideoTime) {
         lastVideoTime = v.currentTime;
@@ -435,13 +552,13 @@
           if (token === generation) stop("Tracking window ended or GrowBot paused");
           return;
         }
-        if (needsResync && Date.now() >= yieldUntil && !bodyBusy && !walkGateBusy) {
+        if (needsResync && !attentionHeld && Date.now() >= yieldUntil && !bodyBusy && !walkGateBusy) {
           await headPreflight();
           needsResync = false;
           if (!running || token !== generation || root.paused && mode !== "track" || root._pauseHard ||
               root.document.hidden || deadline && Date.now() >= deadline) return;
         }
-        if (mode === "attend" && Date.now() >= yieldUntil && !bodyBusy && !walkGateBusy &&
+        if (mode === "attend" && !attentionHeld && Date.now() >= yieldUntil && !bodyBusy && !walkGateBusy &&
             root._motion?.kind !== "walk") {
           if (faceStreak >= 3 && Date.now() >= nextAttentionAt && Date.now() >= attentionUntil) {
             attentionUntil = Date.now() + 4500;
@@ -451,7 +568,7 @@
         if (mode === "attend" && (bodyBusy || walkGateBusy || root._motion?.kind === "walk"))
           attentionUntil = 0;
         const faceAttention = mode === "attend" && Date.now() < attentionUntil;
-        if ((["track", "coexist"].includes(mode) || faceAttention) && lastFace && !pending &&
+        if ((["track", "coexist"].includes(mode) || faceAttention) && !attentionHeld && lastFace && !pending &&
             Date.now() >= yieldUntil && !bodyBusy) {
           const next = nextTarget(commanded, lastFace, options, axisStep);
           const panWanted = Math.abs(next.pan - commanded.pan) >= 0.008;
@@ -461,9 +578,15 @@
           const axis = panWanted && (!tiltWanted || panBurst < 2) ? "pan" : "tilt";
           if (Math.abs(next[axis] - commanded[axis]) >= 0.008) {
             pending = true;
+            const revision = attentionRevision;
             try {
+              trackingCommands++;
               const ack = await send({t: "dog_cal", body_version: 1, body_action: "head", axis, position: Number(next[axis].toFixed(3))});
               if (token !== generation) return;
+              // A late tracking ACK must not replace the deliberate look's
+              // recorded target after the native command took ownership.
+              if (revision !== attentionRevision || attentionHeld) { needsResync = true; }
+              else {
               target[axis] = next[axis];
               const pwm = ack.state && ack.state.commanded && ack.state.commanded[axis];
               if (Number.isFinite(pwm) && headChannels[axis]) commanded[axis] = toSemantic(pwm, headChannels[axis]);
@@ -471,12 +594,17 @@
               refreshGuide();
               panBurst = axis === "pan" ? panBurst + 1 : 0;
               lastAck = {axis, position: target[axis], accepted: true, physicalFeedback: false, at: Date.now()};
+              }
             } finally { pending = false; }
           }
         }
       }
       lastError = null;
     } catch (e) {
+      if(token!==generation||!running)return;
+      if(e.code==="head_transport" && mode!=="observe" && trackingContextActive(token)){
+        beginRecovery(e);schedule(token);return;
+      }
       stop(e.message || String(e));
       return;
     }
@@ -484,6 +612,8 @@
   }
   function stop(reason = "Stopped by operator") {
     running = false; mode = "off"; generation++;
+    recovery.active=false;
+    attentionRevision++;
     walkGateSeq++; walkGateBusy = false;
     attentionUntil = 0; nextAttentionAt = 0; faceStreak = 0;
     if (timer) clearTimeout(timer);
@@ -540,6 +670,8 @@
         ["coexist", "attend"].includes(desired) && (root.paused || root._pauseHard))
       throw Error("GrowBot changed pause state during tracking startup");
     mode = desired; running = true; lastVideoTime = -1; lastFace = null; count = 0; frames = 0; lastFrameAt = null; lastError = null;
+    attentionHeld = false; attentionRevision++; trackingCommands = 0;
+    recovery={active:false,startedAt:0,nextAt:0,attempts:0,successes:0};
     yieldUntil = 0; bodyBusy = false; lastBodyCheck = 0; panBurst = 0;
     needsResync = !!preflight?.bodyBusy;
     attentionUntil = 0; nextAttentionAt = Date.now() + 1500; faceStreak = 0;
@@ -555,8 +687,10 @@
       target: {...target}, commanded: {...commanded}, baseline: {...baseline},
       headAim: headSampledAt && panInverted !== null ? headAim(commanded, panInverted) : null,
       panInverted,
-      headSampledAt, axisStep: {...axisStep}, lastAck, lastError,
-      yieldingToGrowBot: Date.now() < yieldUntil, bodyBusy,
+      headSampledAt, axisStep: {...axisStep}, lastAck, lastError, lastFault,
+      recovery:{...recovery},
+      yieldingToGrowBot: running && (attentionHeld || Date.now() < yieldUntil), bodyBusy,
+      attentionHeld, trackingCommands,
       attentionActive: mode === "attend" && Date.now() < attentionUntil,
       nextAttentionMs: mode === "attend" ? Math.max(0, nextAttentionAt - Date.now()) : 0,
       walkGateBusy, walkGateError,
@@ -589,6 +723,7 @@
         return;
       }
       if (name !== "track face" && name !== "stop tracking") {
+        if (/^look (left|right|up|down|ahead)$/.test(name)) holdForLook();
         walkGateSeq++; walkGateBusy = false; attentionUntil = 0;
         return originalMoveLegs.apply(this, arguments);
       }
@@ -604,10 +739,12 @@
         return;
       }
       if (running && mode === "coexist") {
+        resumeAttention();
         try { root._moveReport(attempt, "accepted", "face_tracking_already_active"); } catch {}
         return;
       }
       if (running && mode === "attend") {
+        resumeAttention();
         attentionUntil = Date.now() + 4500;
         nextAttentionAt = Date.now() + 12000;
         try { root._moveReport(attempt, "accepted", "face_attention_requested_briefly"); } catch {}
@@ -659,9 +796,12 @@
       const intent = userFaceIntent(message);
       if (intent === "stop") stop("Stopped by direct user command");
       else if (intent === "start" && running && mode === "attend") {
+        resumeAttention();
         attentionUntil = Date.now() + 4500;
         nextAttentionAt = Date.now() + 12000;
-      } else if (intent === "start" && !(running && mode === "coexist")) {
+      } else if (intent === "start" && running && mode === "coexist") {
+        resumeAttention();
+      } else if (intent === "start") {
         if (!root.paused && !root._pauseHard && video())
           start({mode: "coexist", durationMs: 20000}).catch(error => {
             lastError = error.message || String(error);
@@ -696,6 +836,6 @@
     if (guide) guide.value = removeGuide(guide.value);
     return status();
   }
-  return {start, stop, status, preflight: headPreflight, headForward, look, quickLook, installTool, uninstallTool,
+  return {start, stop, status, preflight: headPreflight, headForward, benchCenter, look, quickLook, installTool, uninstallTool,
     _test: {chooseFace, smoothFace, nextTarget, toSemantic, savedLookFrames, userFaceIntent, speechToggleIntent, travelDirection, headAim, quickLookPosition}};
 });
