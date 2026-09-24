@@ -1,0 +1,45 @@
+{
+  "algorithm": "sha256",
+  "files": [
+    {
+      "path": "reports/2026-09-24-false-tip/README.md",
+      "bytes": 8526,
+      "sha256": "008dd202d6f8c07b87833389d09f741496455f6d2b660b8f977078ae4e86bf60"
+    },
+    {
+      "path": "reports/2026-09-24-false-tip/trial.json",
+      "bytes": 77012,
+      "sha256": "6ac589ebf3a9fd6ef1557b93a5a1aba3e2fb8ce7b8f3a4c7d49b1943c398be68"
+    },
+    {
+      "path": "reports/2026-09-24-false-tip/verify.cjs",
+      "bytes": 1812,
+      "sha256": "e884f14509119cb801c4b61bef80c34beee42d99e96466b09ce8ca5ddb352a18"
+    },
+    {
+      "path": "prototype/tilt-guard/README.md",
+      "bytes": 4196,
+      "sha256": "610fcb713e3a67b03ccc5109c9f8b64b5d344b057adaaa59b84dfd9f44360f9f"
+    },
+    {
+      "path": "prototype/tilt-guard/tilt-guard.js",
+      "bytes": 4336,
+      "sha256": "d1019d9574f7726ea88a7aec30363059bd16b30812b7ddb442bfa391605678d6"
+    },
+    {
+      "path": "prototype/tilt-guard/test.cjs",
+      "bytes": 1916,
+      "sha256": "81c93c589401a90784075362a1b72c422ccda2fc1f6e90c91b8a7bbd1b6f6a42"
+    },
+    {
+      "path": "prototype/tilt-guard/control.cjs",
+      "bytes": 833,
+      "sha256": "33de22ed692d8cfa41b9c4755d411321d57071e7713fa2e90d140e63165dd2ae"
+    },
+    {
+      "path": "prototype/tilt-guard/trial.cjs",
+      "bytes": 2647,
+      "sha256": "0c7c069e60a8efe28b4d80326f1524a9583848e5fb9c18632d3e0fc5a46038d5"
+    }
+  ]
+}
