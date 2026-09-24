@@ -2,6 +2,8 @@
 
 ## Scope and reading this ledger
 
+For the subsequent floor observation and model-dispatch repair, see [Model-to-head dispatch investigation](ACTION-DISPATCH-TEST.md). Its power-off 0.6 results do not replace the physical 0.5 bench results below.
+
 This answers Brit's stationary-head handoff request for **GrowBot**, not OwlBot. Later entries supersede earlier pending-result notes; the unsuccessful trials are retained. Command acknowledgments and simulated tests are not physical position feedback. Deliberate saved looks in these powered bench trials are operator-selected through the normal gesture wire path, not model-selected choices. No combined walking/tracking result is claimed.
 
 ## Result summary for Brit

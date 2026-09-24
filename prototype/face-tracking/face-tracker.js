@@ -9,7 +9,7 @@
 })(typeof window === "undefined" ? globalThis : window, function (root) {
   "use strict";
 
-  const VERSION = "stationary-0.5";
+  const VERSION = "stationary-0.6";
   const PACKAGE = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/+esm";
   const WASM = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm";
   const MODEL = "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite";
@@ -66,10 +66,13 @@
         "COMMANDED HEAD AIM: unknown until a fresh Pico head reading. Do not assume the camera faces forward.\n") +
       "OPTIONAL FACE TRACKING TOOL (stationary, head only): If you want to briefly follow a person's face with your head, emit gesture:\"track face\" in this reply. It runs for at most 20 seconds, then shuts itself off. To stop sooner, emit gesture:\"stop tracking\". These two commands are tool signals, not leg poses. Your usual saved look gestures still work and take priority. When natural attention is enabled, a face can draw a brief glance without a request; you may instead look at an object your own vision finds interesting. Do not claim to identify someone from face position alone. Before a new walk, the attention tool returns the commanded head aim forward; if it cannot confirm that command, do not claim to have walked.\n" +
       "HEAD OWNERSHIP: A deliberate look suspends face following until you explicitly select gesture:\"track face\" again. A timer does not end your interest in something else. Losing a face stops new tracking targets; it does not release head support.\n" +
+      // GrowBot's current tryParse preserves actions only when say is a string.
+      // An omitted field is not equivalent to an empty string on that host.
+      "ACTION OUTPUT CONTRACT: Always include a top-level say string, even for silent actions. For example, a silent head look is {\"say\":\"\",\"gesture\":\"look left\"}. Use one exact saved gesture name in the top-level gesture field. If you choose a movement, include its action in the same reply; spoken plans alone do not move the body. Queued means awaiting controller checks, not moved. Commanded target reached is not physical position feedback.\n" +
       (recovery.active ? "HEAD TRACKING LINK: recovering using read-only checks; do not claim tracking has resumed.\n" : "") +
       (motionSpeech ?
         "MOTION SPEECH ON FOR TROUBLESHOOTING: You may briefly speak the requested motion and its result, but do not claim physical movement from an ACK alone.\n" :
-        "MOTION SPEECH OFF: Body motion requests, directions, saved look gestures, and face tracking are normally silent. If your reply is only a movement, omit say or leave it empty. Do not read the motion request aloud or announce 'face tracking on.' Continue ordinary conversation when the person actually asks to talk.\n") + GUIDE_END;
+        "MOTION SPEECH OFF: Body motion requests, directions, saved look gestures, and face tracking are normally silent. If your reply is only a movement, include say:\"\"; never omit say. Do not read the motion request aloud or announce 'face tracking on.' Continue ordinary conversation when the person actually asks to talk.\n") + GUIDE_END;
   }
   function removeGuide(value) {
     const start = value.indexOf(GUIDE_START), end = value.indexOf(GUIDE_END);
@@ -714,8 +717,12 @@
         attentionUntil = 0;
         let attempt = null;
         try { if (typeof root._moveRequest === "function") attempt = root._moveRequest(name); } catch {}
+        // The host checks _moveLast immediately after moveLegs returns. Mark
+        // admission before awaiting calibration/ACKs, otherwise its guard emits
+        // a false no_body_commands failure. Admission does not mean PWM was sent.
+        try { root._moveReport(attempt, "accepted", "head_request_queued_not_yet_sent"); } catch {}
         quickLook(name).then(() => {
-          try { root._moveReport(attempt, "accepted", "paced_head_target_sent_unverified"); } catch {}
+          try { root._moveReport(attempt, "completed", "head_target_reached_commanded_state_only"); } catch {}
         }).catch(error => {
           lastError = error.message || String(error);
           try { root._moveReport(attempt, "blocked", "quick_look_failed:" + lastError); } catch {}

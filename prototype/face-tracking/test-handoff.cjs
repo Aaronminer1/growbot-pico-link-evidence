@@ -49,6 +49,38 @@ function harness(speed=400,implementation='head-speed-400-cadence-v2'){
     moves(){return requests.filter(m=>m.body_action==='head').length;}};
 }
 (async()=>{
+  // Mirror the host's synchronous guard after moveLegs(): an async bridge
+  // must admit its request before returning, or the host marks it blocked.
+  const lifecycle=harness();lifecycle.root.paused=false;
+  const outcomes=[];let moveId=0;
+  lifecycle.root._moveRequest=action=>(lifecycle.root._moveLast={id:++moveId,action,state:'requested'});
+  lifecycle.root._moveReport=(a,state,reason)=>{if(!a)return;a.state=state;outcomes.push({state,reason});};
+  lifecycle.api.installTool();await lifecycle.api.start({mode:'attend',durationMs:60000});await flush();
+  lifecycle.root.moveLegs({say:'',gesture:'look left'});
+  if(lifecycle.root._moveLast?.state==='requested')
+    lifecycle.root._moveReport(lifecycle.root._moveLast,'blocked','no_body_commands');
+  assert.equal(outcomes[0]?.state,'accepted','async look must be admitted before the host guard');
+  assert.equal(lifecycle.moves(),0,'admission is not evidence a target was sent');
+  await flush();await flush();
+  assert(outcomes.some(o=>o.state==='completed'&&o.reason==='head_target_reached_commanded_state_only'));
+  assert(!outcomes.some(o=>o.reason==='no_body_commands'));
+  lifecycle.api.stop();
+  const guide=lifecycle.root.document.getElementById('moveGuide').value;
+  const silentExample=JSON.parse(guide.match(/a silent head look is (\{[^\n]+?\})/)[1]);
+  assert.equal(silentExample.say,'');assert.equal(silentExample.gesture,'look left');
+  assert(guide.includes('never omit say'));assert(!guide.includes('omit say or leave it empty'));
+  // A real failure must remain a failure; early admission cannot fabricate
+  // controller completion or resend a motion when the preflight times out.
+  lifecycle.setFaces(false);
+  await lifecycle.api.start({mode:'attend',durationMs:60000});await flush();
+  lifecycle.blockReads(true);const failureStart=outcomes.length,beforeFailure=lifecycle.moves();
+  lifecycle.root.moveLegs({say:'',gesture:'look right'});
+  assert.equal(outcomes[failureStart].state,'accepted');
+  await lifecycle.advance(3100);await flush();
+  assert(outcomes.slice(failureStart).some(o=>o.state==='blocked'&&o.reason.startsWith('quick_look_failed:')));
+  assert(!outcomes.slice(failureStart).some(o=>o.state==='completed'));
+  assert.equal(lifecycle.moves(),beforeFailure);lifecycle.api.stop();
+
   const h=harness();await h.api.start({mode:'track',durationMs:60000});await flush();
   assert(h.moves()>0);await h.api.look('look left');const held=h.moves();
   for(let i=0;i<30;i++)await h.advance(500);
