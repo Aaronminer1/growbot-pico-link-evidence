@@ -1,0 +1,13 @@
+{
+  "provenance": "Transcribed from structured read-only diagnostic tool output observed earlier in the same September 29 session; not a complete original log export.",
+  "physicalMotionMeasured": false,
+  "events": [
+    {"t":1790692178592,"e":"action_outcome","id":24,"action":"walk:fwd","state":"requested","xt":1790692178592},
+    {"t":1790692178592,"e":"action_outcome","id":24,"action":"walk:fwd","state":"accepted","reason":"loading_policy"},
+    {"t":1790692178594,"e":"action_outcome","id":24,"action":"walk:fwd","state":"started","reason":"stance_commands","gait":"official","gain":0.4,"cal":{"L_OFF":0,"R_OFF":0,"L_SIGN":-1,"R_SIGN":1,"gain":0.4,"turn":0,"IMU_SIGN":[1,-1,1]}},
+    {"t":1790692179798,"e":"walk_start","ask":120,"granted":120,"gait":"official"},
+    {"t":1790692299806,"e":"hold_start","s":60,"mode":"policy-idle","l":90,"r":90},
+    {"t":1790692299806,"e":"action_outcome","id":24,"action":"walk:fwd","state":"completed","reason":"done","holding":true},
+    {"t":1790692299806,"e":"walk_end","ms":120008,"why":"done","holding":true,"n":3001,"hz":25,"sat":0,"sw":0.277,"yaw":-20,"tilt":9,"gi":[-18,-15,-14]}
+  ]
+}

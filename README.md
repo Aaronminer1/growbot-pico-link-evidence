@@ -6,6 +6,7 @@ not official GrowBot firmware or an installation package.
 
 ## Start here
 
+- **[September 29: upstream upright-phone tilt fix confirmed live, sanitized current log, earlier walk result, and body-direction/startup findings](reports/2026-09-29-upstream-tilt/README.md)**
 - **[False tipping during forward walking: corrected ten-second floor test, paired IMU evidence and session-only fix](reports/2026-09-24-false-tip/README.md)**
 - **[GrowBot body integration: installed version, walk/turn/head command paths and saved gestures](INTEGRATION-NOTE.md)**
 - **[Experimental on-demand face-tracking prototype and bench results](prototype/face-tracking/README.md)**

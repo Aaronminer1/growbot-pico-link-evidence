@@ -1,0 +1,2052 @@
+{
+  "capturedAt": 1790693188061,
+  "page": "/v3/next.html",
+  "paused": true,
+  "hidden": false,
+  "nativeRunSourceMatches": true,
+  "usesPhoneVertical": true,
+  "temporaryTiltPatchPresent": false,
+  "sourceHashes": {
+    "runGait": "ac200702a09a9f79489ed1f39ef84075ed30705d8510a54e4f0dfa15614a2ff2",
+    "phoneVertical": "532fcc7d23204e7b3e95634cebef37331a24cabccd20ffeb6ce7694e579032fa",
+    "phoneTiltDegrees": "009643db2096ac46893653ddcb245e249fdc789ee4d737a30944726de4a42094"
+  },
+  "redaction": "Allowlisted diagnostic fields only; speech, user text, identities, session links, URLs, memory, credentials and media omitted.",
+  "eventCount": 240,
+  "firstEventAt": 1790692357691,
+  "lastEventAt": 1790692974465,
+  "events": [
+    {
+      "t": 1790692357691,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        1
+      ]
+    },
+    {
+      "t": 1790692357691,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692363455,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692367969,
+      "e": "action_outcome",
+      "id": 27,
+      "action": "gesture",
+      "state": "completed",
+      "reason": "command_window_ended_unverified"
+    },
+    {
+      "t": 1790692367970,
+      "e": "rest_tall",
+      "ok": 1,
+      "l": 50,
+      "r": 130,
+      "ms": 600,
+      "start": "takeover"
+    },
+    {
+      "t": 1790692370071,
+      "e": "model_usage",
+      "id": 47,
+      "phase": "think",
+      "lane": "stream",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 9989,
+      "completion_tokens": 49,
+      "total_tokens": 10038
+    },
+    {
+      "t": 1790692370071,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "complete",
+      "chars": 83,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "say",
+      "speechGate": "ordinary",
+      "totalMs": 2411,
+      "headersMs": 2329,
+      "firstTextMs": 2329,
+      "gateMs": 2329,
+      "act": "none"
+    },
+    {
+      "t": 1790692370071,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "eye": "f",
+      "vs": 0,
+      "lum": 90,
+      "fd": 0.47,
+      "dir": "",
+      "moved": "still",
+      "ms": 2411,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692371658,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        0
+      ]
+    },
+    {
+      "t": 1790692371658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692375304,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692378517,
+      "e": "ear_stale"
+    },
+    {
+      "t": 1790692392039,
+      "e": "reflex_fire",
+      "trig": "loud",
+      "act": "move"
+    },
+    {
+      "t": 1790692395720,
+      "e": "vad_shadow",
+      "ms": 2677,
+      "r": 48000
+    },
+    {
+      "t": 1790692395720,
+      "e": "route",
+      "ms": 2677
+    },
+    {
+      "t": 1790692396714,
+      "e": "stt",
+      "ms": 993,
+      "lane": "pcm",
+      "n": 30
+    },
+    {
+      "t": 1790692396714,
+      "e": "user"
+    },
+    {
+      "t": 1790692398602,
+      "e": "model_usage",
+      "id": 48,
+      "phase": "think",
+      "lane": "stream",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 9955,
+      "completion_tokens": 22,
+      "total_tokens": 9977
+    },
+    {
+      "t": 1790692398602,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "complete",
+      "chars": 75,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "say",
+      "speechGate": "ordinary",
+      "totalMs": 1887,
+      "headersMs": 1791,
+      "firstTextMs": 1791,
+      "gateMs": 1791,
+      "act": "none"
+    },
+    {
+      "t": 1790692398602,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "eye": "f",
+      "vs": 0,
+      "lum": 91,
+      "fd": 0.62,
+      "dir": "",
+      "moved": "still",
+      "ms": 1887,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692399658,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        0
+      ]
+    },
+    {
+      "t": 1790692399658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692404689,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692406566,
+      "e": "reflex_fire",
+      "trig": "loud",
+      "act": "move"
+    },
+    {
+      "t": 1790692409393,
+      "e": "vad_shadow",
+      "ms": 1593,
+      "r": 48000
+    },
+    {
+      "t": 1790692409393,
+      "e": "route",
+      "ms": 1593
+    },
+    {
+      "t": 1790692410128,
+      "e": "stt",
+      "ms": 734,
+      "lane": "pcm",
+      "n": 22
+    },
+    {
+      "t": 1790692410128,
+      "e": "user"
+    },
+    {
+      "t": 1790692412121,
+      "e": "door",
+      "r": 0.016
+    },
+    {
+      "t": 1790692412378,
+      "e": "model_usage",
+      "id": 49,
+      "phase": "think",
+      "lane": "stream",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 9964,
+      "completion_tokens": 68,
+      "total_tokens": 10032
+    },
+    {
+      "t": 1790692412378,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "complete",
+      "chars": 91,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "say",
+      "speechGate": "ordinary",
+      "totalMs": 2249,
+      "headersMs": 2148,
+      "firstTextMs": 2148,
+      "gateMs": 2149,
+      "act": "none"
+    },
+    {
+      "t": 1790692412378,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "eye": "f",
+      "vs": 0,
+      "lum": 91,
+      "fd": 0.53,
+      "dir": "",
+      "moved": "still",
+      "ms": 2248,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692413658,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        0
+      ]
+    },
+    {
+      "t": 1790692413658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692418782,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692419127,
+      "e": "door",
+      "r": 0.014
+    },
+    {
+      "t": 1790692421541,
+      "e": "reflex_fire",
+      "trig": "loud",
+      "act": "move"
+    },
+    {
+      "t": 1790692426126,
+      "e": "vad_shadow",
+      "ms": 3477,
+      "r": 48000
+    },
+    {
+      "t": 1790692426126,
+      "e": "route",
+      "ms": 3477
+    },
+    {
+      "t": 1790692427228,
+      "e": "stt",
+      "ms": 1102,
+      "lane": "pcm",
+      "n": 36
+    },
+    {
+      "t": 1790692427229,
+      "e": "user"
+    },
+    {
+      "t": 1790692429535,
+      "e": "model_usage",
+      "id": 50,
+      "phase": "think",
+      "lane": "stream",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 9983,
+      "completion_tokens": 138,
+      "total_tokens": 10121
+    },
+    {
+      "t": 1790692429535,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "complete",
+      "chars": 41,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "say",
+      "speechGate": "ordinary",
+      "totalMs": 2306,
+      "headersMs": 2250,
+      "firstTextMs": 2250,
+      "gateMs": 2251,
+      "act": "none"
+    },
+    {
+      "t": 1790692429536,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "eye": "f",
+      "vs": 0,
+      "lum": 92,
+      "fd": 0.36,
+      "dir": "",
+      "moved": "still",
+      "ms": 2306,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692429658,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        0
+      ]
+    },
+    {
+      "t": 1790692429658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692432684,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692434895,
+      "e": "door",
+      "r": 0.037
+    },
+    {
+      "t": 1790692435015,
+      "e": "reflex_fire",
+      "trig": "loud",
+      "act": "move"
+    },
+    {
+      "t": 1790692437563,
+      "e": "vad_shadow",
+      "ms": 1497,
+      "r": 48000
+    },
+    {
+      "t": 1790692437563,
+      "e": "route",
+      "ms": 1497
+    },
+    {
+      "t": 1790692438490,
+      "e": "stt",
+      "ms": 927,
+      "lane": "pcm",
+      "n": 20
+    },
+    {
+      "t": 1790692438490,
+      "e": "stt_lang",
+      "code": "en"
+    },
+    {
+      "t": 1790692438490,
+      "e": "user"
+    },
+    {
+      "t": 1790692440727,
+      "e": "model_usage",
+      "id": 51,
+      "phase": "think",
+      "lane": "stream",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 9966,
+      "completion_tokens": 47,
+      "total_tokens": 10013
+    },
+    {
+      "t": 1790692440727,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "complete",
+      "chars": 72,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "say",
+      "speechGate": "ordinary",
+      "totalMs": 2236,
+      "headersMs": 2149,
+      "firstTextMs": 2150,
+      "gateMs": 2150,
+      "act": "none"
+    },
+    {
+      "t": 1790692440727,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "eye": "f",
+      "vs": 0,
+      "lum": 92,
+      "fd": 0.46,
+      "dir": "",
+      "moved": "still",
+      "ms": 2236,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692441658,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        3
+      ]
+    },
+    {
+      "t": 1790692441658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692445658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692446268,
+      "e": "door",
+      "r": 0.019
+    },
+    {
+      "t": 1790692446517,
+      "e": "reflex_fire",
+      "trig": "loud",
+      "act": "move"
+    },
+    {
+      "t": 1790692448937,
+      "e": "vad_shadow",
+      "ms": 1433,
+      "r": 48000
+    },
+    {
+      "t": 1790692448937,
+      "e": "route",
+      "ms": 1433
+    },
+    {
+      "t": 1790692449451,
+      "e": "stt",
+      "ms": 514,
+      "lane": "pcm",
+      "n": 20
+    },
+    {
+      "t": 1790692449451,
+      "e": "stt_lang",
+      "code": "en"
+    },
+    {
+      "t": 1790692449452,
+      "e": "user"
+    },
+    {
+      "t": 1790692451710,
+      "e": "model_usage",
+      "id": 52,
+      "phase": "think",
+      "lane": "stream",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 9914,
+      "completion_tokens": 53,
+      "total_tokens": 9967
+    },
+    {
+      "t": 1790692451711,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "complete",
+      "chars": 116,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "other",
+      "speechGate": "ordinary",
+      "totalMs": 2258,
+      "headersMs": 2144,
+      "firstTextMs": 2144,
+      "gateMs": 2146,
+      "act": "none"
+    },
+    {
+      "t": 1790692451711,
+      "e": "action_outcome",
+      "id": 28,
+      "action": "gesture",
+      "state": "requested"
+    },
+    {
+      "t": 1790692451711,
+      "e": "gesture",
+      "r": "play",
+      "n": "look right",
+      "steps": 8
+    },
+    {
+      "t": 1790692451711,
+      "e": "action_outcome",
+      "id": 28,
+      "action": "gesture",
+      "state": "started",
+      "reason": "commands_sent_unverified",
+      "requested_steps": 8,
+      "requested_ms": [
+        137,
+        149,
+        1500,
+        1500,
+        1500,
+        1500,
+        2000,
+        2000
+      ],
+      "steps": [
+        {
+          "l": 87,
+          "r": 87,
+          "ms": 137
+        },
+        {
+          "l": 93,
+          "r": 93,
+          "ms": 149
+        },
+        {
+          "l": 88,
+          "r": 88,
+          "ms": 1500
+        },
+        {
+          "l": 94,
+          "r": 94,
+          "ms": 1500
+        },
+        {
+          "l": 103,
+          "r": 103,
+          "ms": 1500
+        },
+        {
+          "l": 92,
+          "r": 92,
+          "ms": 1500
+        },
+        {
+          "l": 86,
+          "r": 86,
+          "ms": 2000
+        },
+        {
+          "l": 90,
+          "r": 90,
+          "ms": 2000
+        }
+      ],
+      "duration_ms": 10286,
+      "slew": 400,
+      "start": "cold",
+      "floor_ms": [
+        108,
+        15,
+        13,
+        15,
+        23,
+        28,
+        15,
+        10
+      ]
+    },
+    {
+      "t": 1790692451711,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "eye": "f",
+      "vs": 0,
+      "lum": 92,
+      "fd": 0.38,
+      "dir": "",
+      "moved": "started:gesture",
+      "ms": 2256,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692451713,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        0
+      ]
+    },
+    {
+      "t": 1790692451713,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692452751,
+      "e": "face_track",
+      "state": "welcome_back"
+    },
+    {
+      "t": 1790692458863,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692461997,
+      "e": "action_outcome",
+      "id": 28,
+      "action": "gesture",
+      "state": "completed",
+      "reason": "command_window_ended_unverified"
+    },
+    {
+      "t": 1790692461998,
+      "e": "rest_tall",
+      "ok": 1,
+      "l": 50,
+      "r": 130,
+      "ms": 600,
+      "start": "takeover"
+    },
+    {
+      "t": 1790692463697,
+      "e": "vad_shadow",
+      "ms": 2595,
+      "r": 48000
+    },
+    {
+      "t": 1790692463697,
+      "e": "route",
+      "ms": 2595
+    },
+    {
+      "t": 1790692464335,
+      "e": "stt",
+      "ms": 638,
+      "lane": "pcm",
+      "n": 30
+    },
+    {
+      "t": 1790692464335,
+      "e": "user"
+    },
+    {
+      "t": 1790692466264,
+      "e": "model_usage",
+      "id": 53,
+      "phase": "think",
+      "lane": "stream",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 9935,
+      "completion_tokens": 56,
+      "total_tokens": 9991
+    },
+    {
+      "t": 1790692466264,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "complete",
+      "chars": 144,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "say",
+      "speechGate": "ordinary",
+      "totalMs": 1928,
+      "headersMs": 1815,
+      "firstTextMs": 1815,
+      "gateMs": 1816,
+      "act": "none"
+    },
+    {
+      "t": 1790692466265,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "eye": "f",
+      "vs": 0,
+      "lum": 107,
+      "fd": 0.62,
+      "dir": "",
+      "moved": "still",
+      "ms": 1928,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692467658,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        0
+      ]
+    },
+    {
+      "t": 1790692467658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692475183,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692484117,
+      "e": "ear_stale"
+    },
+    {
+      "t": 1790692490717,
+      "e": "ear_stale"
+    },
+    {
+      "t": 1790692503017,
+      "e": "ear_stale"
+    },
+    {
+      "t": 1790692505157,
+      "e": "model_usage",
+      "id": 54,
+      "phase": "think",
+      "lane": "buffered",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 9526,
+      "completion_tokens": 18,
+      "total_tokens": 9544
+    },
+    {
+      "t": 1790692505157,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "buffered",
+      "chars": 10,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "say",
+      "speechGate": "held",
+      "totalMs": 1498,
+      "act": "none"
+    },
+    {
+      "t": 1790692505157,
+      "e": "think",
+      "k": "tick",
+      "nf": 1,
+      "eye": "f",
+      "vs": 0,
+      "lum": 109,
+      "fd": 0.35,
+      "dir": "",
+      "moved": "still",
+      "ms": 1498,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692505165,
+      "e": "dream_start",
+      "trig": "auto"
+    },
+    {
+      "t": 1790692508225,
+      "e": "model_usage",
+      "id": 55,
+      "phase": "dream",
+      "lane": "buffered",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 5981,
+      "completion_tokens": 481,
+      "total_tokens": 6462
+    },
+    {
+      "t": 1790692508229,
+      "e": "dream"
+    },
+    {
+      "t": 1790692509658,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        0
+      ]
+    },
+    {
+      "t": 1790692509658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692527146,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692530317,
+      "e": "ear_stale"
+    },
+    {
+      "t": 1790692531422,
+      "e": "door",
+      "r": 0.041
+    },
+    {
+      "t": 1790692531674,
+      "e": "reflex_fire",
+      "trig": "loud",
+      "act": "move"
+    },
+    {
+      "t": 1790692533580,
+      "e": "vad_shadow",
+      "ms": 1055,
+      "r": 48000
+    },
+    {
+      "t": 1790692533580,
+      "e": "route",
+      "ms": 1055
+    },
+    {
+      "t": 1790692534336,
+      "e": "stt",
+      "ms": 756,
+      "lane": "pcm",
+      "n": 16
+    },
+    {
+      "t": 1790692534336,
+      "e": "stt_lang",
+      "code": "en"
+    },
+    {
+      "t": 1790692534336,
+      "e": "user"
+    },
+    {
+      "t": 1790692536424,
+      "e": "model_usage",
+      "id": 56,
+      "phase": "think",
+      "lane": "stream",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 9928,
+      "completion_tokens": 64,
+      "total_tokens": 9992
+    },
+    {
+      "t": 1790692536424,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "complete",
+      "chars": 114,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "say",
+      "speechGate": "ordinary",
+      "totalMs": 2087,
+      "headersMs": 1984,
+      "firstTextMs": 1984,
+      "gateMs": 1984,
+      "act": "none"
+    },
+    {
+      "t": 1790692536424,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "eye": "f",
+      "vs": 0,
+      "lum": 105,
+      "fd": 0.51,
+      "dir": "",
+      "moved": "still",
+      "ms": 2087,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692537658,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        0
+      ]
+    },
+    {
+      "t": 1790692537658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692540751,
+      "e": "body_connection",
+      "state": "status",
+      "previous": "status",
+      "checks": 30803,
+      "age": 4754,
+      "hb": 1,
+      "rep": 14
+    },
+    {
+      "t": 1790692544778,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692545142,
+      "e": "reflex_fire",
+      "trig": "loud",
+      "act": "move"
+    },
+    {
+      "t": 1790692547415,
+      "e": "vad_shadow",
+      "ms": 1291,
+      "r": 48000
+    },
+    {
+      "t": 1790692547415,
+      "e": "route",
+      "ms": 1291
+    },
+    {
+      "t": 1790692548237,
+      "e": "stt",
+      "ms": 822,
+      "lane": "pcm",
+      "n": 18
+    },
+    {
+      "t": 1790692548237,
+      "e": "stt_lang",
+      "code": "en"
+    },
+    {
+      "t": 1790692548237,
+      "e": "user"
+    },
+    {
+      "t": 1790692550378,
+      "e": "model_usage",
+      "id": 57,
+      "phase": "think",
+      "lane": "stream",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 9936,
+      "completion_tokens": 29,
+      "total_tokens": 9965
+    },
+    {
+      "t": 1790692550378,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "complete",
+      "chars": 59,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "say",
+      "speechGate": "ordinary",
+      "totalMs": 2140,
+      "headersMs": 2074,
+      "firstTextMs": 2074,
+      "gateMs": 2074,
+      "act": "none"
+    },
+    {
+      "t": 1790692550378,
+      "e": "action_outcome",
+      "id": 29,
+      "action": "gesture",
+      "state": "requested"
+    },
+    {
+      "t": 1790692550378,
+      "e": "gesture",
+      "r": "play",
+      "n": "look ahead",
+      "steps": 8
+    },
+    {
+      "t": 1790692550379,
+      "e": "action_outcome",
+      "id": 29,
+      "action": "gesture",
+      "state": "started",
+      "reason": "commands_sent_unverified",
+      "requested_steps": 8,
+      "requested_ms": [
+        137,
+        149,
+        163,
+        181,
+        193,
+        197,
+        2000,
+        2000
+      ],
+      "steps": [
+        {
+          "l": 87,
+          "r": 87,
+          "ms": 137
+        },
+        {
+          "l": 93,
+          "r": 93,
+          "ms": 149
+        },
+        {
+          "l": 88,
+          "r": 88,
+          "ms": 163
+        },
+        {
+          "l": 97,
+          "r": 97,
+          "ms": 181
+        },
+        {
+          "l": 100,
+          "r": 100,
+          "ms": 193
+        },
+        {
+          "l": 92,
+          "r": 92,
+          "ms": 197
+        },
+        {
+          "l": 86,
+          "r": 86,
+          "ms": 2000
+        },
+        {
+          "l": 90,
+          "r": 90,
+          "ms": 2000
+        }
+      ],
+      "duration_ms": 5020,
+      "slew": 400,
+      "start": "cold",
+      "floor_ms": [
+        108,
+        15,
+        13,
+        23,
+        8,
+        20,
+        15,
+        10
+      ]
+    },
+    {
+      "t": 1790692550379,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "eye": "f",
+      "vs": 0,
+      "lum": 105,
+      "fd": 0.48,
+      "dir": "",
+      "moved": "started:gesture",
+      "ms": 2141,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692550750,
+      "e": "face_track",
+      "state": "welcome_back"
+    },
+    {
+      "t": 1790692551658,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        0
+      ]
+    },
+    {
+      "t": 1790692551658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692553280,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692555399,
+      "e": "action_outcome",
+      "id": 29,
+      "action": "gesture",
+      "state": "completed",
+      "reason": "command_window_ended_unverified"
+    },
+    {
+      "t": 1790692555400,
+      "e": "rest_tall",
+      "ok": 1,
+      "l": 50,
+      "r": 130,
+      "ms": 600,
+      "start": "takeover"
+    },
+    {
+      "t": 1790692558187,
+      "e": "vad_shadow",
+      "ms": 3479,
+      "r": 48000
+    },
+    {
+      "t": 1790692558187,
+      "e": "route",
+      "ms": 3479
+    },
+    {
+      "t": 1790692559016,
+      "e": "stt",
+      "ms": 829,
+      "lane": "pcm",
+      "n": 36
+    },
+    {
+      "t": 1790692559017,
+      "e": "user"
+    },
+    {
+      "t": 1790692561770,
+      "e": "model_usage",
+      "id": 58,
+      "phase": "think",
+      "lane": "stream",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 9958,
+      "completion_tokens": 44,
+      "total_tokens": 10002
+    },
+    {
+      "t": 1790692561770,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "complete",
+      "chars": 111,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "say",
+      "speechGate": "ordinary",
+      "totalMs": 2753,
+      "headersMs": 2660,
+      "firstTextMs": 2660,
+      "gateMs": 2661,
+      "act": "none"
+    },
+    {
+      "t": 1790692561770,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "eye": "f",
+      "vs": 0,
+      "lum": 64,
+      "fd": 0.62,
+      "dir": "",
+      "moved": "still",
+      "ms": 2752,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692563658,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        0
+      ]
+    },
+    {
+      "t": 1790692563658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692567040,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692572618,
+      "e": "ear_stale"
+    },
+    {
+      "t": 1790692582856,
+      "e": "reflex_fire",
+      "trig": "loud",
+      "act": "move"
+    },
+    {
+      "t": 1790692587098,
+      "e": "vad_shadow",
+      "ms": 2979,
+      "r": 48000
+    },
+    {
+      "t": 1790692587098,
+      "e": "route",
+      "ms": 2979
+    },
+    {
+      "t": 1790692588407,
+      "e": "stt",
+      "ms": 1308,
+      "lane": "pcm",
+      "n": 33
+    },
+    {
+      "t": 1790692588408,
+      "e": "user"
+    },
+    {
+      "t": 1790692590049,
+      "e": "model_usage",
+      "id": 59,
+      "phase": "think",
+      "lane": "stream",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 9942,
+      "completion_tokens": 38,
+      "total_tokens": 9980
+    },
+    {
+      "t": 1790692590049,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "complete",
+      "chars": 90,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "say",
+      "speechGate": "ordinary",
+      "totalMs": 1641,
+      "headersMs": 1540,
+      "firstTextMs": 1540,
+      "gateMs": 1541,
+      "act": "none"
+    },
+    {
+      "t": 1790692590050,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "eye": "f",
+      "vs": 0,
+      "lum": 110,
+      "fd": 3.87,
+      "dir": "",
+      "moved": "still",
+      "ms": 1641,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692591658,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        0
+      ]
+    },
+    {
+      "t": 1790692591658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692595053,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692596347,
+      "e": "reflex_fire",
+      "trig": "loud",
+      "act": "move"
+    },
+    {
+      "t": 1790692599556,
+      "e": "vad_shadow",
+      "ms": 2062,
+      "r": 48000
+    },
+    {
+      "t": 1790692599556,
+      "e": "route",
+      "ms": 2062
+    },
+    {
+      "t": 1790692600586,
+      "e": "stt",
+      "ms": 1030,
+      "lane": "pcm",
+      "n": 25
+    },
+    {
+      "t": 1790692600587,
+      "e": "user"
+    },
+    {
+      "t": 1790692602195,
+      "e": "model_usage",
+      "id": 60,
+      "phase": "think",
+      "lane": "stream",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 9931,
+      "completion_tokens": 27,
+      "total_tokens": 9958
+    },
+    {
+      "t": 1790692602195,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "complete",
+      "chars": 99,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "say",
+      "speechGate": "ordinary",
+      "totalMs": 1608,
+      "headersMs": 1520,
+      "firstTextMs": 1521,
+      "gateMs": 1522,
+      "act": "none"
+    },
+    {
+      "t": 1790692602195,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "eye": "f",
+      "vs": 0,
+      "lum": 118,
+      "fd": 2.95,
+      "dir": "",
+      "moved": "still",
+      "ms": 1607,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692603658,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        0
+      ]
+    },
+    {
+      "t": 1790692603658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692606996,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692609907,
+      "e": "reflex_fire",
+      "trig": "loud",
+      "act": "move"
+    },
+    {
+      "t": 1790692614467,
+      "e": "vad_shadow",
+      "ms": 3342,
+      "r": 48000
+    },
+    {
+      "t": 1790692614467,
+      "e": "route",
+      "ms": 3342
+    },
+    {
+      "t": 1790692617205,
+      "e": "stt",
+      "ms": 2738,
+      "lane": "pcm",
+      "n": 35
+    },
+    {
+      "t": 1790692617206,
+      "e": "user"
+    },
+    {
+      "t": 1790692619001,
+      "e": "model_usage",
+      "id": 61,
+      "phase": "think",
+      "lane": "stream",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 9929,
+      "completion_tokens": 29,
+      "total_tokens": 9958
+    },
+    {
+      "t": 1790692619001,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "complete",
+      "chars": 96,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "say",
+      "speechGate": "ordinary",
+      "totalMs": 1794,
+      "headersMs": 1719,
+      "firstTextMs": 1720,
+      "gateMs": 1720,
+      "act": "none"
+    },
+    {
+      "t": 1790692619001,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "eye": "f",
+      "vs": 0,
+      "lum": 118,
+      "fd": 0.42,
+      "dir": "",
+      "moved": "still",
+      "ms": 1794,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692619658,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        0
+      ]
+    },
+    {
+      "t": 1790692619658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692624906,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692625390,
+      "e": "reflex_fire",
+      "trig": "loud",
+      "act": "move"
+    },
+    {
+      "t": 1790692629470,
+      "e": "reflex_fire",
+      "trig": "loud",
+      "act": "move"
+    },
+    {
+      "t": 1790692631453,
+      "e": "vad_shadow",
+      "ms": 4835,
+      "r": 48000
+    },
+    {
+      "t": 1790692631453,
+      "e": "route",
+      "ms": 4835
+    },
+    {
+      "t": 1790692632601,
+      "e": "stt",
+      "ms": 1148,
+      "lane": "pcm",
+      "n": 48
+    },
+    {
+      "t": 1790692632602,
+      "e": "user"
+    },
+    {
+      "t": 1790692634313,
+      "e": "model_usage",
+      "id": 62,
+      "phase": "think",
+      "lane": "stream",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 9951,
+      "completion_tokens": 35,
+      "total_tokens": 9986
+    },
+    {
+      "t": 1790692634313,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "complete",
+      "chars": 80,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "say",
+      "speechGate": "ordinary",
+      "totalMs": 1711,
+      "headersMs": 1637,
+      "firstTextMs": 1638,
+      "gateMs": 1639,
+      "act": "none"
+    },
+    {
+      "t": 1790692634313,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "eye": "f",
+      "vs": 0,
+      "lum": 120,
+      "fd": 4.84,
+      "dir": "",
+      "moved": "still",
+      "ms": 1710,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692635659,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        0
+      ]
+    },
+    {
+      "t": 1790692635659,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692639466,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692640593,
+      "e": "reflex_fire",
+      "trig": "loud",
+      "act": "move"
+    },
+    {
+      "t": 1790692646075,
+      "e": "vad_shadow",
+      "ms": 4309,
+      "r": 48000
+    },
+    {
+      "t": 1790692646075,
+      "e": "route",
+      "ms": 4309
+    },
+    {
+      "t": 1790692646922,
+      "e": "stt",
+      "ms": 847,
+      "lane": "pcm",
+      "n": 43
+    },
+    {
+      "t": 1790692646923,
+      "e": "user"
+    },
+    {
+      "t": 1790692648656,
+      "e": "model_usage",
+      "id": 63,
+      "phase": "think",
+      "lane": "stream",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 9945,
+      "completion_tokens": 25,
+      "total_tokens": 9970
+    },
+    {
+      "t": 1790692648656,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "complete",
+      "chars": 75,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "say",
+      "speechGate": "ordinary",
+      "totalMs": 1733,
+      "headersMs": 1652,
+      "firstTextMs": 1653,
+      "gateMs": 1654,
+      "act": "none"
+    },
+    {
+      "t": 1790692648656,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "eye": "f",
+      "vs": 0,
+      "lum": 121,
+      "fd": 4.63,
+      "dir": "",
+      "moved": "still",
+      "ms": 1732,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692649658,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        0
+      ]
+    },
+    {
+      "t": 1790692649658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692654998,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692658117,
+      "e": "ear_stale"
+    },
+    {
+      "t": 1790692659549,
+      "e": "model_usage",
+      "id": 64,
+      "phase": "think",
+      "lane": "stream",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 10003,
+      "completion_tokens": 58,
+      "total_tokens": 10061
+    },
+    {
+      "t": 1790692659549,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "complete",
+      "chars": 123,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "say",
+      "speechGate": "ordinary",
+      "totalMs": 1891,
+      "headersMs": 1794,
+      "firstTextMs": 1794,
+      "gateMs": 1795,
+      "act": "none"
+    },
+    {
+      "t": 1790692659550,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "eye": "f",
+      "vs": 0,
+      "lum": 114,
+      "fd": 1.29,
+      "dir": "",
+      "moved": "still",
+      "ms": 1891,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692659658,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        1
+      ]
+    },
+    {
+      "t": 1790692659658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692666777,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692668247,
+      "e": "door",
+      "r": 0.025
+    },
+    {
+      "t": 1790692668367,
+      "e": "reflex_fire",
+      "trig": "loud",
+      "act": "move"
+    },
+    {
+      "t": 1790692671299,
+      "e": "vad_shadow",
+      "ms": 1919,
+      "r": 48000
+    },
+    {
+      "t": 1790692671299,
+      "e": "route",
+      "ms": 1919
+    },
+    {
+      "t": 1790692672483,
+      "e": "stt",
+      "ms": 1184,
+      "lane": "pcm",
+      "n": 23
+    },
+    {
+      "t": 1790692672483,
+      "e": "user"
+    },
+    {
+      "t": 1790692674367,
+      "e": "model_usage",
+      "id": 65,
+      "phase": "think",
+      "lane": "stream",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 10010,
+      "completion_tokens": 39,
+      "total_tokens": 10049
+    },
+    {
+      "t": 1790692674367,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "complete",
+      "chars": 81,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "say",
+      "speechGate": "ordinary",
+      "totalMs": 1883,
+      "headersMs": 1791,
+      "firstTextMs": 1791,
+      "gateMs": 1792,
+      "act": "none"
+    },
+    {
+      "t": 1790692674367,
+      "e": "think",
+      "k": "event",
+      "nf": 3,
+      "eye": "f",
+      "vs": 0,
+      "lum": 149,
+      "fd": 5.51,
+      "dir": "",
+      "moved": "still",
+      "ms": 1882,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692675658,
+      "e": "say_lag",
+      "n": 1,
+      "ms": [
+        0
+      ]
+    },
+    {
+      "t": 1790692675658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692680275,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692698017,
+      "e": "ear_stale"
+    },
+    {
+      "t": 1790692713495,
+      "e": "model_usage",
+      "id": 66,
+      "phase": "think",
+      "lane": "buffered",
+      "model": "glm-5.3-flash:cloud",
+      "prompt_tokens": 9600,
+      "completion_tokens": 22,
+      "total_tokens": 9622
+    },
+    {
+      "t": 1790692713496,
+      "e": "reply_status",
+      "complete": true,
+      "parsed": true,
+      "finish": "stop",
+      "transport": "buffered",
+      "chars": 16,
+      "visual": 0,
+      "requestedMaxTokens": 512,
+      "firstField": "other",
+      "speechGate": "held",
+      "totalMs": 1838,
+      "act": "none"
+    },
+    {
+      "t": 1790692713496,
+      "e": "think",
+      "k": "tick",
+      "nf": 1,
+      "eye": "f",
+      "vs": 0,
+      "lum": 146,
+      "fd": 0.56,
+      "dir": "",
+      "moved": "still",
+      "ms": 1837,
+      "fsw": 0,
+      "fmv": 0
+    },
+    {
+      "t": 1790692715717,
+      "e": "ear_stale"
+    },
+    {
+      "t": 1790692721316,
+      "e": "face_track",
+      "state": "stopped",
+      "reason": "camera_closed"
+    },
+    {
+      "t": 1790692721318,
+      "e": "pause_free",
+      "eye": 1
+    },
+    {
+      "t": 1790692721658,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692723756,
+      "e": "face_summary",
+      "why": "hidden",
+      "span_s": 484,
+      "on_s": 0,
+      "follow_s": 0,
+      "seen_follow_ms": -1,
+      "think_on_n": 0,
+      "think_on_ms": -1,
+      "think_off_n": 25,
+      "think_off_ms": 2035,
+      "captured": 495,
+      "decoded": 495,
+      "dropped": 0,
+      "decodeRatio": 1,
+      "frameIntervalMsMedian": 49.6,
+      "frameIntervalMsP95": 1002.1,
+      "detectMsMedian": 11.7,
+      "detectMsP95": 18.1,
+      "frameAgeMsMedian": -1,
+      "frameAgeMsP95": -1,
+      "commandMsMedian": -1,
+      "commandMsP95": -1,
+      "maxStepDeg": 0,
+      "maxStepRate": 0,
+      "sends": 0,
+      "skipped": 0,
+      "sendFail": 0,
+      "holds": 0,
+      "releases": 0,
+      "yields": 0,
+      "reacquires": 0
+    },
+    {
+      "t": 1790692723756,
+      "e": "face_track",
+      "state": "stopped",
+      "reason": "page_hidden"
+    },
+    {
+      "t": 1790692725733,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692726429,
+      "e": "revive",
+      "eye": 0
+    },
+    {
+      "t": 1790692727430,
+      "e": "ctx_check"
+    },
+    {
+      "t": 1790692727446,
+      "e": "face_track",
+      "state": "stopped",
+      "reason": "page_hidden"
+    },
+    {
+      "t": 1790692727732,
+      "e": "voice_outcome"
+    },
+    {
+      "t": 1790692734496,
+      "e": "relay",
+      "awake": 0,
+      "n": 1,
+      "cl": 1
+    },
+    {
+      "t": 1790692972698,
+      "e": "revive",
+      "eye": 0
+    },
+    {
+      "t": 1790692972717,
+      "e": "face_summary",
+      "why": "periodic",
+      "span_s": 249,
+      "on_s": 0,
+      "follow_s": 0,
+      "seen_follow_ms": -1,
+      "captured": 495,
+      "decoded": 495,
+      "dropped": 0,
+      "decodeRatio": 1,
+      "frameIntervalMsMedian": 49.6,
+      "frameIntervalMsP95": 1002.1,
+      "detectMsMedian": 11.7,
+      "detectMsP95": 18.1,
+      "frameAgeMsMedian": -1,
+      "frameAgeMsP95": -1,
+      "commandMsMedian": -1,
+      "commandMsP95": -1,
+      "maxStepDeg": 0,
+      "maxStepRate": 0,
+      "sends": 0,
+      "skipped": 0,
+      "sendFail": 0,
+      "holds": 0,
+      "releases": 0,
+      "yields": 0,
+      "reacquires": 0
+    },
+    {
+      "t": 1790692973695,
+      "e": "ctx_check"
+    },
+    {
+      "t": 1790692974465,
+      "e": "relay",
+      "awake": 1,
+      "n": 21,
+      "cl": 20
+    }
+  ]
+}
