@@ -10,6 +10,14 @@ not official GrowBot firmware or an installation package.
 neither walking nor the observed head movements triggered the false-tip response.**
 Our temporary tilt patch is absent. The separate Pico connection issue remains open.
 
+**Later September 29 update:** added a **switchable body/direction setting**:
+Standard GrowBot (original), OwlBot eight-servo, or Custom; screen-forward,
+screen-backward, or unknown for adapted bodies. This robot is set to OwlBot /
+screen-forward. No gait reversal; five isolated model checks passed.
+[Cause, configurable fix and upstream recommendation](prototype/body-direction/README.md).
+The selection saves locally, but reload removes the prototype UI/hook until reinstalled.
+Brit's permanent tilt fix is separate and remains upstream.
+
 **[Read the chronological guide: changes, test results and remaining issues](CHRONOLOGY.md).**
 It separates current results from historical failures and temporary prototypes.
 

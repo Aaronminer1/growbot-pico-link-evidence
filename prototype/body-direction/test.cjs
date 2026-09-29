@@ -1,0 +1,62 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const factory = require('./body-direction.js');
+// Exact public direction paragraph only; no live memories or device settings.
+const source = fs.readFileSync(require.resolve('./body-direction.js'), 'utf8');
+const old = source.match(/const OLD_DIRECTION = '([^']+)';/)[1];
+const fixture = 'You have two legs: l = left, r = right.\nSAVED_GESTURES_UNCHANGED\n' + old +
+ '\nyour natural walk, screen facing backward during travel\nwalk:{gait:"official",dir:"fwd",secs:8}\nSTOP_RULES_UNCHANGED';
+let calls = 0;
+const native = function (suffix = '') { calls++; assert.equal(this, root); return fixture + suffix; };
+const store=new Map();
+const storage={getItem:k=>store.has(k)?store.get(k):null,setItem:(k,v)=>store.set(k,v)};
+const root = {MODE:'legs',_wheels:false,inFlight:false,_motion:null,body:{id:'test-body'},localStorage:storage,moveGuideText:native};
+const api = factory(root);
+assert.deepEqual(api.inspect(fixture), {direction:1,label:1,body:1});
+assert.equal(api.install().activeForBody, true);
+assert.equal(root.moveGuideText(),fixture); // Original GrowBot is the default.
+assert.equal(api.configure({kind:'owlbot',travel:'screen-forward'}).preferencePersisted,true);
+const wrapped = root.moveGuideText;
+assert.equal(api.install().installed, true);
+assert.equal(root.moveGuideText, wrapped);
+const guide = root.moveGuideText('\nARGUMENT_PRESERVED');
+assert(!guide.includes('screen facing backward'));
+assert(!guide.includes('Screen-forward walking has no validated'));
+assert(!guide.includes('You have two legs:'));
+for(const keep of ['SAVED_GESTURES_UNCHANGED','STOP_RULES_UNCHANGED','walk:{gait:"official",dir:"fwd",secs:8}','ARGUMENT_PRESERVED']) assert(guide.includes(keep));
+assert(guide.includes('A sideways or tilted head changes where the camera looks, not the chassis forward direction.'));
+assert(guide.includes('not proof of physical progress'));
+api.configure({kind:'custom',travel:'screen-backward'});
+assert(root.moveGuideText().includes('away from the phone screen and selfie-camera view WHEN THE HEAD IS CENTERED'));
+assert(!root.moveGuideText().includes('You have an eight-servo body'));
+api.configure({kind:'custom',travel:'unknown'});
+assert(root.moveGuideText().includes('centered screen/selfie view is UNKNOWN'));
+api.configure({kind:'growbot',travel:'screen-forward'});
+assert.equal(root.moveGuideText(),fixture); // Explicit original reset is exact.
+api.configure({kind:'owlbot',travel:'screen-forward'});
+root.body.id='other-body';assert.equal(root.moveGuideText(),fixture); // No cross-body assumption.
+root.body.id='test-body';assert(root.moveGuideText().includes('OwlBot eight-servo'));
+const writes=store.size;
+assert.throws(()=>api.configure({kind:'invalid',travel:'screen-forward'}),/valid body/);
+assert.throws(()=>api.configure({kind:'custom',travel:'native'}),/valid forward/);
+assert.equal(store.size,writes);
+const save=storage.setItem;storage.setItem=()=>{throw Error('quota');};
+assert.throws(()=>api.configure({kind:'custom',travel:'unknown'}),/Could not save/);
+assert.equal(api.status().profile.kind,'owlbot');storage.setItem=save;
+root.MODE='phone';assert.equal(root.moveGuideText(),fixture);
+root.MODE='legs';root._wheels=true;assert.equal(root.moveGuideText(),fixture);
+root._wheels=false;
+root.inFlight=true;assert.throws(()=>api.uninstall(),/finish/);assert.throws(()=>api.configure({kind:'growbot'}),/finish/);
+root.inFlight=false;root._motion={};assert.throws(()=>api.uninstall(),/finish/);
+root._motion=null;
+root.moveGuideText=()=>'';assert.throws(()=>api.install(),/ownership/);assert.throws(()=>api.uninstall(),/ownership/);
+root.moveGuideText=wrapped;assert.equal(api.uninstall().installed,false);assert.equal(root.moveGuideText,native);
+const reloaded=factory(root);reloaded.install();assert.equal(reloaded.status().profile.kind,'owlbot');
+assert(root.moveGuideText().includes('toward the phone screen'));reloaded.uninstall();
+root.body.id='corrupt-body';storage.setItem('gb_custom_body_direction_v1:corrupt-body','broken');
+const corrupt=factory(root);corrupt.install();assert.equal(root.moveGuideText(),fixture);assert(corrupt.status().warning);corrupt.uninstall();root.body.id='test-body';
+root.moveGuideText=()=>fixture.replace(old,'New upstream wording');assert.throws(()=>api.install(),/changed/);
+root.moveGuideText=native;root.inFlight=true;assert.throws(()=>api.install(),/finish/);
+root.inFlight=false;root._motion={};assert.throws(()=>api.install(),/finish/);
+root._motion=null;root.MODE='phone';assert.throws(()=>api.install(),/legged/);
+console.log('PASS: original default/reset, OwlBot/custom profiles, forward/backward/unknown, persistence/reload, body-ID isolation, storage failure/corruption, unchanged commands, mode/ownership/drift guards and rollback.');

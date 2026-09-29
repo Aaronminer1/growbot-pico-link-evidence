@@ -1,0 +1,34 @@
+{
+  "recordedAt": "2026-09-29T15:30:40.059Z",
+  "result": {
+    "version": "body-profile-0.2",
+    "installed": true,
+    "ownsHook": true,
+    "activeForBody": true,
+    "sessionOnly": true,
+    "profile": {
+      "kind": "owlbot",
+      "travel": "screen-forward"
+    },
+    "preferencePersisted": true,
+    "warning": null,
+    "settingsMounted": true,
+    "changesMotorCommands": false,
+    "changesStoredIdentity": false
+  },
+  "checks": {
+    "originalRestoredExactly": true,
+    "customUnknownWorks": true,
+    "uiSelectedOwlbot": true,
+    "oldDirectionGone": true,
+    "unsupportedForwardClaimGone": true,
+    "customDirectionPresent": true,
+    "gaitUnchanged": true,
+    "gaitLibraryUnchanged": true,
+    "bodyConfigurationUnchanged": true,
+    "sensorFunctionUnchanged": true,
+    "pausedUnchanged": true
+  },
+  "paused": false,
+  "motion": false
+}

@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-29",
+  "version": "body-profile-0.2",
+  "profile": {"kind": "owlbot", "travel": "screen-forward"},
+  "source": "Isolated call through the active GrowBot page's configured callModel lane using its corrected effective movement guide; not the conversational action dispatcher",
+  "model": "glm-5.3-flash:cloud",
+  "checks": {
+    "screenForward": true,
+    "keepFwd": true,
+    "headPanDoesNotReverse": true,
+    "rearCameraDoesNotReverse": true,
+    "commandNotDistanceProof": true
+  },
+  "allPassed": true,
+  "dispatched": false,
+  "physicalWalkingRetested": false
+}

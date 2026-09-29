@@ -6,7 +6,7 @@
 
 **Brit's upright-phone tilt fix is live and the owner confirms it worked: neither walking nor the observed head movements triggered the false-tip response.** The phone is running `/v3/next.html`; inspection confirmed the upstream vertical-vector calculation and absence of our temporary tilt patch. This is not a claim that the separate Pico connection problem is fixed.
 
-New material is in [September 29 report and sanitized logs](reports/2026-09-29-upstream-tilt/README.md). It also records two separate findings: incorrect screen-backward body instructions, and possible causes of preliminary leg movement before the stride.
+New material is in [September 29 report and sanitized logs](reports/2026-09-29-upstream-tilt/README.md). It also records two separate findings: incorrect screen-backward body instructions, and possible causes of preliminary leg movement before the stride. A later same-day [body-direction repair](prototype/body-direction/README.md) now corrects the effective model instructions in the live session; it is not a gait reversal or a permanent website change.
 
 ## Status at a glance
 
@@ -17,7 +17,7 @@ New material is in [September 29 report and sanitized logs](reports/2026-09-29-u
 | Silent model-selected head actions | Corrected local prototype passed both directions with servo power off. Powered model-selected handoff remains unverified. |
 | Walking combined with tracking/attention | Not yet established by a complete powered combined test. |
 | Pico connection recovery | Unresolved. Reopening the phone socket did not restore Pico replies in the reproduced failure window. |
-| Forward/backward wording | Current guide uses the standard body's backward-facing convention, inconsistent with the owner's forward-moving eight-servo body. Documented, not corrected in this update. |
+| Forward/backward wording | Configurable Standard GrowBot/OwlBot/Custom body and direction selector installed; OwlBot/screen-forward selected. Five isolated model checks passed. Selection saves locally; reload removes the prototype hook/UI until reinstalled. |
 | Preliminary leg movement | App startup poses and local firmware transition logic identified as candidate causes. Exact installed implementation and physical cause not yet proven. |
 
 ## September 21 — connection evidence and failure reproduction
@@ -104,12 +104,21 @@ New material is in [September 29 report and sanitized logs](reports/2026-09-29-u
 
 **Evidence:** [Latest report](reports/2026-09-29-upstream-tilt/README.md) · [Sanitized current log](reports/2026-09-29-upstream-tilt/current-log.sanitized.json) · [Earlier walk excerpt](reports/2026-09-29-upstream-tilt/earlier-walk-observed-excerpt.json)
 
+## September 29, later follow-up — fix backward-walking instructions
+
+- Rechecked the active page: the standard movement contract and official-gait label both claimed screen-backward travel. The editable guide was regenerated at startup, so a text-box-only change would not be durable.
+- Installed a narrow session adapter correcting the effective movement guide for the owner-confirmed body. At the owner's request, expanded it into a switchable setting: Standard GrowBot (exact original guide), OwlBot eight-servo, or Custom body, with screen-forward/backward/unknown travel. Selected OwlBot/screen-forward for this robot. `official/fwd` still means forward; gaze/head pose and camera choice are not chassis travel direction. No motor, firmware, calibration, sensor or identity changes were made.
+- Offline regression tests and live read-back passed. An isolated configured-model check passed all five direction/physical-evidence questions without dispatching a movement or speaking its reply. No new physical walk was run.
+- The selection saves in a separate local per-body-ID preference; actual settings controls were tested and the original guide restored exactly when selected. **Reload removes this local adapter/UI, not the saved selection; reinstall reads it back.** The published implementation and integration recommendation show Brit how the setting should be integrated permanently upstream.
+
+**Evidence and implementation:** [Body-direction repair](prototype/body-direction/README.md)
+
 ## What remains to investigate
 
 1. Correlate an actual Pico reply loss with uptime, transport faults and supply measurements; phone-socket recovery alone is not a controller fix.
 2. Verify model-selected head actions physically, then the combined head-forward/walk or tracking/walk handoff. Keep these distinct from the completed stationary command-path tests.
-3. Give this body's forward direction an effective body-specific description, without reversing a physically correct gait.
+3. Make the now-tested body-direction description persistent upstream; the local session repair disappears on reload. Verify future natural conversation without reversing the physically correct gait.
 4. Capture an owner-initiated walk's startup packets and controller transition alongside observed leg motion to isolate the preliminary repositioning.
 5. Check articulated-head angles separately from chassis tipping if false positives recur or the operating head range expands.
 
-This guide changes documentation only. Older logs, manifests and detailed trial records remain unchanged. ACKs and commanded positions are software evidence; physical results are labeled as owner observations.
+This guide summarizes the documented work; the later body-direction entry includes a live session-only prompt repair. Older logs, manifests and detailed trial records remain unchanged. ACKs and commanded positions are software evidence; physical results are labeled as owner observations.
