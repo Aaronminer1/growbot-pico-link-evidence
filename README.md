@@ -1,8 +1,17 @@
 # GrowBot Pico connection investigation
 
-Evidence prepared for Brit on **21 September 2026**. This is a diagnostic
-snapshot of a custom OwlBot Pico controller used with the GrowBot browser app,
+Evidence and follow-up tests for Brit, **21–29 September 2026**. This repository
+documents a custom OwlBot Pico controller used with the GrowBot browser app,
 not official GrowBot firmware or an installation package.
+
+## Latest update — September 29
+
+**Brit's upstream upright-phone tilt fix is running. The owner confirms that
+neither walking nor the observed head movements triggered the false-tip response.**
+Our temporary tilt patch is absent. The separate Pico connection issue remains open.
+
+**[Read the chronological guide: changes, test results and remaining issues](CHRONOLOGY.md).**
+It separates current results from historical failures and temporary prototypes.
 
 ## Start here
 
@@ -12,7 +21,7 @@ not official GrowBot firmware or an installation package.
 - **[Experimental on-demand face-tracking prototype and bench results](prototype/face-tracking/README.md)**
 - **[Stationary behavior-handoff verification: deliberate looks, face loss, expiry and recovery](prototype/face-tracking/HANDOFF-TEST.md)**
 - **[Model-to-head dispatch: silent-action parsing and asynchronous request reporting](prototype/face-tracking/ACTION-DISPATCH-TEST.md)**
-- **[Latest walking test: reproduced drop, movement ledger and recovery results](reports/2026-09-21-walking-test/README.md)**
+- **[September 21 historical walking test: reproduced drop, movement ledger and recovery results](reports/2026-09-21-walking-test/README.md)**
 - **[Full report and open questions](evidence/READ-ME-FIRST.md)**
 - [Live controller and heartbeat observations](evidence/live-telemetry.json)
 - [Passive serial capture](evidence/passive-serial.json)
@@ -24,7 +33,7 @@ not official GrowBot firmware or an installation package.
 - [Byte sizes and SHA256 manifest](evidence/SHA256-MANIFEST.json)
 - [Security review](evidence/SECURITY-REVIEW.md)
 
-## Latest walking test
+## Historical connection-failure walking test — September 21
 
 The later owner-supervised floor test reproduced a loss of Pico communication
 during a native-agent walk. Brit's stale-socket watcher forced closes and GrowBot
