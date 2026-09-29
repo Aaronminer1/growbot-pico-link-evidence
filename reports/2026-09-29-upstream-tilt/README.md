@@ -17,7 +17,9 @@ The earlier observer read a forward walking attempt, action 24, with a 120-secon
 
 [Earlier observed walk events](earlier-walk-observed-excerpt.json) are transcribed from the structured diagnostic output captured during this same session. They are **not** a newly downloaded full original log or an independent physical-motion measurement. The original app timestamps and diagnostic fields are retained; omitted events are not reconstructed.
 
-The owner has not requested another walk for this report. We have not performed a new deliberate head-tilt trial. As Brit noted, a phone riding on an articulated head can change angle without the chassis tipping. **Head-versus-chassis compensation remains open.** This report must not be read as proof that every false-tip case is fixed.
+Owner follow-up after publication: **the fix worked in the observed test; neither head movement nor walking triggered the false-tip response.** This is the owner's physical observation, supplementing the app's recorded completion above. The precise head angles and movement range were not measured.
+
+No additional walk or deliberate head-tilt trial was initiated by the observer for this report. As Brit noted, a phone riding on an articulated head can change angle without the chassis tipping. The reported test passed, including the head movements the owner observed; **large head-tilt behavior and head-versus-chassis compensation remain unverified.** This report must not be read as proof that every possible false-tip case is fixed.
 
 ## Log provided
 
